@@ -1,17 +1,16 @@
 param envName string
 param location string
 param logsCustomerId string
+@secure()
 param logsKey string
+
 param storageAccountName string
 @secure()
 param storageAccountKey string
 param openWebUIShareName string
 param liteLLMShareName string
 
-param vnetId string
-param subnetName string
-
-resource containerEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
+resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: envName
   location: location
   properties: {
@@ -22,13 +21,12 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
         sharedKey: logsKey
       }
     }
-    vnetConfiguration: {
-      infrastructureSubnetId: '${vnetId}/subnets/${subnetName}'
-    }
+    zoneRedundant: false
   }
 }
 
-resource envStorageOpenWebUI 'Microsoft.App/managedEnvironments/storages@2025-07-01' = {
+// Azure Files Mounts (bleiben wie gehabt)
+resource envStorageOpenWebUI 'Microsoft.App/managedEnvironments/storages@2024-03-01' = {
   name: 'openwebui-files'
   parent: containerEnv
   properties: {
@@ -41,7 +39,7 @@ resource envStorageOpenWebUI 'Microsoft.App/managedEnvironments/storages@2025-07
   }
 }
 
-resource envStorageLiteLLM 'Microsoft.App/managedEnvironments/storages@2025-07-01' = {
+resource envStorageLiteLLM 'Microsoft.App/managedEnvironments/storages@2024-03-01' = {
   name: 'litellm-config'
   parent: containerEnv
   properties: {
@@ -55,3 +53,5 @@ resource envStorageLiteLLM 'Microsoft.App/managedEnvironments/storages@2025-07-0
 }
 
 output environmentId string = containerEnv.id
+output outboundIpAddresses string = containerEnv.properties.staticIp
+output defaultDomain string = containerEnv.properties.defaultDomain

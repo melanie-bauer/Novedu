@@ -9,6 +9,15 @@ param azureOpenAIBaseUrl string
 param azureOpenAIApiVersion string
 param location string
 
+// DB-Parameter
+param pgHost string
+param pgDatabase string
+param pgPort int = 5432
+@secure()
+param pgUser string
+@secure()
+param pgPassword string
+
 // Open WebUI Container App (öffentlich erreichbar)
 resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
   name: openWebUIName
@@ -26,7 +35,6 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
         external: true          // öffentlich zugänglich
         targetPort: 8080        // Open WebUI hört auf Port 8080
         transport: 'auto'
-        allowInsecure: false    // HTTPS erzwingen
       }
       secrets: [
         {
@@ -91,7 +99,7 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
     managedEnvironmentId: envId
     configuration: {
       ingress: {
-        external: true // internal only, no public endpoint
+        external: true 
         targetPort: 4000
         transport: 'auto'
       }
@@ -111,8 +119,9 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/LiteLLMMasterKey'
           identity: userIdentityResourceId
         }
+        { name: 'pg-user', value: pgUser }
+        { name: 'pg-password', value: pgPassword }
       ]
-      // (If LiteLLM image were in ACR, we could add registries: similar to above)
     }
     template: {
       containers: [
@@ -129,6 +138,12 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'AZURE_API_KEY', secretRef: 'azure-openai-key' }
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
+            { name: 'PGHOST', value: pgHost }
+            { name: 'PGDATABASE', value: pgDatabase }
+            { name: 'PGPORT', value: string(pgPort) }
+            { name: 'PGSSLMODE', value: 'require' }
+            { name: 'PGUSER', secretRef: 'pg-user' }
+            { name: 'PGPASSWORD', secretRef: 'pg-password' }
           ]
           volumeMounts: [
             {
