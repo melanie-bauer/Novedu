@@ -1,0 +1,44 @@
+name: Deploy Bicep to Azure (dev)
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'infra/bicep/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-bicep:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Bicep
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            RG="SchoolAI"
+            BICEP_FILE="./infra/bicep/main.bicep"
+            PARAM_FILE="./infra/bicep/dev.parameters.json"
+
+            az deployment group create \
+              --resource-group "$RG" \
+              --template-file "$BICEP_FILE" \
+              --parameters @"$PARAM_FILE" \
+              --parameters postgresServerAdminLogin="${{ secrets.POSTGRES_ADMIN_LOGIN }}" \
+                           postgresServerAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}"
+                           adminObjectId="${{ secrets.ADMIN_OBJECT_ID }}" \
+                           litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}"
