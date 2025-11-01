@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json",
+  "contentVersion": "1.0.0.0",
+
+  "parameters": {
+    "acrName": {
+      "value": "noveduacr"
+    },
+    "workspaceName": {
+      "value": "novedu-logs"
+    },
+    "storageAccountName": {
+      "value": "novedustorage"
+    },
+    "userIdentityName": {
+      "value": "novedu-identity"
+    },
+    "azureOpenAIName": {
+      "value": "novedu-openai"
+    },
+    "keyVaultName": {
+      "value": "novedu-vault"
+    },
+    "envName": {
+      "value": "novedu-env"
+    },
+    "postgresServerName": {
+      "value": "novedu-pgserver"
+    },
+    "azureOpenAIApiVersion": {
+      "value": "2025-09-01"
+    },
+    "createAzureOpenAI": {
+      "value": false
+    },
+    "createOpenAIModels": {
+      "value": false
+    },
+    "openWebUIName": {
+      "value": "openwebui-app"
+    },
+    "litellmName": {
+      "value": "litellm"
+    },
+    "openWebUIImage": {
+      "value": "ghcr.io/open-webui/open-webui:main"
+    },
+    "litellmImage": {
+      "value": "ghcr.io/berriai/litellm:main-latest"
+    },
+    "vnetName": {
+      "value": "litellm-vnet"
+    },
+    "containerSubnetName": {
+      "value": "containerapps-subnet"
+    },
+    "postgresSubnetName": {
+      "value": "postgres-subnet"
+    },
+    "privateDnsZoneName": {
+      "value": "privatelink.postgres.database.azure.com"
+    }
+  }
+}
