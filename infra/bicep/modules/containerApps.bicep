@@ -126,7 +126,6 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
           env: [
             // LiteLLM proxy reads these to connect to Azure OpenAI
             { name: 'AZURE_API_BASE', value: azureOpenAIBaseUrl }
-            { name: 'AZURE_API_VERSION', value: azureOpenAIApiVersion }
             { name: 'AZURE_API_KEY', secretRef: 'azure-openai-key' }
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
