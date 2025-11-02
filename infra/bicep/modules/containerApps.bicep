@@ -11,7 +11,6 @@ param location string
 
 // DB-Parameter
 param pgHost string
-param pgDatabase string
 param pgPort int = 5432
 @secure()
 param pgUser string
@@ -119,8 +118,6 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/LiteLLMMasterKey'
           identity: userIdentityResourceId
         }
-        { name: 'pg-user', value: pgUser }
-        { name: 'pg-password', value: pgPassword }
       ]
     }
     template: {
@@ -139,11 +136,14 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
             { name: 'PGHOST', value: pgHost }
-            { name: 'PGDATABASE', value: pgDatabase }
+            { name: 'PGDATABASE', value: 'postgres' }
             { name: 'PGPORT', value: string(pgPort) }
             { name: 'PGSSLMODE', value: 'require' }
-            { name: 'PGUSER', secretRef: 'pg-user' }
-            { name: 'PGPASSWORD', secretRef: 'pg-password' }
+            { name: 'PGUSER', value: pgUser }
+            { name: 'PGPASSWORD', value: pgPassword }
+            { name: 'LITELLM_CONFIG', value: '/app/config/litellm_config.yaml' }
+            { name: 'STORE_MODEL_IN_DB', value: 'True' }
+
           ]
           volumeMounts: [
             {

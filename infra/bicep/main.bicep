@@ -100,7 +100,7 @@ module keyVaultModule './modules/keyVault.bicep' = {
     managedIdentityObjectId: userIdentity.properties.principalId
     postgresPasswordSecretValue: postgresServerAdminPassword
     postgresUsernameSecretValue: postgresServerAdminLogin
-    postgresURLSecretValue: 'postgresql://${postgresServerAdminLogin}:${postgresServerAdminPassword}@${postgresServerName}.postgres.database.azure.com:5432/${postgresServerName}?sslmode=require'
+    postgresURLSecretValue: 'postgresql://${postgresServerAdminLogin}:${postgresServerAdminPassword}@${postgresServerName}.postgres.database.azure.com:5432/postgres?sslmode=require'
     litellmMasterKeySecretValue: litellmMasterKey
   }
 }
@@ -126,7 +126,6 @@ module postgresModule './modules/postgres.bicep' = {
     administratorLogin: postgresServerAdminLogin
     administratorLoginPassword: postgresServerAdminPassword
     location: location
-    allowedClientIps: [containerEnvModule.outputs.outboundIpAddresses]
     publicNetworkAccess: 'Enabled'
   }
 }
@@ -146,7 +145,6 @@ module containerAppsModule './modules/containerApps.bicep' = {
     azureOpenAIApiVersion: azureOpenAIApiVersion
     location: location
     pgHost: postgresModule.outputs.postgresHost
-    pgDatabase: postgresServerName
     pgUser: postgresServerAdminLogin
     pgPassword: postgresServerAdminPassword
   }

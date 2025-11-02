@@ -11,9 +11,6 @@ param administratorLoginPassword string
 ])
 param publicNetworkAccess string = 'Enabled'
 
-@description('Array der freizugebenden öffentlichen ACA-Egress-IPs (vom ACA-Environment Output).')
-param allowedClientIps array
-
 param serverEdition string = 'GeneralPurpose'
 param skuSizeGB int = 128
 param dbInstanceType string = 'Standard_D4ds_v4'
@@ -46,13 +43,12 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' =
 
 output postgresHost string = '${serverName}.postgres.database.azure.com'
 
-// Firewall-Rule je IP
-@batchSize(1)
-resource fwRules 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = [for (ip, i) in allowedClientIps: {
+
+resource fwRules 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = {
   parent: postgresServer
-  name: 'allow-aca-egress-${i}'
+  name: 'allow-azure-services'
   properties: {
-    startIpAddress: string(ip)
-    endIpAddress: string(ip)
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
   }
-}]
+}
