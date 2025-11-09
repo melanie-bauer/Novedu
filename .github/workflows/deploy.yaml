@@ -39,6 +39,6 @@ jobs:
               --template-file "$BICEP_FILE" \
               --parameters @"$PARAM_FILE" \
               --parameters postgresServerAdminLogin="${{ secrets.POSTGRES_ADMIN_LOGIN }}" \
-                           postgresServerAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}"
+                           postgresServerAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}" \
                            adminObjectId="${{ secrets.ADMIN_OBJECT_ID }}" \
                            litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}"
