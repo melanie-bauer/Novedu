@@ -12,10 +12,6 @@ param location string
 // DB-Parameter
 param pgHost string
 param pgPort int = 5432
-@secure()
-param pgUser string
-@secure()
-param pgPassword string
 
 // Open WebUI Container App (öffentlich erreichbar)
 resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
@@ -118,6 +114,16 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/LiteLLMMasterKey'
           identity: userIdentityResourceId
         }
+        {
+          name: 'pg-password'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/PostgresPassword'
+          identity: userIdentityResourceId
+        }
+        {
+          name: 'pg-username'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/PostgresUsername'
+          identity: userIdentityResourceId
+        }
       ]
     }
     template: {
@@ -139,8 +145,8 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'PGDATABASE', value: 'postgres' }
             { name: 'PGPORT', value: string(pgPort) }
             { name: 'PGSSLMODE', value: 'require' }
-            { name: 'PGUSER', value: pgUser }
-            { name: 'PGPASSWORD', value: pgPassword }
+            { name: 'PGUSER', secretRef: 'pg-username' }
+            { name: 'PGPASSWORD', secretRef: 'pg-password' }
             { name: 'LITELLM_CONFIG', value: '/app/config/litellm_config.yaml' }
             { name: 'STORE_MODEL_IN_DB', value: 'True' }
 

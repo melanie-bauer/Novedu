@@ -4,10 +4,6 @@ param createAzureOpenAI bool = false
 
 param openAiApiVersion string
 
-resource openAIService 'Microsoft.CognitiveServices/accounts@2025-09-01' existing = {
-  name: openAIName
-}
-
 resource openAIServiceCreated 'Microsoft.CognitiveServices/accounts@2025-09-01' = if (createAzureOpenAI) {
   name: openAIName
   location: location
@@ -22,6 +18,10 @@ resource openAIServiceCreated 'Microsoft.CognitiveServices/accounts@2025-09-01' 
       ipRules: []
     }
   }
+}
+
+resource openAIService 'Microsoft.CognitiveServices/accounts@2025-09-01' existing = {
+  name: openAIName
 }
 
 var models = loadJsonContent('../models.json').models

@@ -1,7 +1,6 @@
 // =====================
 // PARAMETERS
 // =====================
-param acrName string
 param workspaceName string
 param storageAccountName string
 param userIdentityName string
@@ -32,15 +31,6 @@ param litellmImage string
 // =====================
 // MODULES
 // =====================
-
-// ACR
-module acrModule './modules/acr.bicep' = {
-  name: 'deployAcr'
-  params: {
-    acrName: acrName
-    location: location
-  }
-}
 
 // Azure OpenAI
 module azureOpenAIModule './modules/azureOpenAI.bicep' = if (createOpenAIModels) {
@@ -145,7 +135,5 @@ module containerAppsModule './modules/containerApps.bicep' = {
     azureOpenAIApiVersion: azureOpenAIApiVersion
     location: location
     pgHost: postgresModule.outputs.postgresHost
-    pgUser: postgresServerAdminLogin
-    pgPassword: postgresServerAdminPassword
   }
 }
