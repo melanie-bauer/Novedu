@@ -8,9 +8,40 @@ param storageAccountKey string
 param openWebUIShareName string
 param liteLLMShareName string
 
-param vnetId string
+param vnetName string
 param subnetName string
+param resourceGroupName string
 
+// Reference existing VNet
+resource vnet 'Microsoft.Network/virtualNetworks@2022-09-01' existing = {
+  name: vnetName
+  scope: resourceGroup(resourceGroupName)
+}
+
+// Reference existing subnet
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing = {
+  name: subnetName
+  parent: vnet
+}
+
+// Add delegation if missing
+resource delegatedSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' = {
+  name: subnetName
+  parent: vnet
+  properties: {
+    addressPrefix: subnet.properties.addressPrefix
+    delegations: [
+      {
+        name: 'delegation'
+        properties: {
+          serviceName: 'Microsoft.Web/managedEnvironments'
+        }
+      }
+    ]
+  }
+}
+
+// Create the Container Apps Managed Environment
 resource containerEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
   name: envName
   location: location
@@ -23,11 +54,15 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
       }
     }
     vnetConfiguration: {
-      infrastructureSubnetId: '${vnetId}/subnets/${subnetName}'
+      infrastructureSubnetId: delegatedSubnet.id
     }
   }
+  dependsOn: [
+    delegatedSubnet
+  ]
 }
 
+// Storage for OpenWebUI
 resource envStorageOpenWebUI 'Microsoft.App/managedEnvironments/storages@2025-07-01' = {
   name: 'openwebui-files'
   parent: containerEnv
@@ -41,6 +76,7 @@ resource envStorageOpenWebUI 'Microsoft.App/managedEnvironments/storages@2025-07
   }
 }
 
+// Storage for LiteLLM
 resource envStorageLiteLLM 'Microsoft.App/managedEnvironments/storages@2025-07-01' = {
   name: 'litellm-config'
   parent: containerEnv
