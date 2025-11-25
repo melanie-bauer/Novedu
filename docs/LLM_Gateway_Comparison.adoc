@@ -1,0 +1,24 @@
+= LLM Gateway Comparison
+== LiteLLM vs OpenRouter
+:author: Novedu
+:toc:
+:toc-title: Table of Contents
+:sectnums:
+
+This document provides a detailed comparison between LiteLLM and OpenRouter, two popular LLM gateway solutions. We will explore their features, performance, ease of use, and community support to help you make an informed decision.
+
+== Pricing
+
+See https://www.litellm.ai/#pricing for LiteLLM pricing details
+and https://openrouter.ai/pricing for OpenRouter pricing details.
+
+=== OpenRouter Pricing
+OpenRouter offers a free tier with slightly more than 25 Models. If you want more Models, you need to subscribe to a "Pay-as-you-go" plan. It provides around 300 Models for a platform fee of 5.5%. You can buy enterprise plans for more features (price on request).
+
+=== LiteLLM Pricing
+LiteLLM's free plan provides around 100 Models. They also offer an "Enterprise" plan with additional features (price on request).
+
+== Feature Comparison
+
+The following table summarizes key features of LiteLLM and OpenRouter to give a quick overview of their capabilities.
+
