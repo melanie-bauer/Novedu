@@ -1,7 +1,6 @@
 // =====================
 // PARAMETERS
 // =====================
-param acrName string
 param workspaceName string
 param storageAccountName string
 param userIdentityName string
@@ -29,24 +28,9 @@ param litellmName string
 param openWebUIImage string
 param litellmImage string
 
-// Neue Parameter für VNet
-param vnetName string = 'litellm-vnet'
-param containerSubnetName string = 'containerapps-subnet'
-param postgresSubnetName string = 'postgres-subnet'
-param privateDnsZoneName string = 'privatelink.postgres.database.azure.com'
-
 // =====================
 // MODULES
 // =====================
-
-// ACR
-module acrModule './modules/acr.bicep' = {
-  name: 'deployAcr'
-  params: {
-    acrName: acrName
-    location: location
-  }
-}
 
 // Azure OpenAI
 module azureOpenAIModule './modules/azureOpenAI.bicep' = if (createOpenAIModels) {
@@ -74,74 +58,6 @@ module storageModule './modules/storage.bicep' = {
   params: {
     storageAccountName: storageAccountName
     location: location
-  }
-}
-
-// =====================
-// NETWORK SETUP (VNet + DNS)
-// =====================
-
-resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
-  name: vnetName
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: ['10.10.0.0/16']
-    }
-    subnets: [
-      {
-        name: containerSubnetName
-        properties: {
-          addressPrefix: '10.10.0.0/23'
-        }
-      }
-      {
-        name: postgresSubnetName
-        properties: {
-          addressPrefix: '10.10.2.0/23'
-          delegations: [
-            {
-              name: 'pgDelegation'
-              properties: {
-                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServers'
-              }
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-
-resource privateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: privateDnsZoneName
-  location: 'global'
-}
-
-resource dnsLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  parent: privateDnsZone
-  name: '${vnet.name}-link'
-  properties: {
-    virtualNetwork: {
-      id: vnet.id
-    }
-    registrationEnabled: false
-  }
-}
-
-// =====================
-// POSTGRES (PRIVATE)
-// =====================
-module postgresModule './modules/postgres.bicep' = {
-  name: 'deployPostgres'
-  params: {
-    serverName: postgresServerName
-    administratorLogin: postgresServerAdminLogin
-    administratorLoginPassword: postgresServerAdminPassword
-    location: location
-    vnetId: vnet.id
-    subnetName: postgresSubnetName
-    privateDnsZoneArmResourceId: privateDnsZone.id
   }
 }
 
@@ -174,14 +90,11 @@ module keyVaultModule './modules/keyVault.bicep' = {
     managedIdentityObjectId: userIdentity.properties.principalId
     postgresPasswordSecretValue: postgresServerAdminPassword
     postgresUsernameSecretValue: postgresServerAdminLogin
-    postgresURLSecretValue: 'postgresql://${postgresServerAdminLogin}:${postgresServerAdminPassword}@${postgresServerName}.postgres.database.azure.com:5432/${postgresServerName}?sslmode=require'
+    postgresURLSecretValue: 'postgresql://${postgresServerAdminLogin}:${postgresServerAdminPassword}@${postgresServerName}.postgres.database.azure.com:5432/postgres?sslmode=require'
     litellmMasterKeySecretValue: litellmMasterKey
   }
 }
 
-// =====================
-// CONTAINER ENVIRONMENT (VNet Integration)
-// =====================
 module containerEnvModule './modules/containerEnv.bicep' = {
   name: 'deployContainerEnv'
   params: {
@@ -193,14 +106,21 @@ module containerEnvModule './modules/containerEnv.bicep' = {
     storageAccountKey: storageModule.outputs.storageAccountKey
     openWebUIShareName: storageModule.outputs.openWebUIShareName
     liteLLMShareName: storageModule.outputs.litellmConfigShareName
-    vnetId: vnet.id
-    subnetName: containerSubnetName
   }
 }
 
-// =====================
-// CONTAINER APPS (LiteLLM + OpenWebUI)
-// =====================
+module postgresModule './modules/postgres.bicep' = {
+  name: 'deployPostgres'
+  params: {
+    serverName: postgresServerName
+    administratorLogin: postgresServerAdminLogin
+    administratorLoginPassword: postgresServerAdminPassword
+    location: location
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+
 module containerAppsModule './modules/containerApps.bicep' = {
   name: 'deployContainerApps'
   params: {
@@ -214,5 +134,6 @@ module containerAppsModule './modules/containerApps.bicep' = {
     azureOpenAIBaseUrl: azureOpenAIEndpointVal
     azureOpenAIApiVersion: azureOpenAIApiVersion
     location: location
+    pgHost: postgresModule.outputs.postgresHost
   }
 }

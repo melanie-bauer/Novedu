@@ -2,6 +2,7 @@ param keyVaultName string
 param location string
 @secure()
 param openAIKeySecretValue string // Azure OpenAI API-Schlüssel, der als Secret im Vault gespeichert wird
+@secure()
 param adminObjectId string // AAD Objekt-ID eines Administrators (Benutzer oder Gruppe) für Vault-Zugriff
 param managedIdentityObjectId string // Objekt-ID der User-Assigned Managed Identity (für Key Vault Leserechte)
 @secure()
@@ -90,5 +91,6 @@ resource postgresURLSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
     value: postgresURLSecretValue
   }
 }
+
 
 output vaultUri string = vault.properties.vaultUri
