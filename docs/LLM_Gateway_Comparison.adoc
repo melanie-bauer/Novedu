@@ -1,5 +1,5 @@
 = LLM Gateway Comparison
-== LiteLLM vs OpenRouter
+== LiteLLM vs OpenRouter vs possible own solution
 :author: Novedu
 :toc:
 :toc-title: Table of Contents
@@ -19,8 +19,16 @@
 
 
 == LiteLLM
+=== Privacy
+LiteLLM can be self-hosted (e.g., on Azure). When self-hosted, all data stays within the own infrastructure. LiteLLM does not train models on user data.
+
+=== Ease
+
 == OpenRouter
-== self-hosted
+=== Privacy
+OpenRouter is a fully managed SaaS footnote:[Software as a Service; cloud-hosted application accessed over the internet.]
+solution. All requests are processed through OpenRouter servers. To have your requests routed through a European server, you must subscribe to the Enterprise plan. OpenRouter does not train models on user data, but it samples a small number of prompts for anonymized categorization to power reporting and model ranking. OpenRouter does not provide an option to self-host the gateway.
+
 
 // == Pricing
 
@@ -53,3 +61,6 @@
 
 // |===
 
+https://www.reddit.com/r/LocalLLaMA/comments/1l98lly/privacy_implications_of_sending_data_to_openrouter/[privacy implications of using OpenRouter] +
+https://openrouter.ai/[OpenRouter website] +
+https://www.litellm.ai/[LiteLLM website] +
