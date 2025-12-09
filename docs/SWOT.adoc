@@ -1,0 +1,46 @@
+= SWOT Analyse Novedu
+
+[cols="1,1", options="header"]
+|===
+|Stärken (Strengths)
+|Schwächen (Weaknesses)
+
+|*DSGVO-konforme*, sichere KI-Plattform speziell für Schulen
+|Hoher initialer *Entwicklungsaufwand*
+
+|*Open-Source-Architektur* schafft Vertrauen und Erweiterbarkeit
+|*Abhängigkeit* von externen LLM-Anbietern und deren Preismodellen
+
+|Pädagogisch *konfigurierbare Tutor-Instanzen*
+|*Begrenzte Marktreputation* als junges Unternehmen
+
+|*Budget- und Tokenkontrolle* als USP
+|*Komplexität des technischen Betriebs* (Hosting, Sicherheit)
+
+|*Hoher Bedarf* im Bildungsmarkt, da keine vergleichbare Lösung existiert
+|*Skalierung und Support* müssen aufgebaut werden
+
+|*Europäische* Infrastruktur & Datenhoheit
+|Schulen haben *lange Entscheidungszyklen*
+|===
+
+[cols="1,1", options="header"]
+|===
+|Chancen (Opportunities)
+|Risiken (Threats)
+
+|Steigende *Nachfrage nach KI* in Schulen durch neue Lehrpläne und politischen Druck
+|*Änderungen* bei *Datenschutzrichtlinien oder LLM-Regulierungen*
+
+|Fehlen marktreifer Konkurrenzprodukte schafft *First-Mover-Vorteil*
+|*Skepsis* von Lehrkräften und Schulleitungen gegenüber KI-Systemen
+
+|*Zusammenarbeit* mit *Bildungsdirektionen*, Ministerien, Förderstellen
+|*API-Preisänderungen oder Performanceprobleme bei LLM-Anbietern*
+
+|Etablierung als *europäische Standardlösung für KI* an Schulen
+|*Finanzierungsrisiken* bei verzögerten Förderzusagen
+
+|*Skalierbarkeit* in weitere Bildungssegmente (FHs, Universitäten, etc.)
+|*Technische Risiken:* Systemkomplexität, Wartungsaufwand
+|===
