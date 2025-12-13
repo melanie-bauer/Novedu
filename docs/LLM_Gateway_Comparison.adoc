@@ -3,7 +3,6 @@
 :author: Novedu
 :toc:
 :toc-title: Table of Contents
-:sectnums:
 
 == Evaluation Criteria
 
@@ -18,16 +17,33 @@
 
 
 
-== LiteLLM
+== 1. LiteLLM
 === Privacy
 LiteLLM can be self-hosted (e.g., on Azure). When self-hosted, all data stays within the own infrastructure. LiteLLM does not train models on user data.
 
-=== Ease
+=== Pricing & Budget Control
+LiteLLM provides flexible cost tracking and pricing customization for all LLM providers.
+You can choose either custom pricing where you override default model costs or use the most common option _cost per token_.
+In LiteLLM, you can also set budgets for your API requests using tags.
+Tags are labels you can attach to your request to track and limit spending by category.
+With this feature, you could filter requests by class,
+which allows us to have token/cost tracking per class and set budget limits accordingly.
 
-== OpenRouter
+
+== 2. OpenRouter
 === Privacy
 OpenRouter is a fully managed SaaS footnote:[Software as a Service; cloud-hosted application accessed over the internet.]
 solution. All requests are processed through OpenRouter servers. To have your requests routed through a European server, you must subscribe to the Enterprise plan. OpenRouter does not train models on user data, but it samples a small number of prompts for anonymized categorization to power reporting and model ranking. OpenRouter does not provide an option to self-host the gateway.
+
+=== Pricing & Budget Control
+OpenRouter charges a 5.5% fee when purchasing credits.
+They pass through the pricing of the underlying LLM providers.
+Concerning cost tracking, you have two options:  If you like,
+you can use a dashboard to track usage and spending by Provider/Model.
+Alternatively, you can enable usage accounting for your API requests.
+When you add the usage parameter, OpenRouter will return a usage object with detailed token information.
+LiteLLM does not provide budget limit features, you would have to implement this on your side.
+
 
 
 // == Pricing
@@ -61,6 +77,15 @@ solution. All requests are processed through OpenRouter servers. To have your re
 
 // |===
 
+Sources +
 https://www.reddit.com/r/LocalLLaMA/comments/1l98lly/privacy_implications_of_sending_data_to_openrouter/[privacy implications of using OpenRouter] +
-https://openrouter.ai/[OpenRouter website] +
+
+https://docs.litellm.ai/docs/proxy/custom_pricing[LiteLLM Custom Pricing] +
 https://www.litellm.ai/[LiteLLM website] +
+https://docs.litellm.ai/docs/proxy/tag_budgets[LiteLLM Tag Budgets] +
+
+
+
+https://openrouter.ai/[OpenRouter website] +
+https://openrouter.ai/docs/guides/guides/usage-accounting[OpenRouter Usage Accounting] +
+https://openrouter.ai/activity[OpenRouter Activity Dashboard]
