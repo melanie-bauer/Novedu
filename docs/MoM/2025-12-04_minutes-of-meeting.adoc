@@ -85,7 +85,7 @@ a| Bicep restructuring und entfernen der ACR
 | 09.12.2025
 
 | Melanie Bauer
-a| LibreChat auf Azure deployen
+a| LibreChat lokal deployen
 | 09.12.2025
 
 | Melanie Bauer & Konstantin Wetscher
