@@ -88,6 +88,16 @@ If, for example, LiteLLM has an outage, you wouldn't be able to use it until it'
 With your own solution,
 you can ensure high availability because you are in charge of when the maintenance works take place.
 
+==== Development
+Building your own LLM gateway requires significant development effort and expertise.
+It takes at least 6 months to have a minimal viable product (MVP).
+Furthermore, you have to continue with observability.
+This means you need to monitor the system, track data (e.g. response times), and summarize your findings. +
+You also have to validate outputs and avoid the AI to generate harmful content. +
+
+It is very hard to work on such a project without prior experience.
+You must be familiar with LLMs, APIs, security best practices, and coding in general, of course.
+It is also good to know about CI/CD pipelines, containerization (e.g., Docker), and orchestration (e.g., Kubernetes).
 
 // == Pricing
 
