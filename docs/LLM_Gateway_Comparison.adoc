@@ -99,6 +99,15 @@ It is very hard to work on such a project without prior experience.
 You must be familiar with LLMs, APIs, security best practices, and coding in general, of course.
 It is also good to know about CI/CD pipelines, containerization (e.g., Docker), and orchestration (e.g., Kubernetes).
 
+==== Maintenance Overhead
+Maintaining your own LLM gateway involves a lot of ongoing tasks.
+If you use multiple LLM providers, you have to keep track of their API changes and update your gateway accordingly.
+You need to manage API keys, tokens, and user access securely to ensure nothing gets compromised.
+Requests must be distributed across multiple providers or instances,
+which means you need to monitor system performance and availability.
+You also have to enforce rate limits to match the constraints of each provider.
+Last but not least, you have to log requests, responses, and system events securely for auditing and debugging purposes.
+
 // == Pricing
 
 // See https://www.litellm.ai/#pricing for LiteLLM pricing details and https://openrouter.ai/pricing for OpenRouter pricing details.
