@@ -12,7 +12,7 @@
 - Transparent Model Pricing, Token/Cost Tracking per class, Budget Limits
 * Ease of Integration
 - Clear docs, simple rest api
-* Model Diversity 
+* Model Diversity
 - Mandatory: Azure OpenAI; optional: OpenAI, Claude, Gemini, Mistral
 
 
@@ -72,6 +72,16 @@ it lacks more advanced budget management features (as budget per class).
 Additionally, as a SaaS service, it is not possible for us to determine exactly where data is processed.
 
 
+==== Own Solution
+==== Pros
+You have full control over your infrastructure, meaning you can tailor the gateway to your requirements.
+If, for example, LiteLLM has an outage, you wouldn't be able to use it until it's back online.
+With your own solution,
+you can ensure high availability because you are in charge of when the maintenance works take place.
+Additionally, you can implement custom features that may not be available in existing solutions.
+
+
+
 // == Pricing
 
 // See https://www.litellm.ai/#pricing for LiteLLM pricing details and https://openrouter.ai/pricing for OpenRouter pricing details.
@@ -120,4 +130,6 @@ https://openrouter.ai/docs/quickstart[OpenRouter Quickstart Guide] +
 https://openrouter.ai/pricing[OpenRouter Pricing (see Models section)]
 
 https://developers.cloudflare.com/ai-gateway/usage/providers/[Cloudflare AI Gateway Supported Models] +
-https://developers.cloudflare.com/ai-gateway/[Cloudflare AI Gateway Documentation]
+https://developers.cloudflare.com/ai-gateway/[Cloudflare AI Gateway Documentation] +
+
+https://portkey.ai/blog/the-cost-of-building-an-llm-gateway/[The Cost of Building an LLM Gateway]
