@@ -81,14 +81,15 @@ Additionally, as a SaaS service, it is not possible for us to determine exactly 
 === Own Solution
 
 ==== Benefits
+
 You have full control over your infrastructure, meaning you can tailor the gateway to your requirements.
 It's possible to implement custom features that may not be available in LiteLLM or OpenRouter. +
 You can also have a tighter integration with your existing system (and e.g. use existing authentication mechanisms). +
 If, for example, LiteLLM has an outage, you wouldn't be able to use it until it's back online.
-With your own solution,
-you can ensure high availability because you are in charge of when the maintenance works take place.
+With your own solution, you can ensure high availability because you are in charge of when the maintenance works take place.
 
 ==== Development
+
 Building your own LLM gateway requires significant development effort and expertise.
 It takes at least 6 months to have a minimal viable product (MVP).
 Furthermore, you have to continue with observability.
@@ -100,44 +101,22 @@ You must be familiar with LLMs, APIs, security best practices, and coding in gen
 It is also good to know about CI/CD pipelines, containerization (e.g., Docker), and orchestration (e.g., Kubernetes).
 
 ==== Maintenance Overhead
+
 Maintaining your own LLM gateway involves a lot of ongoing tasks.
 If you use multiple LLM providers, you have to keep track of their API changes and update your gateway accordingly.
 You need to manage API keys, tokens, and user access securely to ensure nothing gets compromised.
-Requests must be distributed across multiple providers or instances,
-which means you need to monitor system performance and availability.
+Requests must be distributed across multiple providers or instances, which means you need to monitor system performance and availability.
 You also have to enforce rate limits to match the constraints of each provider.
 Last but not least, you have to log requests, responses, and system events securely for auditing and debugging purposes.
 
-// == Pricing
+== Conclusion
 
-// See https://www.litellm.ai/#pricing for LiteLLM pricing details and https://openrouter.ai/pricing for OpenRouter pricing details.
-
-// === OpenRouter Pricing
-
-// OpenRouter offers a free tier with slightly more than 25 Models.
-// If you want more Models, you need to subscribe to a "Pay-as-you-go" plan.
-// It provides around 300 Models for a platform fee of 5.5% on top of model cost.
-// You can buy enterprise plans for more features (price on request).
-
-// === LiteLLM Pricing
-
-// LiteLLM's free plan provides around 100 Models.
-// They also offer an "Enterprise" plan with additional features (price on request).
-
-// == Feature Comparison
-
-// The following table summarizes key features of LiteLLM and OpenRouter to give a quick overview of their capabilities.
-
-// [cols="1,1",options="header"]
-// |===
-// | LiteLLM | OpenRouter
-// | Supports 100+ models via multiple providers
-// | Supports 300+ models from ~50 providers
-// | self-hostable (Docker/K8s), full control over infrastructure| Fully Managed SaaS; no need to run your own gateway infrastructure
-// | Data stays inside your infrastructure when self-hosted
-// | Requests processed through OpenRouter servers
-
-// |===
+LiteLLM offers the best balance between privacy, pricing control, ease of integration, and model diversity.
+OpenRouter instead is a fully managed SaaS solution which is easy to get run, but lacks essential features.
+Without options like budget limit via tags and self-hosting, it does not meet our privacy and pricing requirements.
+Cloudflare AI Gateway is an interesting alternative, but also lacks budget management features and does not provide guarantee where the data is processed.
+Building our own solution is possible but requires significant development effort and ongoing maintenance.
+This is maybe a relevant option for later, but for now, *LiteLLM* is the most suitable choice.
 
 Sources +
 https://www.reddit.com/r/LocalLLaMA/comments/1l98lly/privacy_implications_of_sending_data_to_openrouter/[Privacy Implications of using OpenRouter] +
