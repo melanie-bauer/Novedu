@@ -15,71 +15,78 @@
 * Model Diversity
 - Mandatory: Azure OpenAI; optional: OpenAI, Claude, Gemini, Mistral
 
-
-
 == 1. LiteLLM
+
 === Privacy
+
 LiteLLM can be self-hosted, (e.g., on Azure).
 When self-hosted, all data stays within the own infrastructure.
 LiteLLM does not train models on user data.
 
 === Pricing & Budget Control
+
 LiteLLM provides flexible cost tracking and pricing customization for all LLM providers.
 You can choose either custom pricing where you override default model costs or use the most common option _cost per token_.
 In LiteLLM, you can also set budgets for your API requests using tags.
 Tags are labels you can attach to your request to track and limit spending by category.
-With this feature, you could filter requests by class,
-which allows us to have token/cost tracking per class and set budget limits accordingly.
+With this feature, you could filter requests by class, which allows us to have token/cost tracking per class and set budget limits accordingly.
 
 === Ease of Integration
+
 LiteLLM offers a clear documentation on their own website, as for the proxy server and also for the SDKs.
-If you set it up as a proxy, you have a lot of initial work to do,
-but once done, integration is straightforward via REST API.
+If you set it up as a proxy, you have a lot of initial work to do, but once done, integration is straightforward via REST API.
 
 === Model Diversity
-LiteLLM supports over 100 models from multiple providers,
-including all of our mandatory and optional providers and a lot more
+
+LiteLLM supports over 100 models from multiple providers, including all of our mandatory and optional providers and a lot more
 
 == 2. OpenRouter
+
 === Privacy
+
 OpenRouter is a fully managed SaaS footnote:[Software as a Service; cloud-hosted application accessed over the internet.]
-solution. All requests are processed through OpenRouter servers. To have your requests routed through a European server, you must subscribe to the Enterprise plan. OpenRouter does not train models on user data, but it samples a small number of prompts for anonymized categorization to power reporting and model ranking. OpenRouter does not provide an option to self-host the gateway.
+solution.
+All requests are processed through OpenRouter servers.
+To have your requests routed through a European server, you must subscribe to the Enterprise plan.
+OpenRouter does not train models on user data, but it samples a small number of prompts for anonymized categorization to power reporting and model ranking.
+OpenRouter does not provide an option to self-host the gateway.
 
 === Pricing & Budget Control
+
 OpenRouter charges a 5.5% fee when purchasing credits.
 They pass through the pricing of the underlying LLM providers.
-Concerning cost tracking, you have two options:  If you like,
-you can use a dashboard to track usage and spending by Provider/Model.
+Concerning cost tracking, you have two options: If you like, you can use a dashboard to track usage and spending by Provider/Model.
 Alternatively, you can enable usage accounting for your API requests.
 When you add the usage parameter, OpenRouter will return a usage object with detailed token information.
 LiteLLM does not provide budget limit features, you would have to implement this on your side.
 
-
 === Ease of Integration
+
 OpenRouter provides a quickstart guide and API documentation on their website.
 Because it's a fully managed SaaS solution, you don't have to set up any infrastructure.
 Integration is straightforward via REST API.
 
-
 === Model Diversity
+
 OpenRouter supports over 300 models from more than 60 providers, including all of our mandatory and optional providers.
 
-=== 3. Other considerations
-==== Cloudflare AI Gateway
+== 3. Other considerations
+
+=== Cloudflare AI Gateway
+
 It offers a wide range of models, easy integration, and an appealing dashboard.
-While it supports rate limiting to control usage,
-it lacks more advanced budget management features (as budget per class).
+While it supports rate limiting to control usage, it lacks more advanced budget management features (as budget per class).
 Additionally, as a SaaS service, it is not possible for us to determine exactly where data is processed.
 
+=== Own Solution
 
-==== Own Solution
-==== Pros
+==== Benefits
 You have full control over your infrastructure, meaning you can tailor the gateway to your requirements.
+It's possible to implement custom features that may not be available in LiteLLM or OpenRouter. +
+You can also have a tighter integration with your existing system (and e.g. use existing authentication mechanisms). +
 If, for example, LiteLLM has an outage, you wouldn't be able to use it until it's back online.
 With your own solution,
 you can ensure high availability because you are in charge of when the maintenance works take place.
-Additionally, you can implement custom features that may not be available in existing solutions.
-
 
 
 // == Pricing
@@ -121,7 +128,6 @@ https://www.litellm.ai/[LiteLLM Website] +
 https://docs.litellm.ai/docs/proxy/tag_budgets[LiteLLM Tag Budgets] +
 https://docs.litellm.ai/[LiteLLM Getting Started] +
 https://models.litellm.ai/[LiteLLM Model List] +
-
 
 https://openrouter.ai/[OpenRouter website] +
 https://openrouter.ai/docs/guides/guides/usage-accounting[OpenRouter Usage Accounting] +
