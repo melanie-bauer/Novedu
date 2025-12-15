@@ -1,4 +1,9 @@
 = SWOT Analyse Novedu
+:author: Melanie Bauer, Lukas Larndorfer, Konstantin Wetscher, André Wildberger
+:date: 09.12.2025
+
+_Melanie Bauer, Lukas Larndorfer, Konstantin Wetscher, André Wildberger_ +
+_09.12.2025_
 
 [cols="1,1", options="header"]
 |===
