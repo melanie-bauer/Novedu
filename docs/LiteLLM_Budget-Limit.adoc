@@ -1,0 +1,108 @@
+= LiteLLM Budget Validation
+== Budget per Student (OpenWebUI + Azure)
+:author: Novedu
+:toc:
+:toc-title: Table of Contents
+
+== Evaluation Criteria
+
+* Budget Enforcement
+- The per-student budget must not only be tracked, but also reliably blocked once exceeded.
+* Integration (OpenWebUI → LiteLLM)
+- Student identity must arrive in the gateway reproducibly as a Customer/End-User..
+* Operational Behavior
+- Reset logic (e.g., daily) and cost/spend calculation must be transparent and verifiable.
+* Data Protection
+- Store only usage/spend; no prompt/response logging in plaintext.
+
+== 1. Case: Header-based student identity is not mapped correctly (tracking incorrect or missing)
+
+=== Description
+OpenWebUI can forward user information via headers (e.g., user email/id/name).
+If LiteLLM does not read/map these headers correctly, the student identity is either:
+
+- not set at all, or
+- mapped to an incorrect/constant default.
+
+In that case, all “per-student” budgets become ineffective because requests are not attributed to the correct identity.
+
+=== Typical Symptoms
+- No (or wrong) customer IDs appear in the LiteLLM UI.
+- Spend logs show only one identity (e.g., `default_user_id`) for all students.
+- Filtering by customer/end-user returns no results.
+
+=== What to Verify
+- Does LiteLLM receive a unique `user/end_user/customer` identifier per request?
+
+=== Findings
+Using the Swagger UI, two identical POST requests were sent with `user: "student1@schule.at"` and `user: "student2@schule.at"`.
+Both requests were answered successfully with 200 OK. In `spend/logs` and `/customer/daily/activity`, the requests were correctly separated and recorded as `end_user`.
+Therefore, students can be clearly distinguished for tracking.
+
+== 2. Case: End-user budget is not enforced (tracking only, no blocking)
+
+=== Description
+There are bug reports where end-user budgets track spend, but requests are not rejected after the budget is exceeded.
+
+=== Why this Matters
+This is a risk scenario: “budget per student” would be reporting only, without real cost control.
+
+=== Typical Symptoms
+- Customer/end-user spend increases beyond `max_budget`.
+- Requests continue to succeed (no 4xx/429/403 error).
+
+=== What to Verify
+- Clear error behavior when the budget is exceeded (status code + message).
+- No further provider call once the budget is exceeded.
+
+=== Findings
+For end-user `budgettest1@schule.at`, a very small budget was set (`max_budget=0.00001`).
+After a first request with high token output, spend increased and exceeded the budget. The following request was blocked by LiteLLM and returned an `ExceededBudget (type: budget_exceeded)` error.
+This proves that, in this deployment, LiteLLM not only tracks per-student budget limits, but enforces them reliably. More issues follow.
+
+== 3. Case: Budget reset / “per day” (timezone / rolling window) -> thorougly tested
+
+=== Description
+The critical question is when LiteLLM resets a budget window (rolling window vs. calendar day / timezone).
+In the tests, an end-user with a very small `max_budget` and a short `budget_duration` (e.g., `60s`) was pushed over budget.
+Afterwards, it was repeatedly checked whether access would be re-enabled once the duration had elapsed.
+
+Result: budget enforcement (`ExceededBudget`) works reliably, but the reset is not visible exactly after the configured duration and may appear different depending on the endpoint (asynchronous reporting / caching).
+
+...asynchronous reporting => LiteLLM decides immediately on incoming requests (budget gate: allow/block), but values exposed through reporting endpoints are partially aggregated views and/or updated with a delay.
+
+=== Typical Symptoms
+- `ExceededBudget` occurs even though `spend: 0` is shown in `customer/info` or `customer/list`.
+- Reset happens delayed / “jumpy” (not exactly after e.g. 60s); afterwards, requests may work again.
+
+=== What to Verify
+- Is access actually re-enabled after `budget_duration` expires (reproducibly), or are there delayed/asynchronous resets?
+- Are budget decisions at `chat/completions` consistent with reporting (`customer/*`, `spend/logs`)?
+- For `budget_duration="1d"`: verify rolling 24h vs. calendar-day reset (UTC vs. local timezone) across a day change and via daily-activity endpoints.
+
+=== Findings
+During testing with `resettest3@schule.at` (`max_budget=0.00001`, `budget_duration="60s"`), the budget was exceeded and LiteLLM successfully blocked further calls with `ExceededBudget`.
+During observation, `customer/*` endpoints sometimes showed `spend: 0` even though requests were still blocked. After a few additional requests, the budget was exceeded again (e.g., `Spend=1.419e-05 > Budget=1e-05`).
+This indicates delayed/asynchronous resetting or differing data states between the budget gate and reporting.
+For the “per-day” scenario, the reset timing (rolling window vs. calendar day / timezone implementation) must be verified, tested, and documented in more depth.
+
+== 4. Conclusion
+Based on the performed prognosis LiteLLM could be a viable Choise, however it still needs extensive Testing and maybe even extensions to reach a truly acceptable state. LiteLLM already can distinguish between students and block users from exceeding the budget, once they breach their limit.
+
+The main risk however is the reset behaviour (explained in Case 3): budget rests were not consistently observed at the time of their configured window, and reporting endpoints sometimes showed values that did not match the immediate budget-gate behaviour. Therefore additional Tests over multiple days, maybe even a week are required (UTC vs local timezones) and under realistic loads (multiple students in parallel), in order that predictable "per-day" behaviour and reporting consistency and be confirmed.
+
+If daily reset behaviour cannot be proven reliable, then an additional operational safeguard (e.g a seperate reset / pre-call budget guard) should be considered to ensure strict cost control.
+
+Sources +
+https://docs.litellm.ai/docs/tutorials/openweb_ui +
+https://docs.litellm.ai/docs/proxy/customer_usage +
+https://docs.litellm.ai/docs/proxy/customers +
+https://docs.litellm.ai/docs/proxy/users +
+https://docs.litellm.ai/docs/proxy/virtual_keys +
+https://docs.litellm.ai/docs/proxy/ui +
+
+https://github.com/BerriAI/litellm/issues/11083 +
+https://github.com/BerriAI/litellm/issues/12905 +
+https://github.com/BerriAI/litellm/issues/15967 +
+https://github.com/BerriAI/litellm/issues/14667 +
+https://github.com/BerriAI/litellm/issues/15908 +
