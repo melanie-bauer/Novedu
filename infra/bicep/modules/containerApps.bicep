@@ -38,6 +38,16 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/AzureOpenAIKey'
           identity: userIdentityResourceId
         }
+        {
+          name: 'openid-client-id'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/OpenIDClientId'
+          identity: userIdentityResourceId
+        }
+        {
+          name: 'openid-client-secret'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/OpenIDClientSecret'
+          identity: userIdentityResourceId
+        }
       ]
     }
     template: {
@@ -57,6 +67,13 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'True' }
             { name: 'ENABLE_GROUPS', value: 'true' }
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
+            { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
+            { name: 'OAUTH_PROVIDER_NAME', value: 'Microsoft Entra ID'}
+            { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0'}
+            { name: 'OPENID_CLIENT_ID', secretRef: 'openid-client-id' }
+            { name: 'OPENID_CLIENT_SECRET', secretRef: 'openid-client-secret' }
+            { name: 'OPENID_SCOPES', value: 'openid profile email'}
+            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/oidc/callback'}
           ]
           volumeMounts: [
             {
