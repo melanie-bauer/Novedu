@@ -82,6 +82,8 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
             { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
             { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
+            { name: 'ENABLE_LOGIN_FORM', value: 'false'}
+            { name: 'OAUTH_MERGE_ACCOUNTS_BY_EMAIL', value: 'true'}
           ]
           volumeMounts: [
             {
