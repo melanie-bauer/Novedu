@@ -13,7 +13,10 @@ param postgresUsernameSecretValue string // Benutzername für PostgreSQL-Datenba
 param postgresURLSecretValue string // Verbindungs-URL für PostgreSQL-Datenbank, die als Secret im Vault gespeichert wird
 @secure()
 param litellmMasterKeySecretValue string
-
+@secure() 
+param openidClientIdSecretValue string
+@secure()
+param openidClientSecretValue string
 
 resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
@@ -92,5 +95,20 @@ resource postgresURLSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   }
 }
 
+resource openidClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'OpenIDClientId'
+  properties: {
+    value: openidClientIdSecretValue
+  }
+}
+
+resource openidClientSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'OpenIDClientSecret'
+  properties: {
+    value: openidClientSecretValue
+  }
+}
 
 output vaultUri string = vault.properties.vaultUri
