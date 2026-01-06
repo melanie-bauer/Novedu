@@ -43,4 +43,5 @@ jobs:
                            adminObjectId="${{ secrets.ADMIN_OBJECT_ID }}" \
                            litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}" \
                            openidClientId="${{ secrets.OPEN_ID_CLIENT_ID }}" \
-                           openidClientSecret="${{ secrets.OPEN_ID_CLIENT_SECRET }}"
+                           openidClientSecret="${{ secrets.OPEN_ID_CLIENT_SECRET }}" \
+                           webUISecretKey="${{ secrets.WEBUI_SECRET_KEY }}"

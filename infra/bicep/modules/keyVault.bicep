@@ -17,6 +17,8 @@ param litellmMasterKeySecretValue string
 param openidClientIdSecretValue string
 @secure()
 param openidClientSecretValue string
+@secure()
+param webUISecretKeySecretValue string
 
 resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
@@ -108,6 +110,14 @@ resource openidClientSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: 'OpenIDClientSecret'
   properties: {
     value: openidClientSecretValue
+  }
+}
+
+resource webUISecretKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'WebUISecretKey'
+  properties: {
+    value: webUISecretKeySecretValue
   }
 }
 

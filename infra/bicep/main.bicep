@@ -34,6 +34,9 @@ param openidClientId string
 @secure()
 param openidClientSecret string
 
+@secure() 
+param webUISecretKey string
+
 
 // =====================
 // MODULES
@@ -101,6 +104,7 @@ module keyVaultModule './modules/keyVault.bicep' = {
     litellmMasterKeySecretValue: litellmMasterKey
     openidClientIdSecretValue: openidClientId
     openidClientSecretValue: openidClientSecret
+    webUISecretKeySecretValue: webUISecretKey
   }
 }
 
