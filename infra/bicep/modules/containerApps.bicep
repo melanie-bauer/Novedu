@@ -79,6 +79,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'MICROSOFT_CLIENT_TENANT_ID', value: '91fc072c-edef-4f97-bdc5-cfb67718ae3a'}
             { name: 'MICROSOFT_OAUTH_SCOPE', value: 'openid email profile'}
             { name: 'MICROSOFT_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
+            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
             { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
             { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
