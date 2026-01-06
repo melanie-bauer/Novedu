@@ -77,10 +77,11 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0/.well-known/openid-configuration'}
             { name: 'OAUTH_CLIENT_ID', secretRef: 'openid-client-id' }
             { name: 'OAUTH_CLIENT_SECRET', secretRef: 'openid-client-secret' }
-            { name: 'OPENID_SCOPES', value: 'openid profile email'}
+            { name: 'OAUTH_SCOPES', value: 'openid email profile'}
             { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/oidc/callback'}
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
             { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
+            { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
           ]
           volumeMounts: [
             {
