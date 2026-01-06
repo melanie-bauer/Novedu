@@ -28,6 +28,13 @@ param litellmName string
 param openWebUIImage string
 param litellmImage string
 
+@secure()
+param openidClientId string
+
+@secure()
+param openidClientSecret string
+
+
 // =====================
 // MODULES
 // =====================
@@ -92,6 +99,8 @@ module keyVaultModule './modules/keyVault.bicep' = {
     postgresUsernameSecretValue: postgresServerAdminLogin
     postgresURLSecretValue: 'postgresql://${postgresServerAdminLogin}:${postgresServerAdminPassword}@${postgresServerName}.postgres.database.azure.com:5432/postgres?sslmode=require'
     litellmMasterKeySecretValue: litellmMasterKey
+    openidClientIdSecretValue: openidClientId
+    openidClientSecretValue: openidClientSecret
   }
 }
 

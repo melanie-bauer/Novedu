@@ -41,4 +41,6 @@ jobs:
               --parameters postgresServerAdminLogin="${{ secrets.POSTGRES_ADMIN_LOGIN }}" \
                            postgresServerAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}" \
                            adminObjectId="${{ secrets.ADMIN_OBJECT_ID }}" \
-                           litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}"
+                           litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}" \
+                           openidClientId="${{ secrets.OPEN_ID_CLIENT_ID }}" \
+                           openidClientSecret="${{ secrets.OPEN_ID_CLIENT_SECRET }}"
