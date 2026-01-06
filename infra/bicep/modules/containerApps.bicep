@@ -88,6 +88,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'WEBUI_AUTH_COOKIE_SAME_SITE', value: 'lax'}
             { name: 'WEBUI_SESSION_COOKIE_SECURE', value: 'true'}
             { name: 'WEBUI_AUTH_COOKIE_SECURE', value: 'true'}
+            { name: 'GLOBAL_LOG_LEVEL', value: 'DEBUG'}
           ]
           volumeMounts: [
             {
