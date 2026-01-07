@@ -69,7 +69,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'OPENAI_API_BASE_URL', value: 'http://${liteLLMName}:4000' }
             { name: 'OPENAI_API_KEY', secretRef: 'azure-openai-key' }
             { name: 'OPENAI_API_VERSION', value: azureOpenAIApiVersion }
-            { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'True' }
+            { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'true' }
             { name: 'ENABLE_GROUPS', value: 'true' }
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
             { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
