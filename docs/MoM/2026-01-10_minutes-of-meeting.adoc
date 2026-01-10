@@ -28,9 +28,9 @@ ifndef::imagesdir[:imagesdir: images]
 |Discord
 
 |von-bis
-|Sa, 10.1.2026, 14.00-
+|Sa, 10.1.2026, 14.00-14.45
 |Dauer
-|x min
+|45 min
 |===
 
 
