@@ -83,6 +83,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ENABLE_SIGNUP', value: 'false' }
             { name: 'ENABLE_OAUTH_ROLE_MANAGEMENT', value: 'true' }
             { name: 'OAUTH_ROLES_CLAIM', value: 'roles' }
+            { name: 'OAUTH_GROUP_CLAIM', value: 'groups' }
             { name: 'ENABLE_OAUTH_GROUP_CREATION', value: 'true' }
             { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0/.well-known/openid-configuration'}
             { name: 'MICROSOFT_CLIENT_ID', secretRef: 'openid-client-id' }
