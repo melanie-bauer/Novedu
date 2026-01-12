@@ -4,105 +4,38 @@
 :toc:
 :toc-title: Table of Contents
 
-== Evaluation Criteria
+== 1. Tracking between students
+=== I. What was expected
+Requests should be tracked between different students. Meaning each student should have their own budget and the usage of one student should not affect the budget of another student.
 
-* Budget Enforcement
-- The per-student budget must not only be tracked, but also reliably blocked once exceeded.
-* Integration (OpenWebUI → LiteLLM)
-- Student identity must arrive in the gateway reproducibly as a Customer/End-User..
-* Operational Behavior
-- Reset logic (e.g., daily) and cost/spend calculation must be transparent and verifiable.
-* Data Protection
-- Store only usage/spend; no prompt/response logging in plaintext.
+=== II. Findings
+At the current time LiteLLM does not have a built-in way to track usage between students. Also SSO was not setup for this evaluation. Meaning this point still has to be verified at a later time. +
+However what could already be observed is that inside Swagger LiteLLM is able to differentiate between different users.
 
-== 1. Case: Header-based student identity is not mapped correctly (tracking incorrect or missing)
+== 2. Setting a budget
+=== I. What was expected
+A Budget can be set and request spends were allowed to accumilate until the budget is exceeded.
 
-=== Description
-OpenWebUI can forward user information via headers (e.g., user email/id/name).
-If LiteLLM does not read/map these headers correctly, the student identity is either:
+=== II. Findings
+LiteLLM clearly supports budgeting by: setting & tracking spend in USD,  allowing a budget reset period (daily, weekly, monthly) to be set and displaing what models were allowed.
 
-- not set at all, or
-- mapped to an incorrect/constant default.
+==== Noteworthy:
+Sometimes tiny budgets show up as 0$ however runtime enforcement errors show that the budget is 0.01$ for example.
 
-In that case, all “per-student” budgets become ineffective because requests are not attributed to the correct identity.
+== 3. Exceeding that budget
+=== I. What was expected
+Once spend exceeds the budget, LiteLLM should prevent any further model calls (no provider request, no additional cost).
 
-=== Typical Symptoms
-- No (or wrong) customer IDs appear in the LiteLLM UI.
-- Spend logs show only one identity (e.g., `default_user_id`) for all students.
-- Filtering by customer/end-user returns no results.
+=== II. Findings
+Budget enforcement works and blocks calls immediately after the threshold is exceeded. +
+LiteLLM recognizes acummulated spend and compares it to the Max budget, for example: 0.01$ -> 0.017$ => lead to a HTTP 400 Error & did not allow further calls. +
 
-=== What to Verify
-- Does LiteLLM receive a unique `user/end_user/customer` identifier per request?
+==== Evidence that calls are blocked before they hit the model provider
+inside the logs of LiteLLM request that failed showed that no Tokens were used up and no costs were registered with the model provider. +
+=> Exactly what was expected. LiteLLM blocks before any provider calls are made.
 
-=== Findings
-Using the Swagger UI, two identical POST requests were sent with `user: "student1@schule.at"` and `user: "student2@schule.at"`.
-Both requests were answered successfully with 200 OK. In `spend/logs` and `/customer/daily/activity`, the requests were correctly separated and recorded as `end_user`.
-Therefore, students can be clearly distinguished for tracking.
-
-== 2. Case: End-user budget is not enforced (tracking only, no blocking)
-
-=== Description
-There are bug reports where end-user budgets track spend, but requests are not rejected after the budget is exceeded.
-
-=== Why this Matters
-This is a risk scenario: “budget per student” would be reporting only, without real cost control.
-
-=== Typical Symptoms
-- Customer/end-user spend increases beyond `max_budget`.
-- Requests continue to succeed (no 4xx/429/403 error).
-
-=== What to Verify
-- Clear error behavior when the budget is exceeded (status code + message).
-- No further provider call once the budget is exceeded.
-
-=== Findings
-For end-user `budgettest1@schule.at`, a very small budget was set (`max_budget=0.00001`).
-After a first request with high token output, spend increased and exceeded the budget. The following request was blocked by LiteLLM and returned an `ExceededBudget (type: budget_exceeded)` error.
-This proves that, in this deployment, LiteLLM not only tracks per-student budget limits, but enforces them reliably. More issues follow.
-
-== 3. Case: Budget reset / “per day” (timezone / rolling window) -> thorougly tested
-
-=== Description
-The critical question is when LiteLLM resets a budget window (rolling window vs. calendar day / timezone).
-In the tests, an end-user with a very small `max_budget` and a short `budget_duration` (e.g., `60s`) was pushed over budget.
-Afterwards, it was repeatedly checked whether access would be re-enabled once the duration had elapsed.
-
-Result: budget enforcement (`ExceededBudget`) works reliably, but the reset is not visible exactly after the configured duration and may appear different depending on the endpoint (asynchronous reporting / caching).
-
-...asynchronous reporting => LiteLLM decides immediately on incoming requests (budget gate: allow/block), but values exposed through reporting endpoints are partially aggregated views and/or updated with a delay.
-
-=== Typical Symptoms
-- `ExceededBudget` occurs even though `spend: 0` is shown in `customer/info` or `customer/list`.
-- Reset happens delayed / “jumpy” (not exactly after e.g. 60s); afterwards, requests may work again.
-
-=== What to Verify
-- Is access actually re-enabled after `budget_duration` expires (reproducibly), or are there delayed/asynchronous resets?
-- Are budget decisions at `chat/completions` consistent with reporting (`customer/*`, `spend/logs`)?
-- For `budget_duration="1d"`: verify rolling 24h vs. calendar-day reset (UTC vs. local timezone) across a day change and via daily-activity endpoints.
-
-=== Findings
-During testing with `resettest3@schule.at` (`max_budget=0.00001`, `budget_duration="60s"`), the budget was exceeded and LiteLLM successfully blocked further calls with `ExceededBudget`.
-During observation, `customer/*` endpoints sometimes showed `spend: 0` even though requests were still blocked. After a few additional requests, the budget was exceeded again (e.g., `Spend=1.419e-05 > Budget=1e-05`).
-This indicates delayed/asynchronous resetting or differing data states between the budget gate and reporting.
-For the “per-day” scenario, the reset timing (rolling window vs. calendar day / timezone implementation) must be verified, tested, and documented in more depth.
-
-== 4. Conclusion
-Based on the performed prognosis LiteLLM could be a viable Choise, however it still needs extensive Testing and maybe even extensions to reach a truly acceptable state. LiteLLM already can distinguish between students and block users from exceeding the budget, once they breach their limit.
-
-The main risk however is the reset behaviour (explained in Case 3): budget rests were not consistently observed at the time of their configured window, and reporting endpoints sometimes showed values that did not match the immediate budget-gate behaviour. Therefore additional Tests over multiple days, maybe even a week are required (UTC vs local timezones) and under realistic loads (multiple students in parallel), in order that predictable "per-day" behaviour and reporting consistency and be confirmed.
-
-If daily reset behaviour cannot be proven reliable, then an additional operational safeguard (e.g a seperate reset / pre-call budget guard) should be considered to ensure strict cost control.
-
-Sources +
-https://docs.litellm.ai/docs/tutorials/openweb_ui +
-https://docs.litellm.ai/docs/proxy/customer_usage +
-https://docs.litellm.ai/docs/proxy/customers +
-https://docs.litellm.ai/docs/proxy/users +
-https://docs.litellm.ai/docs/proxy/virtual_keys +
-https://docs.litellm.ai/docs/proxy/ui +
-
-https://github.com/BerriAI/litellm/issues/11083 +
-https://github.com/BerriAI/litellm/issues/12905 +
-https://github.com/BerriAI/litellm/issues/15967 +
-https://github.com/BerriAI/litellm/issues/14667 +
-https://github.com/BerriAI/litellm/issues/15908 +
+== 4. Further obersavations
+Budget overshoot by last allowed request: +
+In testing, a request was allowed while spend was still below the configured max budget, but its final cost pushed the total spend beyond the budget (e.g., total spend $0.0179 with max budget $0.01). This is consistent with budget enforcement that checks current spend before request execution and only blocks subsequent requests once the budget is exceeded. +
+Risk: In large-scale deployments, these “final request overshoots” (and especially parallel request races) can accumulate over time. +
+Mitigations: Set budget to 0.8$ / 0.9$ instead of 1$ to leave room for overshoot. Introduce a cap for request-tokens or implement a pre-call projected-cost check to avoid overshoot.

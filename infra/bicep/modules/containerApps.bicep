@@ -48,6 +48,11 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/OpenIDClientSecret'
           identity: userIdentityResourceId
         }
+        {
+          name: 'webui-secret-key'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/WebUISecretKey'
+          identity: userIdentityResourceId
+        }
       ]
     }
     template: {
@@ -64,19 +69,32 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'OPENAI_API_BASE_URL', value: 'http://${liteLLMName}:4000' }
             { name: 'OPENAI_API_KEY', secretRef: 'azure-openai-key' }
             { name: 'OPENAI_API_VERSION', value: azureOpenAIApiVersion }
-            { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'True' }
+            { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'true' }
             { name: 'ENABLE_GROUPS', value: 'true' }
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
             { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
-            { name: 'OAUTH_PROVIDER_NAME', value: 'Microsoft Entra ID'}
-            { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0'}
-            { name: 'OPENID_CLIENT_ID', secretRef: 'openid-client-id' }
-            { name: 'OPENID_CLIENT_SECRET', secretRef: 'openid-client-secret' }
-            { name: 'OPENID_SCOPES', value: 'openid profile email'}
-            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/oidc/callback'}
             { name: 'ENABLE_OAUTH_GROUP_MANAGEMENT': 'true' }
             { name: 'OAUTH_GROUP_CLAIM': 'groups' }
             { name: 'ENABLE_OAUTH_GROUP_CREATION': 'true' }
+            { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0/.well-known/openid-configuration'}
+            { name: 'MICROSOFT_CLIENT_ID', secretRef: 'openid-client-id' }
+            { name: 'MICROSOFT_CLIENT_SECRET', secretRef: 'openid-client-secret' }
+            { name: 'MICROSOFT_CLIENT_TENANT_ID', value: '91fc072c-edef-4f97-bdc5-cfb67718ae3a'}
+            { name: 'MICROSOFT_OAUTH_SCOPE', value: 'openid email profile'}
+            { name: 'MICROSOFT_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
+            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
+            { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
+            { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
+            { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
+            { name: 'ENABLE_LOGIN_FORM', value: 'true'}
+            { name: 'OAUTH_MERGE_ACCOUNTS_BY_EMAIL', value: 'true'}
+            { name: 'WEBUI_SESSION_COOKIE_SAME_SITE', value: 'lax'}
+            { name: 'WEBUI_AUTH_COOKIE_SAME_SITE', value: 'lax'}
+            { name: 'WEBUI_SESSION_COOKIE_SECURE', value: 'true'}
+            { name: 'WEBUI_AUTH_COOKIE_SECURE', value: 'true'}
+            { name: 'GLOBAL_LOG_LEVEL', value: 'DEBUG'}
+            { name: 'DEFAULT_USER_ROLE', value: 'user'}
+            { name: 'ENABLE_USER_AUTO_VERIFY', value: 'true' }
           ]
           volumeMounts: [
             {
