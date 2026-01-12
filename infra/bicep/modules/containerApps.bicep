@@ -73,6 +73,9 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ENABLE_GROUPS', value: 'true' }
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
             { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
+            { name: 'ENABLE_OAUTH_GROUP_MANAGEMENT': 'true' }
+            { name: 'OAUTH_GROUP_CLAIM': 'groups' }
+            { name: 'ENABLE_OAUTH_GROUP_CREATION': 'true' }
             { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0/.well-known/openid-configuration'}
             { name: 'MICROSOFT_CLIENT_ID', secretRef: 'openid-client-id' }
             { name: 'MICROSOFT_CLIENT_SECRET', secretRef: 'openid-client-secret' }
