@@ -74,6 +74,9 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'OPENID_CLIENT_SECRET', secretRef: 'openid-client-secret' }
             { name: 'OPENID_SCOPES', value: 'openid profile email'}
             { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/oidc/callback'}
+            { name: 'ENABLE_OAUTH_GROUP_MANAGEMENT': 'true' }
+            { name: 'OAUTH_GROUP_CLAIM': 'groups' }
+            { name: 'ENABLE_OAUTH_GROUP_CREATION': 'true' }
           ]
           volumeMounts: [
             {
