@@ -74,13 +74,22 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
             { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
             { name: 'ENABLE_OAUTH_GROUP_MANAGEMENT', value: 'true' }
+            { name: 'OAUTH_CLIENT_ID', value: 'entraIdApp.appId' }
+            { name: 'OAUTH_CODE_CHALLENGE_METHOD', value: 'S256' }
+            { name: 'OAUTH_PROVIDER_NAME', value: 'Microsoft Entra ID' }
+            { name: 'OAUTH_EMAIL_CLAIM', value: 'email' }
+            { name: 'OAUTH_GROUPS_CLAIM', value: 'groups' }
+            { name: 'OAUTH_USERNAME_CLAIM', value: 'name' }
+            { name: 'ENABLE_SIGNUP', value: 'false' }
+            { name: 'ENABLE_OAUTH_ROLE_MANAGEMENT', value: 'true' }
+            { name: 'OAUTH_ROLES_CLAIM', value: 'roles' }
             { name: 'OAUTH_GROUP_CLAIM', value: 'groups' }
             { name: 'ENABLE_OAUTH_GROUP_CREATION', value: 'true' }
             { name: 'OPENID_PROVIDER_URL', value: 'https://login.microsoftonline.com/91fc072c-edef-4f97-bdc5-cfb67718ae3a/v2.0/.well-known/openid-configuration'}
             { name: 'MICROSOFT_CLIENT_ID', secretRef: 'openid-client-id' }
             { name: 'MICROSOFT_CLIENT_SECRET', secretRef: 'openid-client-secret' }
             { name: 'MICROSOFT_CLIENT_TENANT_ID', value: '91fc072c-edef-4f97-bdc5-cfb67718ae3a'}
-            { name: 'MICROSOFT_OAUTH_SCOPE', value: 'openid email profile'}
+            { name: 'MICROSOFT_OAUTH_SCOPES', value: 'openid email profile User.Read GroupMember.Read.All'}
             { name: 'MICROSOFT_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
             { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
