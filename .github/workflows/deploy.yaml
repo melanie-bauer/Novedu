@@ -44,4 +44,6 @@ jobs:
                            litellmMasterKey="${{ secrets.LITELLM_MASTER_KEY }}" \
                            openidClientId="${{ secrets.OPEN_ID_CLIENT_ID }}" \
                            openidClientSecret="${{ secrets.OPEN_ID_CLIENT_SECRET }}" \
-                           webUISecretKey="${{ secrets.WEBUI_SECRET_KEY }}"
+                           webUISecretKey="${{ secrets.WEBUI_SECRET_KEY }}" \
+                           openAiApiKey="${{ secrets.OPENAI_API_KEY }}" \
+                           anthropicApiKey="${{ secrets.ANTHROPIC_API_KEY }}" 

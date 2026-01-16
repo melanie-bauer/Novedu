@@ -149,8 +149,13 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
       }
       secrets: [
         {
-          name: 'azure-openai-key'
-          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/AzureOpenAIKey'
+          name: 'openai-key'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/OpenAIKey'
+          identity: userIdentityResourceId
+        }
+        {
+          name: 'anthropic-key'
+          keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/AnthropicKey'
           identity: userIdentityResourceId
         }
         {
@@ -186,8 +191,8 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
           }
           env: [
             // LiteLLM proxy reads these to connect to Azure OpenAI
-            { name: 'AZURE_API_BASE', value: azureOpenAIBaseUrl }
-            { name: 'AZURE_API_KEY', secretRef: 'azure-openai-key' }
+            { name: 'OPENAI_API_KEY', secretRef: 'openai-key' }
+            { name: 'ANTHROPIC_API_KEY', secretRef: 'anthropic-key' }
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
             { name: 'PGHOST', value: pgHost }
@@ -197,7 +202,7 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'PGUSER', secretRef: 'pg-username' }
             { name: 'PGPASSWORD', secretRef: 'pg-password' }
             { name: 'LITELLM_CONFIG', value: '/app/config/litellm_config.yaml' }
-            { name: 'STORE_MODEL_IN_DB', value: 'True' }
+            { name: 'STORE_MODEL_IN_DB', value: 'false' }
 
           ]
           volumeMounts: [

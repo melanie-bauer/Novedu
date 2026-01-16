@@ -27,6 +27,10 @@ param openidClientIdSecretValue string
 param openidClientSecretValue string
 @secure()
 param webUISecretKeySecretValue string
+@secure()
+param openAiApiKey string
+@secure()
+param anthropicApiKey string
 
 // Built-in role definitions (data plane) for Key Vault
 resource kvSecretsOfficerRoleDef 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
@@ -87,8 +91,16 @@ resource miSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022-0
 }
 
 
-// Speichert den Azure OpenAI API Key als Secret im Key Vault
+// Speichert den OpenAI API Key als Secret im Key Vault
 resource openAISecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'OpenAIKey'
+  properties: {
+    value: openAiApiKey
+  }
+}
+
+resource azureOpenAISecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: vault
   name: 'AzureOpenAIKey'
   properties: {
@@ -150,6 +162,14 @@ resource webUISecretKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: 'WebUISecretKey'
   properties: {
     value: webUISecretKeySecretValue
+  }
+}
+
+resource anthropicSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'AnthropicKey'
+  properties: {
+    value: anthropicApiKey
   }
 }
 
