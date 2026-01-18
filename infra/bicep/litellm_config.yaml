@@ -8,15 +8,14 @@ general_settings:
   # User header mappings for Open WebUI integration
   # This enables per-user tracking from Open WebUI
   user_header_mappings:
-    - header_name: X-OpenWebUI-User-Id
+    - header_name: x-openwebui-user-id
       litellm_user_role: internal_user
-    - header_name: X-OpenWebUI-User-Email
+    - header_name: x-openwebui-user-email
       litellm_user_role: customer
 
   # UI Settings
   ui_access_mode: "all"  # Allow UI access for managing users/keys
 
-  store_model_in_db: true
   store_prompts_in_spend_logs: true
   
 # LiteLLM Settings
@@ -31,20 +30,73 @@ litellm_settings:
     
   # Drop unmapped params to prevent errors
   drop_params: true
+
+  extra_spend_tag_headers:
+    - "x-openwebui-user-email"
   
-# Router Settings (optional - for load balancing multiple deployments)
-router_settings:
-  routing_strategy: "simple-shuffle"
-  num_retries: 2
-  timeout: 60
 
 model_list:
-  - model_name: gpt-4o-mini
+  - model_name: gpt-5.1
     litellm_params:
-      model: azure/gpt-4o-mini
-      api_base: os.environ/AZURE_API_BASE
-      api_key: os.environ/AZURE_API_KEY
-      api_version: preview
+      model: openai/gpt-5.1
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-5-mini
+    litellm_params:
+      model: openai/gpt-5-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-5-nano
+    litellm_params:
+      model: openai/gpt-5-nano
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4.1
+    litellm_params:
+      model: openai/gpt-4.1
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4.1-mini
+    litellm_params:
+      model: openai/gpt-4.1-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4.1-nano
+    litellm_params:
+      model: openai/gpt-4.1-nano
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: o3
+    litellm_params:
+      model: openai/o3
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: o4-mini
+    litellm_params:
+      model: openai/o4-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4o-realtime-preview
+    litellm_params:
+      model: openai/gpt-4o-realtime-preview-2024-10-01
+      api_key: os.environ/OPENAI_API_KEY
+    model_info:
+      mode: realtime
+
+  - model_name: claude-sonnet-4-5
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5-20250929
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-opus-4-5
+    litellm_params:
+      model: anthropic/claude-opus-4-5-20251101
+      api_key: os.environ/ANTHROPIC_API_KEY
 
 # Cost Tracking
 # LiteLLM automatically tracks costs for known models

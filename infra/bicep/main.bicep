@@ -37,6 +37,11 @@ param openidClientSecret string
 @secure() 
 param webUISecretKey string
 
+@secure()
+param openAiApiKey string
+@secure()
+param anthropicApiKey string
+
 
 // =====================
 // MODULES
@@ -105,6 +110,8 @@ module keyVaultModule './modules/keyVault.bicep' = {
     openidClientIdSecretValue: openidClientId
     openidClientSecretValue: openidClientSecret
     webUISecretKeySecretValue: webUISecretKey
+    openAiApiKey: openAiApiKey
+    anthropicApiKey: anthropicApiKey
   }
 }
 
