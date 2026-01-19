@@ -32,7 +32,7 @@ param openAiApiKey string
 @secure()
 param anthropicApiKey string
 
-// Built-in role definitions (data plane) for Key Vault
+/*// Built-in role definitions (data plane) for Key Vault
 resource kvSecretsOfficerRoleDef 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   scope: subscription()
   // Key Vault Secrets Officer
@@ -87,6 +87,41 @@ resource miSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022-0
     roleDefinitionId: kvSecretsUserRoleDef.id
     principalId: managedIdentityObjectId
     principalType: 'ServicePrincipal'
+  }
+}*/
+
+resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    tenantId: subscription().tenantId
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    // Access Policies: Admin (voller Zugriff auf Secrets) und Managed Identity (Leserechte)
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: adminObjectId
+        permissions: {
+          secrets: ['get', 'list', 'set', 'delete']
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: managedIdentityObjectId
+        permissions: {
+          secrets: ['get', 'list']
+        }
+      }
+    ]
+    // ARM-Deployment darf auf den Vault zugreifen (für die Secret-Erstellung)
+    enabledForTemplateDeployment: true
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
   }
 }
 
