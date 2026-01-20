@@ -80,9 +80,9 @@ resource litellmConfig_fileShare 'Microsoft.Storage/storageAccounts/fileServices
   }
 }
 
-var litellmConfig = loadTextContent('../litellm_config.yaml')
+var litellmConfig = loadTextContent('../config.yaml')
 
-// Upload litellm_config.yaml to litellm-config file share
+// Upload config.yaml to litellm-config file share
 resource uploadLitellmConfig_deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'upload-litellm-config'
   location: location
@@ -105,7 +105,7 @@ resource uploadLitellmConfig_deploymentScript 'Microsoft.Resources/deploymentScr
         value: litellmConfig
       }
     ]
-    scriptContent: 'echo "$CONTENT" > litellm_config.yaml && az storage file upload --source litellm_config.yaml -s ${litellmConfig_fileShare.name}'
+    scriptContent: 'echo "$CONTENT" > config.yaml && az storage file upload --source config.yaml -s ${litellmConfig_fileShare.name}'
   }
 }
 

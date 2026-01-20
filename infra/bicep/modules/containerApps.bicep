@@ -92,7 +92,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
             { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
             { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
-            { name: 'ENABLE_LOGIN_FORM', value: 'true'}
+            { name: 'ENABLE_LOGIN_FORM', value: 'false'}
             { name: 'OAUTH_MERGE_ACCOUNTS_BY_EMAIL', value: 'true'}
             { name: 'WEBUI_SESSION_COOKIE_SAME_SITE', value: 'lax'}
             { name: 'WEBUI_AUTH_COOKIE_SAME_SITE', value: 'lax'}
@@ -182,6 +182,10 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
         {
           name: 'litellm-proxy'
           image: liteLLMImage
+          args: [
+            '--config'
+            '/app/config.yaml'
+          ]
           resources: {
             cpu: 1
             memory: '2.0Gi'
@@ -192,20 +196,20 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ANTHROPIC_API_KEY', secretRef: 'anthropic-key' }
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
-            { name: 'PGHOST', value: pgHost }
-            { name: 'PGDATABASE', value: 'postgres' }
-            { name: 'PGPORT', value: string(pgPort) }
-            { name: 'PGSSLMODE', value: 'require' }
-            { name: 'PGUSER', secretRef: 'pg-username' }
-            { name: 'PGPASSWORD', secretRef: 'pg-password' }
-            { name: 'LITELLM_CONFIG', value: '/app/config/litellm_config.yaml' }
-            { name: 'STORE_MODEL_IN_DB', value: 'false' }
+            // { name: 'PGHOST', value: pgHost }
+            // { name: 'PGDATABASE', value: 'postgres' }
+            // { name: 'PGPORT', value: string(pgPort) }
+            // { name: 'PGSSLMODE', value: 'require' }
+            // { name: 'PGUSER', secretRef: 'pg-username' }
+            // { name: 'PGPASSWORD', secretRef: 'pg-password' }
+            { name: 'CONFIG_FILE_PATH', value: '/app/config.yaml' }
+            // { name: 'STORE_MODEL_IN_DB', value: 'false' }
 
           ]
           volumeMounts: [
             {
               volumeName: 'litellm-config'
-              mountPath: '/app/config'
+              mountPath: '/app'
             }
           ]
         }
