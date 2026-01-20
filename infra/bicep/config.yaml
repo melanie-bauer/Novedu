@@ -83,7 +83,7 @@ model_list:
 
   - model_name: gpt-4o-realtime-preview
     litellm_params:
-      model: openai/gpt-4o-realtime-preview-2024-10-01
+      model: openai/gpt-4o-realtime-preview
       api_key: os.environ/OPENAI_API_KEY
     model_info:
       mode: realtime
