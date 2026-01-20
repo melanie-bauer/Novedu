@@ -198,14 +198,14 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             // { name: 'PGSSLMODE', value: 'require' }
             // { name: 'PGUSER', secretRef: 'pg-username' }
             // { name: 'PGPASSWORD', secretRef: 'pg-password' }
-            { name: 'CONFIG_FILE_PATH', value: '/app/config.yaml' }
+            { name: 'CONFIG_FILE_PATH', value: '/app/config/config.yaml' }
             // { name: 'STORE_MODEL_IN_DB', value: 'false' }
 
           ]
           volumeMounts: [
             {
               volumeName: 'litellm-config'
-              mountPath: '/app'
+              mountPath: '/app/config'
             }
           ]
         }
