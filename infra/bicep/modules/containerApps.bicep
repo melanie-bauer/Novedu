@@ -192,12 +192,12 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ANTHROPIC_API_KEY', secretRef: 'anthropic-key' }
             { name: 'DATABASE_URL', secretRef: 'azure-postgres-url'}
             { name: 'LITELLM_MASTER_KEY', secretRef: 'litellm-master-key' }
-            // { name: 'PGHOST', value: pgHost }
-            // { name: 'PGDATABASE', value: 'postgres' }
-            // { name: 'PGPORT', value: string(pgPort) }
-            // { name: 'PGSSLMODE', value: 'require' }
-            // { name: 'PGUSER', secretRef: 'pg-username' }
-            // { name: 'PGPASSWORD', secretRef: 'pg-password' }
+            { name: 'PGHOST', value: pgHost }
+            { name: 'PGDATABASE', value: 'postgres' }
+            { name: 'PGPORT', value: string(pgPort) }
+            { name: 'PGSSLMODE', value: 'require' }
+            { name: 'PGUSER', secretRef: 'pg-username' }
+            { name: 'PGPASSWORD', secretRef: 'pg-password' }
             { name: 'CONFIG_FILE_PATH', value: '/app/config/config.yaml' }
             // { name: 'STORE_MODEL_IN_DB', value: 'false' }
 
