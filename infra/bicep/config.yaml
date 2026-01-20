@@ -8,9 +8,9 @@ general_settings:
   # User header mappings for Open WebUI integration
   # This enables per-user tracking from Open WebUI
   user_header_mappings:
-    - header_name: x-openwebui-user-id
-      litellm_user_role: internal_user
     - header_name: x-openwebui-user-email
+      litellm_user_role: internal_user
+    - header_name: x-openwebui-user-name
       litellm_user_role: customer
 
   # UI Settings
