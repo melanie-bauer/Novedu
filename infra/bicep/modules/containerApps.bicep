@@ -182,10 +182,6 @@ resource liteLLMApp 'Microsoft.App/containerApps@2025-07-01' = {
         {
           name: 'litellm-proxy'
           image: liteLLMImage
-          args: [
-            '--config'
-            '/app/config.yaml'
-          ]
           resources: {
             cpu: 1
             memory: '2.0Gi'
