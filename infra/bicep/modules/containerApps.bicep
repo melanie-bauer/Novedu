@@ -73,12 +73,9 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'ENABLE_GROUPS', value: 'true' }
             { name: 'ENABLE_ADVANCED_PERMISSIONS', value: 'true' }
             { name: 'ENABLE_OAUTH_SIGNUP', value: 'true' }
-            { name: 'ENABLE_OAUTH_GROUP_MANAGEMENT', value: 'true' }
-            { name: 'OAUTH_CLIENT_ID', value: 'entraIdApp.appId' }
-            { name: 'OAUTH_CODE_CHALLENGE_METHOD', value: 'S256' }
-            { name: 'OAUTH_PROVIDER_NAME', value: 'Microsoft Entra ID' }
-            { name: 'OAUTH_EMAIL_CLAIM', value: 'email' }
-            { name: 'OAUTH_GROUPS_CLAIM', value: 'groups' }
+            { name: 'ENABLE_MICROSOFT_GROUP_MANAGEMENT', value: 'true' }
+            { name: 'MICROSOFT_EMAIL_CLAIM', value: 'email' }
+            { name: 'MICROSOFT_GROUPS_CLAIM', value: 'groups' }
             { name: 'OAUTH_USERNAME_CLAIM', value: 'name' }
             { name: 'ENABLE_SIGNUP', value: 'false' }
             { name: 'ENABLE_OAUTH_ROLE_MANAGEMENT', value: 'true' }
