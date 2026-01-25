@@ -78,7 +78,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'MICROSOFT_GROUPS_CLAIM', value: 'groups' }
             { name: 'OAUTH_USERNAME_CLAIM', value: 'name' }
             { name: 'ENABLE_SIGNUP', value: 'false' }
-            { name: 'ENABLE_OAUTH_ROLE_MANAGEMENT', value: 'true' }
+            { name: 'ENABLE_OAUTH_ROLE_MANAGEMENT', value: 'false' }
             { name: 'OAUTH_ROLES_CLAIM', value: 'roles' }
             { name: 'OAUTH_GROUP_CLAIM', value: 'groups' }
             { name: 'ENABLE_OAUTH_GROUP_CREATION', value: 'true' }
