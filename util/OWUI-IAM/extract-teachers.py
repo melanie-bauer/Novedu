@@ -19,7 +19,7 @@ def generate_random_password(length=16):
 
 # Regex:
 # 1 Buchstabe . viele Buchstaben/Zahlen @htl-leonding.ac.at
-email_regex = re.compile(r'^[a-z]\.[a-z0-9]+@htl-leonding\.ac\.at$')
+email_regex = re.compile(r'^[a-z]\.[a-z0-9-]+@htl-leonding\.ac\.at$')
 
 # Prüfe, ob Ausgabeordner existiert, sonst erstelle ihn
 os.makedirs(os.path.dirname(output_file), exist_ok=True)
