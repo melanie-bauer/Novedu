@@ -8,9 +8,9 @@ general_settings:
   # User header mappings for Open WebUI integration
   # This enables per-user tracking from Open WebUI
   user_header_mappings:
-    - header_name: x-openwebui-user-email
+    - header_name: x-openwebui-user-id
       litellm_user_role: internal_user
-    - header_name: x-openwebui-user-name
+    - header_name: x-openwebui-user-email
       litellm_user_role: customer
 
   # UI Settings
@@ -18,6 +18,8 @@ general_settings:
 
   store_prompts_in_spend_logs: true
   store_model_in_db: true
+
+  max_end_user_budget_id: "minimal_test_budget"
   
 # LiteLLM Settings
 litellm_settings:
