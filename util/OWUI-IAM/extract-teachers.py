@@ -2,6 +2,7 @@ import csv
 import secrets
 import string
 import os
+import re
 
 # Eingabe-CSV
 input_file = "csv/input/UserList.csv"
@@ -16,6 +17,10 @@ def generate_random_password(length=16):
     )
     return ''.join(secrets.choice(chars) for _ in range(length))
 
+# Regex:
+# 1 Buchstabe . viele Buchstaben/Zahlen @htl-leonding.ac.at
+email_regex = re.compile(r'^[a-z]\.[a-z0-9]+@htl-leonding\.ac\.at$')
+
 # Prüfe, ob Ausgabeordner existiert, sonst erstelle ihn
 os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
@@ -24,6 +29,7 @@ with open(input_file, newline='', encoding='utf-8-sig') as csv_in, \
 
     reader = csv.DictReader(csv_in)
     # BOM- und Leerzeichen-sichere Header
+    # BOM: Byte Order Mark
     reader.fieldnames = [name.strip() for name in reader.fieldnames]
 
     fieldnames = ['Name', 'Email', 'Password', 'Role']
@@ -38,11 +44,8 @@ with open(input_file, newline='', encoding='utf-8-sig') as csv_in, \
         upn = row['userPrincipalName'].strip().lower()
         display_name = row['displayName'].strip()
 
-        # Filter: *.*@htl-leonding.ac.at, kein 'students'
-        if ("@htl-leonding.ac.at" in upn and
-            "students" not in upn and
-            '.' in upn.split('@')[0]):
-
+        # Regex-Filter für Lehrer-Mails
+        if email_regex.match(upn):
             password = generate_random_password(16)
 
             writer.writerow({
