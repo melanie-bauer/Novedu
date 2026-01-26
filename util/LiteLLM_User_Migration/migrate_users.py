@@ -35,57 +35,49 @@ def migrate_users_to_postgres(users):
     inserted = 0
 
     for user_id, email in users:
-        query_check = f'SELECT 1 FROM "{PG_TABLE_NAME}" WHERE user_id = %s OR user_email = %s'
-        cursor.execute(query_check, (user_id, email))
+        cursor.execute(f'SELECT 1 FROM "{PG_TABLE_NAME}" WHERE user_id = %s', (user_id,))
         if cursor.fetchone():
-            continue
+            continue 
+
+        cursor.execute(f'SELECT user_id FROM "{PG_TABLE_NAME}" WHERE user_email = %s', (email,))
+        result = cursor.fetchone()
+        if result:
+            existing_id = result[0]
+            if existing_id != user_id:
+                cursor.execute(f'''
+                    UPDATE "{PG_TABLE_NAME}"
+                    SET user_id = %s
+                    WHERE user_email = %s
+                ''', (user_id, email))
+                print(f"{inserted}: Benutzer-ID aktualisiert für {email} (alt: {existing_id}, neu: {user_id})")
+                inserted += 1
+                continue
 
         query_insert = f'''
-                        INSERT INTO "{PG_TABLE_NAME}" (
-                            user_id, user_alias, team_id, sso_user_id, organization_id, password, teams, user_role,
-                            max_budget, spend, user_email, models, metadata, max_parallel_requests, tpm_limit, rpm_limit,
-                            budget_duration, budget_reset_at, allowed_cache_controls, model_spend, model_max_budget,
-                            created_at, updated_at, object_permission_id, policies
-                        ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s
-                        )
-                        '''
-                        
+            INSERT INTO "{PG_TABLE_NAME}" (
+                user_id, user_alias, team_id, sso_user_id, organization_id, password, teams, user_role,
+                max_budget, spend, user_email, models, metadata, max_parallel_requests, tpm_limit, rpm_limit,
+                budget_duration, budget_reset_at, allowed_cache_controls, model_spend, model_max_budget,
+                created_at, updated_at, object_permission_id, policies
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s
+            )
+        '''
         now = datetime.datetime.now(datetime.UTC)
         budget_reset = datetime.datetime(2026, 2, 1)
 
         cursor.execute(query_insert, (
-            user_id,         # user_id
-            None,            # user_alias
-            None,            # team_id
-            None,            # sso_user_id
-            None,            # organization_id
-            None,            # password
-            '{}',            # teams (JSON)
-            'internal_user_viewer',  # user_role
-            15,              # max_budget
-            0,               # spend
-            email,           # user_email
-            '{no-default-models}',  # models (JSON)
-            '{}',            # metadata (JSON)
-            None,            # max_parallel_requests
-            None,            # tpm_limit
-            None,            # rpm_limit
-            '30d',           # budget_duration
-            budget_reset,    # budget_reset_at
-            '{}',            # allowed_cache_controls
-            '{}',            # model_spend
-            '{}',            # model_max_budget
-            now,             # created_at
-            now,             # updated_at
-            None,            # object_permission_id
-            '{}'             # policies
+            user_id, None, None, None, None, None, '{}', 'internal_user_viewer',
+            15, 0, email, '{no-default-models}', '{}', None, None, None,
+            '30d', budget_reset, '{}', '{}', '{}',
+            now, now, None, '{}'
         ))
         inserted += 1
-        print(f"Benutzer {email} eingefügt")
+        print(f"{inserted}: Neuer Benutzer eingefügt: {email}")
+
     conn.commit()
     cursor.close()
     conn.close()
