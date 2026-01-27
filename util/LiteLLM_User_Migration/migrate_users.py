@@ -35,11 +35,11 @@ def migrate_users_to_postgres(users):
     inserted = 0
 
     for user_id, email in users:
-        cursor.execute(f'SELECT 1 FROM "{PG_TABLE_NAME}" WHERE user_id = %s', (user_id,))
+        cursor.execute(f'SELECT 1 FROM "{PG_TABLE_NAME}" WHERE user_id = %s AND user_email = %s', (user_id, email))
         if cursor.fetchone():
             continue 
 
-        cursor.execute(f'SELECT user_id FROM "{PG_TABLE_NAME}" WHERE user_email = %s', (email,))
+        cursor.execute(f'SELECT user_id FROM "{PG_TABLE_NAME}" WHERE user_email = %s', (email))
         result = cursor.fetchone()
         if result:
             existing_id = result[0]
@@ -50,6 +50,20 @@ def migrate_users_to_postgres(users):
                     WHERE user_email = %s
                 ''', (user_id, email))
                 print(f"{inserted}: Benutzer-ID aktualisiert für {email} (alt: {existing_id}, neu: {user_id})")
+                inserted += 1
+                continue
+
+        cursor.execute(f'SELECT user_email FROM "{PG_TABLE_NAME}" WHERE user_id = %s', (user_id))
+        result = cursor.fetchone()
+        if result:
+            existing_email = result[0]
+            if existing_email != email:
+                cursor.execute(f'''
+                    UPDATE "{PG_TABLE_NAME}"
+                    SET user_email = %s
+                    WHERE user_id = %s
+                ''', (email, user_id))
+                print(f"{inserted}: Benutzer-Email aktualisiert für {user_id} (alt: {existing_email}, neu: {email})")
                 inserted += 1
                 continue
 

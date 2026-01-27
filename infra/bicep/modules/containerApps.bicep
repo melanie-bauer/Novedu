@@ -100,7 +100,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'WEBUI_AUTH_COOKIE_SECURE', value: 'true'}
             { name: 'GLOBAL_LOG_LEVEL', value: 'DEBUG'}
             // { name: 'DEFAULT_USER_ROLE', value: 'user'}
-            { name: 'ENABLE_USER_AUTO_VERIFY', value: 'true' }
+            {name: 'ENABLE_ADMIN_CHAT_ACCESS', value: 'false'}
           ]
           volumeMounts: [
             {
