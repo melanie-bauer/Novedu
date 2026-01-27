@@ -1,0 +1,38 @@
+= Anforderungsbeschreibung Novedu
+:toc: left
+:sectnums:
+:icons: font
+:docdate: 2026-01-27
+:imagesdir: images
+
+== Grundfunktionen
+
+=== Login und Benutzerverwaltung
+* Login mit Entra ID
+* Automatische zuweisung der Rolle (Lehrer, Schüler) basierend auf Email (gibt es eine bessere Lösung?)
+* Automatische zuweisung zu Gruppen/Klassen basierend auf Entra ID Gruppen
+* Admin Benutzer können manuell Benutzer anlegen, bearbeiten und löschen
+
+* Automatische Synchronisation der Benutzer und Gruppen mit Entra ID (z.B. täglich für mögliche Namensänderungen oder neue Benutzer)
+* einfache Migration am Jahresanfang, wenn neue Klassen/Gruppen angelegt werden ohne das bestehende Chats verloren gehen
+
+=== Chatoberfläche
+* benutzerfreundliches Chatfenster mit Eingabefeld für Fragen
+* Anzeige von Chatverlauf und Antworten
+* Unterstützung für Textformatierung (Fett, Kursiv, Listen)
+* Möglichkeit, den Chatverlauf zu exportieren (z.B. als PDF)
+* Hochladen und verarbeiten von Dateien (z.B. PDFs, Bilder) zur Kontextualisierung der Fragen
+* Auswahl verschiedener Sprachmodelle (z.B. GPT-3.5, GPT-4)
+* Anzeige von Antwortzeiten und Ladeindikatoren
+* Mathematische Formeln korrekt darstellen (LaTeX Unterstützung)
+* Code-Snippets korrekt formatieren und hervorheben
+* Code-Ausführung für unterstützte Programmiersprachen (Python, JavaScript, etc.)
+* temporäre Speicherung des Chatverlaufs für die Dauer der Sitzung möglich
+
+=== Navbar
+=== Chatverlauf und verwaltung
+* Übersicht über alle bisherigen Chats
+* Möglichkeit, Chats zu löschen oder zu archivieren
+* Suchfunktion, um bestimmte Chats oder Themen zu finden
+* neuen Chat starten Button
+* Gruppierung der Chats in "Folder" nach Fach, Schuljahr, und anschließend dem verwendeten Tutoring-Modell
