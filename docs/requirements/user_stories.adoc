@@ -1,8 +1,8 @@
-# User Stories
+= User Stories
 
-## Epic 1 – Lehrer:innen
+== Epic 1 – Lehrer:innen
 
-### Story 1.1 – Tutor mit eigenem System Prompt anlegen  
+=== Story 1.1 – Tutor mit eigenem System Prompt anlegen  
 **User Story**  
 Als Fachlehrer:in (Mathematik/Deutsch/Programmieren) möchte ich durch einen eigenen System-Prompt einen KI-Tutor anlegen, damit dieser meinem Ansatz und den Klassenregeln folgt.
 
@@ -15,7 +15,7 @@ Als Fachlehrer:in (Mathematik/Deutsch/Programmieren) möchte ich durch einen eig
 ---
 
 
-### Story 1.2 – LLM pro Tutor auswählen  
+=== Story 1.2 – LLM pro Tutor auswählen  
 **User Story**  
 Als Lehrer:in möchte ich für jeden meiner Tutoren das zugrundeliegende LLM-Modell auswählen können, damit ich Qualität, Geschwindigkeit und Kosten für meinen Anwendungsfall ausbalancieren kann.
 
@@ -27,9 +27,9 @@ Als Lehrer:in möchte ich für jeden meiner Tutoren das zugrundeliegende LLM-Mod
 
 ---
 
-## Epic 2 – Tutor-Nutzung durch Schüler:innen & UI
+== Epic 2 – Tutor-Nutzung durch Schüler:innen & UI
 
-### Story 2.1 – Schüler:in nutzt einen zugewiesenen Tutor  
+=== Story 2.1 – Schüler:in nutzt einen zugewiesenen Tutor  
 **User Story**  
 Als Schüler:in möchte ich die meinen Klassen zugewiesenen KI-Tutoren nutzen können, damit ich Unterstützung beim Lernen und beim Lösen von Aufgaben bekomme.
 
@@ -41,7 +41,7 @@ Als Schüler:in möchte ich die meinen Klassen zugewiesenen KI-Tutoren nutzen k�
 
 ---
 
-### Story 2.2 – Texte und Bilder (z.B. Fotos) an Tutor schicken  
+=== Story 2.2 – Texte und Bilder (z.B. Fotos) an Tutor schicken  
 **User Story**  
 Als Schüler:in möchte ich sowohl Text als auch Bilder (z.B. Fotos meiner handschriftlichen Arbeiten) an meinen Tutor senden können, damit ich Feedback zu meinen eigenen Lösungen erhalte.
 
@@ -52,7 +52,7 @@ Als Schüler:in möchte ich sowohl Text als auch Bilder (z.B. Fotos meiner hands
 
 ---
 
-### Story 2.3 – Mathematische Formeln und Quellcode korrekt anzeigen  
+=== Story 2.3 – Mathematische Formeln und Quellcode korrekt anzeigen  
 **User Story**  
 Als Schüler:in möchte ich, dass mathematische Formeln und Code-Snippets korrekt angezeigt werden, damit ich die Erklärungen des Tutors gut lesen und verstehen kann.
 
@@ -63,7 +63,7 @@ Als Schüler:in möchte ich, dass mathematische Formeln und Code-Snippets korrek
 
 ---
 
-### Story 2.4 – Desktop- und Mobile-Nutzung  
+=== Story 2.4 – Desktop- und Mobile-Nutzung  
 **User Story**  
 Als Schüler:in möchte ich den KI-Tutor sowohl am Desktop als auch auf mobilen Geräten komfortabel nutzen können, damit ich in der Schule und unterwegs lernen kann.
 
@@ -74,9 +74,9 @@ Als Schüler:in möchte ich den KI-Tutor sowohl am Desktop als auch auf mobilen 
 
 ---
 
-## Epic 3 – Budgetkontrolle & Transparenz
+== Epic 3 – Budgetkontrolle & Transparenz
 
-### Story 3.1 – Budgets pro Klasse und Zeitraum definieren  
+=== Story 3.1 – Budgets pro Klasse und Zeitraum definieren  
 **User Story**  
 Als Schuladministrator:in möchte ich Token- oder Kostenbudgets pro Klasse und Zeitraum (Stunde/Tag/Woche/Monat) festlegen können, damit die KI-Nutzung innerhalb unserer finanziellen Grenzen bleibt.
 
@@ -88,7 +88,7 @@ Als Schuladministrator:in möchte ich Token- oder Kostenbudgets pro Klasse und Z
 
 ---
 
-### Story 3.2 – Tokens/Kosten gegen Budget zählen  
+=== Story 3.2 – Tokens/Kosten gegen Budget zählen  
 **User Story**  
 Als Systemverantwortliche:r möchte ich, dass jede LLM-Nutzung (inklusive der API-Keys für Programmierklassen) auf die jeweils passenden Budgets angerechnet wird, damit die Kosten planbar bleiben.
 
@@ -99,7 +99,7 @@ Als Systemverantwortliche:r möchte ich, dass jede LLM-Nutzung (inklusive der AP
 
 ---
 
-### Story 3.3 – Budget-Transparenz für Schüler:innen & Lehrer:innen  
+=== Story 3.3 – Budget-Transparenz für Schüler:innen & Lehrer:innen  
 **User Story**  
 Als Schüler:in oder Lehrer:in möchte ich meine aktuelle KI-Nutzung und das verbleibende Budget einsehen können, damit ich KI verantwortungsvoll nutze.
 
@@ -111,7 +111,7 @@ Als Schüler:in oder Lehrer:in möchte ich meine aktuelle KI-Nutzung und das ver
 
 ---
 
-### Story 3.4 – Dashboard für Schulleitung  
+=== Story 3.4 – Dashboard für Schulleitung  
 **User Story**  
 Als Schulleitung möchte ich die gesamte Budgetnutzung pro Klasse in einem Dashboard sehen können, damit ich Nutzung und Kosten überwachen kann.
 
@@ -122,7 +122,7 @@ Als Schulleitung möchte ich die gesamte Budgetnutzung pro Klasse in einem Dashb
 
 ---
 
-### Story 3.5 – Nur Budgetstatistiken speichern (Datenschutz)  
+=== Story 3.5 – Nur Budgetstatistiken speichern (Datenschutz)  
 **User Story**  
 Als für den Datenschutz Verantwortliche:r möchte ich, dass die Plattform nur Budget-Nutzungsstatistiken und nicht den vollständigen Gesprächsinhalt speichert, damit das System datenschutzkonform bleibt.
 
@@ -134,9 +134,9 @@ Als für den Datenschutz Verantwortliche:r möchte ich, dass die Plattform nur B
 ---
 
 
-## Epic 4 – Code Interpreter & fachliche Unterstützung
+== Epic 4 – Code Interpreter & fachliche Unterstützung
 
-### Story 4.1 – Code Interpreter für mathematische Aufgaben  
+=== Story 4.1 – Code Interpreter für mathematische Aufgaben  
 **User Story**  
 Als Mathematik-Lehrer:in möchte ich, dass mein KI-Tutor Code ausführen kann (z.B. für Berechnungen oder Diagramme), damit Schüler:innen komplexe Probleme mit korrekten Berechnungen erkunden können.
 
@@ -148,9 +148,9 @@ Als Mathematik-Lehrer:in möchte ich, dass mein KI-Tutor Code ausführen kann (z
 
 ---
 
-## Epic 5 – Authentifizierung, LLM-Provider & Infrastruktur
+== Epic 5 – Authentifizierung, LLM-Provider & Infrastruktur
 
-### Story 5.1 – SSO mit bestehenden Schulaccounts  
+=== Story 5.1 – SSO mit bestehenden Schulaccounts  
 **User Story**  
 Als Lehrer:in oder Schüler:in möchte ich mich über unseren bestehenden Schulaccount (z.B. Entra ID) anmelden können, damit ich kein eigenes Benutzerkonto mit Passwort für die KI-Plattform benötige.
 
@@ -161,7 +161,7 @@ Als Lehrer:in oder Schüler:in möchte ich mich über unseren bestehenden Schula
 
 ---
 
-### Story 5.2 – Azure OpenAI anbinden  
+=== Story 5.2 – Azure OpenAI anbinden  
 **User Story**  
 Als IT-Administrator:in möchte ich eine Azure-OpenAI-Verbindung konfigurieren und testen können, damit die Plattform mindestens einen konformen LLM-Provider verwenden kann.
 
@@ -172,7 +172,7 @@ Als IT-Administrator:in möchte ich eine Azure-OpenAI-Verbindung konfigurieren u
 
 ---
 
-### Story 5.3 – Mehrere LLM-Provider konfigurieren  
+=== Story 5.3 – Mehrere LLM-Provider konfigurieren  
 **User Story**  
 Als IT-Administrator:in möchte ich mehrere LLM-Provider (Azure OpenAI, OpenAI, Claude, Gemini, Mistral) konfigurieren und steuern können, welche Modelle verfügbar sind, damit die Schule den besten Mix aus Performance, Kosten und Compliance wählen kann.
 
@@ -183,7 +183,7 @@ Als IT-Administrator:in möchte ich mehrere LLM-Provider (Azure OpenAI, OpenAI, 
 
 ---
 
-### Story 5.4 – Betrieb in EU-Rechenzentren / On-Premise  
+=== Story 5.4 – Betrieb in EU-Rechenzentren / On-Premise  
 **User Story**  
 Als IT-Administrator:in möchte ich die Plattform vollständig in europäischen Rechenzentren oder On-Premise mit Open-Source-Komponenten betreiben können, damit das System die lokalen Datenschutzgesetze einhält.
 
@@ -194,7 +194,7 @@ Als IT-Administrator:in möchte ich die Plattform vollständig in europäischen 
 
 ---
 
-### Story 5.5 – Konfiguration für andere Schulen wiederverwendbar  
+=== Story 5.5 – Konfiguration für andere Schulen wiederverwendbar  
 **User Story**  
 Als Administrator:in einer anderen Schule möchte ich die Plattform (Schulname, Klassen, LLM-Provider, Budgets) ohne Code-Änderungen konfigurieren können, damit wir die Lösung einfach übernehmen können.
 
