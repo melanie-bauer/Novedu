@@ -30,7 +30,7 @@ jobs:
         uses: azure/cli@v1
         with:
           inlineScript: |
-            RG="SchoolAI"
+            RG="Novedu"
             BICEP_FILE="./infra/bicep/main.bicep"
             PARAM_FILE="./infra/bicep/dev.parameters.json"
 
