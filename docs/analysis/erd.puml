@@ -1,0 +1,18 @@
+@startuml Novedu ERD
+
+entity "User" as user {
+  user_id : UUID <<PK>>
+  --
+  entra_oid : VARCHAR(36)
+  email : VARCHAR(255)
+  display_name : VARCHAR(255)
+  first_name : VARCHAR(100)
+  last_name : VARCHAR(100)
+  is_active : BOOLEAN
+  last_login_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+@enduml
+
