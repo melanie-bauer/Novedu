@@ -87,20 +87,20 @@ resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-
 // =====================
 // KEY VAULT
 // =====================
-var azureOpenAIResourceId = resourceId('Microsoft.CognitiveServices/accounts', azureOpenAIName)
+/*var azureOpenAIResourceId = resourceId('Microsoft.CognitiveServices/accounts', azureOpenAIName)
 var azureOpenAIEndpointVal = !createAzureOpenAI 
   ? reference(azureOpenAIResourceId, azureOpenAIApiVersion, 'full').properties.endpoint 
   : azureOpenAIModule.outputs.azureOpenAIEndpoint
 var azureOpenAIKeyVal = !createAzureOpenAI 
   ? listKeys(azureOpenAIResourceId, azureOpenAIApiVersion).key1 
-  : azureOpenAIModule.outputs.azureOpenAIKey
+  : azureOpenAIModule.outputs.azureOpenAIKey*/
 
 module keyVaultModule './modules/keyVault.bicep' = {
   name: 'deployKeyVault'
   params: {
     keyVaultName: keyVaultName
     location: location
-    openAIKeySecretValue: azureOpenAIKeyVal
+    //openAIKeySecretValue: azureOpenAIKeyVal
     adminObjectId: adminObjectId
     managedIdentityObjectId: userIdentity.properties.principalId
     postgresPasswordSecretValue: postgresServerAdminPassword
@@ -151,7 +151,7 @@ module containerAppsModule './modules/containerApps.bicep' = {
     envId: containerEnvModule.outputs.environmentId
     userIdentityResourceId: userIdentity.id
     keyVaultName: keyVaultName
-    azureOpenAIBaseUrl: azureOpenAIEndpointVal
+    // azureOpenAIBaseUrl: azureOpenAIEndpointVal
     azureOpenAIApiVersion: azureOpenAIApiVersion
     location: location
     pgHost: postgresModule.outputs.postgresHost
