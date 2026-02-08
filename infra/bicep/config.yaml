@@ -1,4 +1,4 @@
-# General Settings
+# General settings
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   
