@@ -7,7 +7,7 @@
       "value": "novedu-logs"
     },
     "storageAccountName": {
-      "value": "novedustorage"
+      "value": "novedu-storage"
     },
     "userIdentityName": {
       "value": "novedu-identity"
@@ -22,7 +22,7 @@
       "value": "novedu-env"
     },
     "postgresServerName": {
-      "value": "novedu-pgserver"
+      "value": "novedu-postgres"
     },
     "azureOpenAIApiVersion": {
       "value": "2025-09-01"
