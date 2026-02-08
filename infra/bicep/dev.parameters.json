@@ -7,7 +7,7 @@
       "value": "novedu-logs"
     },
     "storageAccountName": {
-      "value": "novedu-storage"
+      "value": "novedufiles"
     },
     "userIdentityName": {
       "value": "novedu-identity"
