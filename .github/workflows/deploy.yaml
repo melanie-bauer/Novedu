@@ -6,7 +6,8 @@ on:
       - dev
     paths:
       - 'infra/bicep/**'
-
+  workflow_dispatch:
+  
 permissions:
   id-token: write
   contents: read
