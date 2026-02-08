@@ -1,7 +1,7 @@
 param keyVaultName string
 param location string
-@secure()
-param openAIKeySecretValue string // Azure OpenAI API-Schlüssel, der als Secret im Vault gespeichert wird
+//@secure()
+//param openAIKeySecretValue string // Azure OpenAI API-Schlüssel, der als Secret im Vault gespeichert wird
 @secure()
 param adminObjectId string // AAD Objekt-ID eines Administrators (Benutzer oder Gruppe) für Vault-Zugriff
 
@@ -135,13 +135,13 @@ resource openAISecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   }
 }
 
-resource azureOpenAISecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+/*resource azureOpenAISecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: vault
   name: 'AzureOpenAIKey'
   properties: {
     value: openAIKeySecretValue
   }
-}
+}*/
 
 // Speichert den LibreChat Encryption Key als Secret im Key Vault
 resource litellmMasterKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
