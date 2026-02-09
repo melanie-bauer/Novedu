@@ -16,7 +16,7 @@
       "value": "novedu-openai"
     },
     "keyVaultName": {
-      "value": "novedu-vault"
+      "value": "novedu-kv-prod"
     },
     "envName": {
       "value": "novedu-env"
