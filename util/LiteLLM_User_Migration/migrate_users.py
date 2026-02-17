@@ -85,8 +85,8 @@ def migrate_users_to_postgres(users):
 
         cursor.execute(query_insert, (
             user_id, None, None, None, None, None, '{}', 'internal_user_viewer',
-            15, 0, email, '{no-default-models}', '{}', None, None, None,
-            '30d', budget_reset, '{}', '{}', '{}',
+            0.3, 0, email, '{no-default-models}', '{}', None, None, None,
+            '7d', budget_reset, '{}', '{}', '{}',
             now, now, None, '{}'
         ))
         inserted += 1
