@@ -12,7 +12,60 @@ entity "User" as user {
   last_login_at : TIMESTAMP
   created_at : TIMESTAMP
   updated_at : TIMESTAMP
+  role_id : UUID <<FK>>
 }
+
+
+entity "Role" as role {
+  role_id : UUID <<PK>>
+  --
+  name : VARCHAR(50)
+  description : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "Permission" as permission {
+  permission_id : UUID <<PK>>
+  --
+  name : VARCHAR(100)
+  description : TEXT
+  resource : VARCHAR(100)
+  action : VARCHAR(50)
+  created_at : TIMESTAMP
+}
+entity "RolePermission" as role_permission {
+  role_permission_id : UUID <<PK>>
+  --
+  role_id : UUID <<FK>>
+  permission_id : UUID <<FK>>
+  created_at : TIMESTAMP
+}
+
+entity "Class" as class {
+  class_id : UUID <<PK>>
+  --
+  name : VARCHAR(50)
+  school_year : VARCHAR(10)
+  is_active : BOOLEAN
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "UserClass" as user_class {
+  user_class_id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  class_id : UUID <<FK>>
+}
+
+
+
+user }o--|| role
+user_class }o--|| user
+user_class }o--|| class
+role_permission }o--|| role
+role_permission }o--|| permission
 
 @enduml
 
