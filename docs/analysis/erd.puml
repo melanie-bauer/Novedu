@@ -10,9 +10,9 @@ entity "User" as user {
   last_name : VARCHAR(100)
   is_active : BOOLEAN
   last_login_at : TIMESTAMP
+  role_id : UUID <<FK>>
   created_at : TIMESTAMP
   updated_at : TIMESTAMP
-  role_id : UUID <<FK>>
 }
 
 
