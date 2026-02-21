@@ -59,6 +59,44 @@ entity "UserClass" as user_class {
   class_id : UUID <<FK>>
 }
 
+entity "Subject" as subject {
+  subject_id : UUID <<PK>>
+  --
+  name : VARCHAR(100)
+  description : TEXT
+}
+
+entity "LLMModel" as llm_model {
+  llm_model_id : UUID <<PK>>
+  --
+  name : VARCHAR(100)
+  provider : VARCHAR(30)
+  model_identifier : VARCHAR(100)
+  is_active : BOOLEAN
+  cost_per_input_token : DECIMAL(10,8)
+  cost_per_output_token : DECIMAL(10,8)
+}
+
+entity "AITutor" as ai_tutor {
+  ai_tutor_id : UUID <<PK>>
+  --
+  name : VARCHAR(100)
+  system_prompt : TEXT
+  llm_model_id : UUID <<FK>>
+  subject_id : UUID <<FK>>
+  created_by_user_id : UUID <<FK>>
+  is_active : BOOLEAN
+}
+
+entity "TutorClass" as tutor_class {
+  tutor_class_assignment_id : UUID <<PK>>
+  --
+  tutor_id : UUID <<FK>>
+  class_id : UUID <<FK>>
+  is_enabled : BOOLEAN
+  enabled_at : TIMESTAMP
+}
+
 
 
 user }o--|| role
@@ -66,6 +104,13 @@ user_class }o--|| user
 user_class }o--|| class
 role_permission }o--|| role
 role_permission }o--|| permission
+
+ai_tutor }o--|| llm_model
+ai_tutor }o--|| subject
+ai_tutor }o--|| user
+tutor_class }o--|| ai_tutor
+tutor_class }o--|| class
+tutor_class }o--|| user
 
 @enduml
 
