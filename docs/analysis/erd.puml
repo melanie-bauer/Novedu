@@ -1,116 +1,375 @@
 @startuml Novedu ERD
+!theme plain
+title Novedu – Entity Relationship Diagram
 
-entity "User" as user {
-  user_id : UUID <<PK>>
+skinparam linetype ortho
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam roundcorner 5
+
+' ========== Schule & Entra ID ==========
+
+entity "School" as School {
+  * id : string <<PK>>
   --
-  entra_oid : VARCHAR(36)
-  email : VARCHAR(255)
-  display_name : VARCHAR(255)
-  first_name : VARCHAR(100)
-  last_name : VARCHAR(100)
-  is_active : BOOLEAN
-  last_login_at : TIMESTAMP
-  role_id : UUID <<FK>>
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  name : string
+  created_at : datetime
+  updated_at : datetime
 }
 
-
-entity "Role" as role {
-  role_id : UUID <<PK>>
+entity "SchoolEntraConfig" as SchoolEntraConfig {
+  * id : string <<PK>>
   --
-  name : VARCHAR(50)
-  description : TEXT
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  school_id : string <<FK>>
+  tenant_id : string
+  client_id : string
+  client_secret_encrypted : string
+  redirect_uri : string
+  is_enabled : boolean
+  created_at : datetime
+  updated_at : datetime
 }
 
-entity "Permission" as permission {
-  permission_id : UUID <<PK>>
-  --
-  name : VARCHAR(100)
-  description : TEXT
-  resource : VARCHAR(100)
-  action : VARCHAR(50)
-  created_at : TIMESTAMP
-}
-entity "RolePermission" as role_permission {
-  role_permission_id : UUID <<PK>>
-  --
-  role_id : UUID <<FK>>
-  permission_id : UUID <<FK>>
-  created_at : TIMESTAMP
-}
+' ========== Nutzer ==========
 
-entity "Class" as class {
-  class_id : UUID <<PK>>
+entity "User" as User {
+  * id : string <<PK>>
   --
-  name : VARCHAR(50)
-  school_year : VARCHAR(10)
-  is_active : BOOLEAN
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  entra_oid : string
+  name : string
+  email : string
+  school_id : string <<FK>>
+  budget_config_id : string <<FK>>
+  is_first_login : boolean
+  is_active : boolean
+  last_login_at : datetime
+  created_at : datetime
+  updated_at : datetime
 }
 
-entity "UserClass" as user_class {
-  user_class_id : UUID <<PK>>
+entity "UserSettings" as UserSettings {
+  * id : string <<PK>>
   --
-  user_id : UUID <<FK>>
-  class_id : UUID <<FK>>
+  user_id : string <<FK>>
+  language : string
+  notify_budget_warning : boolean
+  created_at : datetime
+  updated_at : datetime
 }
 
-entity "Subject" as subject {
-  subject_id : UUID <<PK>>
+entity "BudgetPeriod" as BudgetPeriod {
+  * id : string <<PK>>
   --
-  name : VARCHAR(100)
-  description : TEXT
+  code : string
+  name : string
+  created_at : datetime
 }
 
-entity "LLMModel" as llm_model {
-  llm_model_id : UUID <<PK>>
+entity "BudgetUsageHistory" as BudgetUsageHistory {
+  * id : string <<PK>>
   --
-  name : VARCHAR(100)
-  provider : VARCHAR(30)
-  model_identifier : VARCHAR(100)
-  is_active : BOOLEAN
-  cost_per_input_token : DECIMAL(10,8)
-  cost_per_output_token : DECIMAL(10,8)
+  user_id : string <<FK>>
+  budget_period_id : string <<FK>>
+  start_date : date
+  end_date : date
+  amount_used : decimal
+  created_at : datetime
 }
 
-entity "AITutor" as ai_tutor {
-  ai_tutor_id : UUID <<PK>>
+' ========== Gruppen (inkl. Klassen) ==========
+' Frontend: immer "Klasse" / Class; DB: Group + GroupType (Klasse, Freifachgruppe, …)
+
+entity "GroupType" as GroupType {
+  * id : string <<PK>>
   --
-  name : VARCHAR(100)
-  system_prompt : TEXT
-  llm_model_id : UUID <<FK>>
-  subject_id : UUID <<FK>>
-  created_by_user_id : UUID <<FK>>
-  is_active : BOOLEAN
+  code : string
+  name : string
+  created_at : datetime
 }
 
-entity "TutorClass" as tutor_class {
-  tutor_class_assignment_id : UUID <<PK>>
+entity "Group" as Group {
+  * id : string <<PK>>
   --
-  tutor_id : UUID <<FK>>
-  class_id : UUID <<FK>>
-  is_enabled : BOOLEAN
-  enabled_at : TIMESTAMP
+  name : string
+  description : string
+  group_type_id : string <<FK>>
+  school_id : string <<FK>>
+  budget_config_id : string <<FK>>
+  is_active : boolean
+  created_at : datetime
+  updated_at : datetime
 }
 
+entity "GroupMember" as GroupMember {
+  * id : string <<PK>>
+  --
+  group_id : string <<FK>>
+  user_id : string <<FK>>
+  created_at : datetime
+}
 
+' ========== Rollen & Rechte ==========
 
-user }o--|| role
-user_class }o--|| user
-user_class }o--|| class
-role_permission }o--|| role
-role_permission }o--|| permission
+entity "Role" as Role {
+  * id : string <<PK>>
+  --
+  name : string
+  description : string
+  school_id : string <<FK>>
+  budget_config_id : string <<FK>>
+  is_system : boolean
+  created_at : datetime
+  updated_at : datetime
+}
 
-ai_tutor }o--|| llm_model
-ai_tutor }o--|| subject
-ai_tutor }o--|| user
-tutor_class }o--|| ai_tutor
-tutor_class }o--|| class
-tutor_class }o--|| user
+entity "Permission" as Permission {
+  * id : string <<PK>>
+  --
+  name : string
+  description : string
+  resource : string
+  action : string
+  created_at : datetime
+}
+
+entity "RolePermission" as RolePermission {
+  * id : string <<PK>>
+  --
+  role_id : string <<FK>>
+  permission_id : string <<FK>>
+  created_at : datetime
+}
+
+entity "UserRole" as UserRole {
+  * id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  role_id : string <<FK>>
+  created_at : datetime
+}
+
+' ========== Fächer ==========
+
+entity "Subject" as Subject {
+  * id : string <<PK>>
+  --
+  name : string
+  created_at : datetime
+  updated_at : datetime
+}
+
+' ========== KI-Infrastruktur ==========
+
+entity "AIProvider" as AIProvider {
+  * id : string <<PK>>
+  --
+  name : string
+  api_key_configured : boolean
+  is_enabled : boolean
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "AIModel" as AIModel {
+  * id : string <<PK>>
+  --
+  provider_id : string <<FK>>
+  name : string
+  description : string
+  cost_per_1k_input_tokens : decimal
+  cost_per_1k_output_tokens : decimal
+  max_tokens : int
+  is_enabled : boolean
+  created_at : datetime
+  updated_at : datetime
+}
+
+' ========== Tutoren ==========
+
+entity "TutorConfig" as TutorConfig {
+  * id : string <<PK>>
+  --
+  name : string
+  subject_id : string <<FK>>
+  description : string
+  system_prompt : text
+  model_id : string <<FK>>
+  temperature : decimal
+  max_tokens : int
+  created_by : string <<FK>>
+  is_enabled : boolean
+  status : enum (draft|published)
+  icon : string
+  color : string
+  didactic_mode : enum
+  no_personal_data : boolean
+  no_full_solutions : boolean
+  show_sources : boolean
+  hide_knowledge_base : boolean
+  expires_at : datetime
+  assignment_text : text
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "TutorGroupAssignment" as TutorGroupAssignment {
+  * id : string <<PK>>
+  --
+  tutor_id : string <<FK>>
+  group_id : string <<FK>>
+  is_enabled : boolean
+  enabled_until : datetime
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "TutorStudentAssignment" as TutorStudentAssignment {
+  * id : string <<PK>>
+  --
+  tutor_id : string <<FK>>
+  user_id : string <<FK>>
+  created_at : datetime
+}
+
+entity "TutorDocument" as TutorDocument {
+  * id : string <<PK>>
+  --
+  tutor_id : string <<FK>>
+  kind : enum (knowledge|assignment)
+  name : string
+  type : string
+  size : int
+  uploaded_at : datetime
+  location : string
+  created_at : datetime
+  updated_at : datetime
+}
+
+' ========== Chat ==========
+
+entity "Chat" as Chat {
+  * id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  tutor_id : string <<FK>>
+  title : string
+  date : date
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "Message" as Message {
+  * id : string <<PK>>
+  --
+  chat_id : string <<FK>>
+  role : enum (user|assistant)
+  content : text
+  timestamp : datetime
+  feedback : enum (positive|negative)
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "ChatAttachment" as ChatAttachment {
+  * id : string <<PK>>
+  --
+  message_id : string <<FK>>
+  name : string
+  type : string
+  size : int
+  uploaded_at : datetime
+  storage_path : string
+  created_at : datetime
+}
+
+' ========== Budget & Kosten ==========
+
+entity "BudgetConfig" as BudgetConfig {
+  * id : string <<PK>>
+  --
+  type : enum (role|group|user)
+  target_id : string
+  budget_period_id : string <<FK>>
+  limit_amount : decimal
+  warning_threshold : int
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "CostEntry" as CostEntry {
+  * id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  tutor_id : string <<FK>>
+  input_tokens : int
+  output_tokens : int
+  cost : decimal
+  timestamp : datetime
+  created_at : datetime
+}
+
+' ========== Global ==========
+
+entity "GlobalSettings" as GlobalSettings {
+  * id : string <<PK>>
+  --
+  school_id : string <<FK>>
+  system_prompt : text
+  last_modified_by : string <<FK>>
+  last_modified_at : datetime
+  created_at : datetime
+  updated_at : datetime
+}
+
+' ========== Beziehungen ==========
+
+' Schule & Entra & GlobalSettings
+School ||--|| SchoolEntraConfig : ""
+School ||--|| GlobalSettings : "school_id"
+School ||--o{ User : "school_id"
+School ||--o{ Group : "school_id"
+School ||--o{ Role : "school_id"
+
+' Nutzer & Budget-Historie
+User ||--|| UserSettings : ""
+User ||--o{ BudgetUsageHistory : "user_id"
+BudgetPeriod ||--o{ BudgetUsageHistory : "budget_period_id"
+
+' Gruppen (Group = Class im Frontend)
+GroupType ||--o{ Group : "group_type_id"
+Group ||--o{ GroupMember : ""
+User ||--o{ GroupMember : ""
+
+' Rollen & Rechte
+User ||--o{ UserRole : ""
+Role ||--o{ UserRole : ""
+Role ||--o{ RolePermission : ""
+Permission ||--o{ RolePermission : ""
+
+' Fächer & KI & Tutoren
+Subject ||--o{ TutorConfig : "subject_id"
+AIProvider ||--|{ AIModel : "provider_id"
+User ||--o{ TutorConfig : "created_by"
+AIModel ||--o{ TutorConfig : "model_id"
+TutorConfig ||--o{ TutorGroupAssignment : ""
+Group ||--o{ TutorGroupAssignment : ""
+TutorConfig ||--o{ TutorStudentAssignment : ""
+User ||--o{ TutorStudentAssignment : ""
+TutorConfig ||--o{ TutorDocument : "tutor_id"
+
+' Chat
+User ||--o{ Chat : "user_id"
+TutorConfig ||--o{ Chat : "tutor_id"
+Chat ||--|{ Message : "chat_id"
+Message ||--o{ ChatAttachment : "message_id"
+
+' BudgetConfig: User, Group, Role richten jeweils (optional) ein Budget ein
+User }o--|| BudgetConfig : "budget_config_id"
+Group }o--|| BudgetConfig : "budget_config_id"
+Role }o--|| BudgetConfig : "budget_config_id"
+BudgetPeriod ||--o{ BudgetConfig : "budget_period_id"
+User ||--o{ CostEntry : "user_id"
+TutorConfig ||--o{ CostEntry : "tutor_id"
+GlobalSettings }o--|| User : "last_modified_by"
 
 @enduml
-
