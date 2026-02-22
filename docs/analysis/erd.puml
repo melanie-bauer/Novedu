@@ -10,315 +10,315 @@ skinparam roundcorner 5
 ' ========== Schule & Entra ID ==========
 
 entity "School" as School {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  created_at : datetime
-  updated_at : datetime
+  name : varchar(255)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "SchoolEntraConfig" as SchoolEntraConfig {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  school_id : string <<FK>>
-  tenant_id : string
-  client_id : string
-  client_secret_encrypted : string
-  redirect_uri : string
+  school_id : UUID <<FK>>
+  tenant_id : UUID
+  client_id : UUID
+  client_secret_encrypted : varchar(1024)
+  redirect_uri : varchar(1024)
   is_enabled : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 ' ========== Nutzer ==========
 
 entity "User" as User {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  entra_oid : string
-  name : string
-  email : string
-  school_id : string <<FK>>
-  budget_config_id : string <<FK>>
+  entra_oid : varchar(36)
+  name : varchar(255)
+  email : varchar(320)
+  school_id : UUID <<FK>>
+  budget_config_id : UUID <<FK>>
   is_first_login : boolean
   is_active : boolean
-  last_login_at : datetime
-  created_at : datetime
-  updated_at : datetime
+  last_login_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "UserSettings" as UserSettings {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  user_id : string <<FK>>
-  language : string
+  user_id : UUID <<FK>>
+  language : varchar(10)
   notify_budget_warning : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "BudgetPeriod" as BudgetPeriod {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  code : string
-  name : string
-  created_at : datetime
+  code : varchar(100)
+  name : varchar(255)
+  created_at : TIMESTAMP
 }
 
 entity "BudgetUsageHistory" as BudgetUsageHistory {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  user_id : string <<FK>>
-  budget_period_id : string <<FK>>
+  user_id : UUID <<FK>>
+  budget_period_id : UUID <<FK>>
   start_date : date
   end_date : date
   amount_used : decimal
-  created_at : datetime
+  created_at : TIMESTAMP
 }
 
 ' ========== Gruppen (inkl. Klassen) ==========
 ' Frontend: immer "Klasse" / Class; DB: Group + GroupType (Klasse, Freifachgruppe, …)
 
 entity "GroupType" as GroupType {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  code : string
-  name : string
-  created_at : datetime
+  code : varchar(100)
+  name : varchar(255)
+  created_at : TIMESTAMP
 }
 
 entity "Group" as Group {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  description : string
-  group_type_id : string <<FK>>
-  school_id : string <<FK>>
-  budget_config_id : string <<FK>>
+  name : varchar(255)
+  description : text
+  group_type_id : UUID <<FK>>
+  school_id : UUID <<FK>>
+  budget_config_id : UUID <<FK>>
   is_active : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "GroupMember" as GroupMember {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  group_id : string <<FK>>
-  user_id : string <<FK>>
-  created_at : datetime
+  group_id : UUID <<FK>>
+  user_id : UUID <<FK>>
+  created_at : TIMESTAMP
 }
 
 ' ========== Rollen & Rechte ==========
 
 entity "Role" as Role {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  description : string
-  school_id : string <<FK>>
-  budget_config_id : string <<FK>>
+  name : varchar(255)
+  description : text
+  school_id : UUID <<FK>>
+  budget_config_id : UUID <<FK>>
   is_system : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "Permission" as Permission {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  description : string
-  resource : string
-  action : string
-  created_at : datetime
+  name : varchar(255)
+  description : text
+  resource : varchar(100)
+  action : varchar(100)
+  created_at : TIMESTAMP
 }
 
 entity "RolePermission" as RolePermission {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  role_id : string <<FK>>
-  permission_id : string <<FK>>
-  created_at : datetime
+  role_id : UUID <<FK>>
+  permission_id : UUID <<FK>>
+  created_at : TIMESTAMP
 }
 
 entity "UserRole" as UserRole {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  user_id : string <<FK>>
-  role_id : string <<FK>>
-  created_at : datetime
+  user_id : UUID <<FK>>
+  role_id : UUID <<FK>>
+  created_at : TIMESTAMP
 }
 
 ' ========== Fächer ==========
 
 entity "Subject" as Subject {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  created_at : datetime
-  updated_at : datetime
+  name : varchar(255)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 ' ========== KI-Infrastruktur ==========
 
 entity "AIProvider" as AIProvider {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
+  name : varchar(255)
   api_key_configured : boolean
   is_enabled : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "AIModel" as AIModel {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  provider_id : string <<FK>>
-  name : string
-  description : string
+  provider_id : UUID <<FK>>
+  name : varchar(255)
+  description : text
   cost_per_1k_input_tokens : decimal
   cost_per_1k_output_tokens : decimal
   max_tokens : int
   is_enabled : boolean
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 ' ========== Tutoren ==========
 
 entity "TutorConfig" as TutorConfig {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  name : string
-  subject_id : string <<FK>>
-  description : string
+  name : varchar(255)
+  subject_id : UUID <<FK>>
+  description : text
   system_prompt : text
-  model_id : string <<FK>>
+  model_id : UUID <<FK>>
   temperature : decimal
   max_tokens : int
-  created_by : string <<FK>>
+  created_by : UUID <<FK>>
   is_enabled : boolean
   status : enum (draft|published)
-  icon : string
-  color : string
+  icon : varchar(100)
+  color : varchar(20)
   didactic_mode : enum
   no_personal_data : boolean
   no_full_solutions : boolean
   show_sources : boolean
   hide_knowledge_base : boolean
-  expires_at : datetime
+  expires_at : TIMESTAMP
   assignment_text : text
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "TutorGroupAssignment" as TutorGroupAssignment {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  tutor_id : string <<FK>>
-  group_id : string <<FK>>
+  tutor_id : UUID <<FK>>
+  group_id : UUID <<FK>>
   is_enabled : boolean
-  enabled_until : datetime
-  created_at : datetime
-  updated_at : datetime
+  enabled_until : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "TutorStudentAssignment" as TutorStudentAssignment {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  tutor_id : string <<FK>>
-  user_id : string <<FK>>
-  created_at : datetime
+  tutor_id : UUID <<FK>>
+  user_id : UUID <<FK>>
+  created_at : TIMESTAMP
 }
 
 entity "TutorDocument" as TutorDocument {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  tutor_id : string <<FK>>
+  tutor_id : UUID <<FK>>
   kind : enum (knowledge|assignment)
-  name : string
-  type : string
+  name : varchar(255)
+  type : varchar(100)
   size : int
-  uploaded_at : datetime
-  location : string
-  created_at : datetime
-  updated_at : datetime
+  uploaded_at : TIMESTAMP
+  location : varchar(1024)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 ' ========== Chat ==========
 
 entity "Chat" as Chat {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  user_id : string <<FK>>
-  tutor_id : string <<FK>>
-  title : string
+  user_id : UUID <<FK>>
+  tutor_id : UUID <<FK>>
+  title : varchar(255)
   date : date
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "Message" as Message {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  chat_id : string <<FK>>
+  chat_id : UUID <<FK>>
   role : enum (user|assistant)
   content : text
-  timestamp : datetime
+  timestamp : TIMESTAMP
   feedback : enum (positive|negative)
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "ChatAttachment" as ChatAttachment {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  message_id : string <<FK>>
-  name : string
-  type : string
+  message_id : UUID <<FK>>
+  name : varchar(255)
+  type : varchar(100)
   size : int
-  uploaded_at : datetime
-  storage_path : string
-  created_at : datetime
+  uploaded_at : TIMESTAMP
+  storage_path : varchar(1024)
+  created_at : TIMESTAMP
 }
 
 ' ========== Budget & Kosten ==========
 
 entity "BudgetConfig" as BudgetConfig {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
   type : enum (role|group|user)
-  target_id : string
-  budget_period_id : string <<FK>>
+  target_id : UUID
+  budget_period_id : UUID <<FK>>
   limit_amount : decimal
   warning_threshold : int
-  created_at : datetime
-  updated_at : datetime
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 entity "CostEntry" as CostEntry {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  user_id : string <<FK>>
-  tutor_id : string <<FK>>
+  user_id : UUID <<FK>>
+  tutor_id : UUID <<FK>>
   input_tokens : int
   output_tokens : int
   cost : decimal
-  timestamp : datetime
-  created_at : datetime
+  timestamp : TIMESTAMP
+  created_at : TIMESTAMP
 }
 
 ' ========== Global ==========
 
 entity "GlobalSettings" as GlobalSettings {
-  * id : string <<PK>>
+  * id : UUID <<PK>>
   --
-  school_id : string <<FK>>
+  school_id : UUID <<FK>>
   system_prompt : text
-  last_modified_by : string <<FK>>
-  last_modified_at : datetime
-  created_at : datetime
-  updated_at : datetime
+  last_modified_by : UUID <<FK>>
+  last_modified_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
 }
 
 ' ========== Beziehungen ==========
