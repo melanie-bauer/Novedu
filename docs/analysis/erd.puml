@@ -72,7 +72,7 @@ entity "BudgetUsageHistory" as BudgetUsageHistory {
   budget_period_id : UUID <<FK>>
   start_date : date
   end_date : date
-  amount_used : decimal
+  amount_used : numeric(12,2)
   created_at : TIMESTAMP
 }
 
@@ -176,9 +176,9 @@ entity "AIModel" as AIModel {
   provider_id : UUID <<FK>>
   name : varchar(255)
   description : text
-  cost_per_1k_input_tokens : decimal
-  cost_per_1k_output_tokens : decimal
-  max_tokens : int
+  cost_per_1k_input_tokens : numeric(12,6)
+  cost_per_1k_output_tokens : numeric(12,6)
+  max_tokens : integer
   is_enabled : boolean
   created_at : TIMESTAMP
   updated_at : TIMESTAMP
@@ -194,8 +194,8 @@ entity "TutorConfig" as TutorConfig {
   description : text
   system_prompt : text
   model_id : UUID <<FK>>
-  temperature : decimal
-  max_tokens : int
+  temperature : numeric(12,2)
+  max_tokens : integer
   created_by : UUID <<FK>>
   is_enabled : boolean
   status : enum (draft|published)
@@ -238,7 +238,7 @@ entity "TutorDocument" as TutorDocument {
   kind : enum (knowledge|assignment)
   name : varchar(255)
   type : varchar(100)
-  size : int
+  size : integer
   uploaded_at : TIMESTAMP
   location : varchar(1024)
   created_at : TIMESTAMP
@@ -276,7 +276,7 @@ entity "ChatAttachment" as ChatAttachment {
   message_id : UUID <<FK>>
   name : varchar(255)
   type : varchar(100)
-  size : int
+  size : integer
   uploaded_at : TIMESTAMP
   storage_path : varchar(1024)
   created_at : TIMESTAMP
@@ -290,8 +290,8 @@ entity "BudgetConfig" as BudgetConfig {
   type : enum (role|group|user)
   target_id : UUID
   budget_period_id : UUID <<FK>>
-  limit_amount : decimal
-  warning_threshold : int
+  limit_amount : numeric(12,2)
+  warning_threshold : integer
   created_at : TIMESTAMP
   updated_at : TIMESTAMP
 }
@@ -301,9 +301,9 @@ entity "CostEntry" as CostEntry {
   --
   user_id : UUID <<FK>>
   tutor_id : UUID <<FK>>
-  input_tokens : int
-  output_tokens : int
-  cost : decimal
+  input_tokens : integer
+  output_tokens : integer
+  cost : numeric(12,2)
   timestamp : TIMESTAMP
   created_at : TIMESTAMP
 }
