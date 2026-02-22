@@ -13,8 +13,8 @@ entity "School" as School {
   * id : UUID <<PK>>
   --
   name : varchar(255)
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "SchoolEntraConfig" as SchoolEntraConfig {
@@ -26,8 +26,8 @@ entity "SchoolEntraConfig" as SchoolEntraConfig {
   client_secret_encrypted : varchar(1024)
   redirect_uri : varchar(1024)
   is_enabled : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 ' ========== Nutzer ==========
@@ -42,9 +42,9 @@ entity "User" as User {
   budget_config_id : UUID <<FK>>
   is_first_login : boolean
   is_active : boolean
-  last_login_at : TIMESTAMP
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  last_login_at : timestamp
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "UserSettings" as UserSettings {
@@ -53,8 +53,8 @@ entity "UserSettings" as UserSettings {
   user_id : UUID <<FK>>
   language : varchar(10)
   notify_budget_warning : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "BudgetPeriod" as BudgetPeriod {
@@ -62,7 +62,7 @@ entity "BudgetPeriod" as BudgetPeriod {
   --
   code : varchar(100)
   name : varchar(255)
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 entity "BudgetUsageHistory" as BudgetUsageHistory {
@@ -73,7 +73,7 @@ entity "BudgetUsageHistory" as BudgetUsageHistory {
   start_date : date
   end_date : date
   amount_used : numeric(12,2)
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 ' ========== Gruppen (inkl. Klassen) ==========
@@ -84,7 +84,7 @@ entity "GroupType" as GroupType {
   --
   code : varchar(100)
   name : varchar(255)
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 entity "Group" as Group {
@@ -96,8 +96,8 @@ entity "Group" as Group {
   school_id : UUID <<FK>>
   budget_config_id : UUID <<FK>>
   is_active : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "GroupMember" as GroupMember {
@@ -105,7 +105,7 @@ entity "GroupMember" as GroupMember {
   --
   group_id : UUID <<FK>>
   user_id : UUID <<FK>>
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 ' ========== Rollen & Rechte ==========
@@ -118,8 +118,8 @@ entity "Role" as Role {
   school_id : UUID <<FK>>
   budget_config_id : UUID <<FK>>
   is_system : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "Permission" as Permission {
@@ -129,7 +129,7 @@ entity "Permission" as Permission {
   description : text
   resource : varchar(100)
   action : varchar(100)
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 entity "RolePermission" as RolePermission {
@@ -137,7 +137,7 @@ entity "RolePermission" as RolePermission {
   --
   role_id : UUID <<FK>>
   permission_id : UUID <<FK>>
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 entity "UserRole" as UserRole {
@@ -145,7 +145,7 @@ entity "UserRole" as UserRole {
   --
   user_id : UUID <<FK>>
   role_id : UUID <<FK>>
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 ' ========== Fächer ==========
@@ -154,8 +154,8 @@ entity "Subject" as Subject {
   * id : UUID <<PK>>
   --
   name : varchar(255)
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 ' ========== KI-Infrastruktur ==========
@@ -166,8 +166,8 @@ entity "AIProvider" as AIProvider {
   name : varchar(255)
   api_key_configured : boolean
   is_enabled : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "AIModel" as AIModel {
@@ -180,8 +180,8 @@ entity "AIModel" as AIModel {
   cost_per_1k_output_tokens : numeric(12,6)
   max_tokens : integer
   is_enabled : boolean
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 ' ========== Tutoren ==========
@@ -206,10 +206,10 @@ entity "TutorConfig" as TutorConfig {
   no_full_solutions : boolean
   show_sources : boolean
   hide_knowledge_base : boolean
-  expires_at : TIMESTAMP
+  expires_at : timestamp
   assignment_text : text
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "TutorGroupAssignment" as TutorGroupAssignment {
@@ -218,9 +218,9 @@ entity "TutorGroupAssignment" as TutorGroupAssignment {
   tutor_id : UUID <<FK>>
   group_id : UUID <<FK>>
   is_enabled : boolean
-  enabled_until : TIMESTAMP
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  enabled_until : timestamp
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "TutorStudentAssignment" as TutorStudentAssignment {
@@ -228,7 +228,7 @@ entity "TutorStudentAssignment" as TutorStudentAssignment {
   --
   tutor_id : UUID <<FK>>
   user_id : UUID <<FK>>
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 entity "TutorDocument" as TutorDocument {
@@ -239,10 +239,10 @@ entity "TutorDocument" as TutorDocument {
   name : varchar(255)
   type : varchar(100)
   size : integer
-  uploaded_at : TIMESTAMP
+  uploaded_at : timestamp
   location : varchar(1024)
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 ' ========== Chat ==========
@@ -254,8 +254,8 @@ entity "Chat" as Chat {
   tutor_id : UUID <<FK>>
   title : varchar(255)
   date : date
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "Message" as Message {
@@ -264,10 +264,10 @@ entity "Message" as Message {
   chat_id : UUID <<FK>>
   role : enum (user|assistant)
   content : text
-  timestamp : TIMESTAMP
+  timestamp : timestamp
   feedback : enum (positive|negative)
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "ChatAttachment" as ChatAttachment {
@@ -277,9 +277,9 @@ entity "ChatAttachment" as ChatAttachment {
   name : varchar(255)
   type : varchar(100)
   size : integer
-  uploaded_at : TIMESTAMP
+  uploaded_at : timestamp
   storage_path : varchar(1024)
-  created_at : TIMESTAMP
+  created_at : timestamp
 }
 
 ' ========== Budget & Kosten ==========
@@ -288,12 +288,11 @@ entity "BudgetConfig" as BudgetConfig {
   * id : UUID <<PK>>
   --
   type : enum (role|group|user)
-  target_id : UUID
   budget_period_id : UUID <<FK>>
   limit_amount : numeric(12,2)
   warning_threshold : integer
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity "CostEntry" as CostEntry {
@@ -304,8 +303,8 @@ entity "CostEntry" as CostEntry {
   input_tokens : integer
   output_tokens : integer
   cost : numeric(12,2)
-  timestamp : TIMESTAMP
-  created_at : TIMESTAMP
+  timestamp : timestamp
+  created_at : timestamp
 }
 
 ' ========== Global ==========
@@ -316,9 +315,9 @@ entity "GlobalSettings" as GlobalSettings {
   school_id : UUID <<FK>>
   system_prompt : text
   last_modified_by : UUID <<FK>>
-  last_modified_at : TIMESTAMP
-  created_at : TIMESTAMP
-  updated_at : TIMESTAMP
+  last_modified_at : timestamp
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 ' ========== Beziehungen ==========
