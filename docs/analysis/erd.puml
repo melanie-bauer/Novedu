@@ -2,7 +2,6 @@
 !theme plain
 title Novedu – Entity Relationship Diagram
 
-skinparam linetype ortho
 skinparam backgroundColor #FEFEFE
 skinparam defaultFontSize 11
 skinparam roundcorner 5
@@ -72,7 +71,6 @@ entity "BudgetUsageHistory" as BudgetUsageHistory {
   budget_period_id : UUID <<FK>>
   start_date : date
   end_date : date
-  amount_used : numeric(12,2)
   created_at : timestamp
 }
 
@@ -298,7 +296,7 @@ entity "BudgetConfig" as BudgetConfig {
 entity "CostEntry" as CostEntry {
   * id : UUID <<PK>>
   --
-  user_id : UUID <<FK>>
+  budget_usage_history_id : UUID <<FK>>
   tutor_id : UUID <<FK>>
   input_tokens : integer
   output_tokens : integer
@@ -367,7 +365,7 @@ User }o--|| BudgetConfig : "budget_config_id"
 Group }o--|| BudgetConfig : "budget_config_id"
 Role }o--|| BudgetConfig : "budget_config_id"
 BudgetPeriod ||--o{ BudgetConfig : "budget_period_id"
-User ||--o{ CostEntry : "user_id"
+BudgetUsageHistory ||--o{ CostEntry : "user_id"
 TutorConfig ||--o{ CostEntry : "tutor_id"
 GlobalSettings }o--|| User : "last_modified_by"
 
