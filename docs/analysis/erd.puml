@@ -39,6 +39,7 @@ entity "User" as User {
   email : citext
   school_id : int <<FK>>
   budget_config_id : int <<FK>>
+  role_id : int <<FK>>
   is_first_login : boolean
   is_active : boolean
   last_login_at : timestamptz
@@ -120,32 +121,6 @@ entity "Role" as Role {
   updated_at : timestamptz
 }
 
-entity "Permission" as Permission {
-  * id : int <<PK>>
-  --
-  name : varchar(255)
-  description : text
-  resource : varchar(100)
-  action : varchar(100)
-  created_at : timestamptz
-}
-
-entity "RolePermission" as RolePermission {
-  * id : int <<PK>>
-  --
-  role_id : int <<FK>>
-  permission_id : int <<FK>>
-  created_at : timestamptz
-}
-
-entity "UserRole" as UserRole {
-  * id : int <<PK>>
-  --
-  user_id : int <<FK>>
-  role_id : int <<FK>>
-  created_at : timestamptz
-}
-
 ' ========== Fächer ==========
 
 entity "Subject" as Subject {
@@ -177,7 +152,8 @@ entity "AIModel" as AIModel {
   description : text
   cost_per_1k_input_tokens : numeric(10,6)
   cost_per_1k_output_tokens : numeric(10,6)
-  max_tokens : int
+  max_input_tokens : int
+  max_output_tokens : int
   is_enabled : boolean
   created_at : timestamptz
   updated_at : timestamptz
@@ -194,7 +170,7 @@ entity "TutorConfig" as TutorConfig {
   system_prompt : text
   model_id : int <<FK>>
   temperature : double precision
-  max_tokens : int
+  max_output_tokens : int
   created_by : int <<FK>>
   is_enabled : boolean
   status : enum (draft|published)
@@ -338,10 +314,7 @@ Group ||--o{ GroupMember : ""
 User ||--o{ GroupMember : ""
 
 ' Rollen & Rechte
-User ||--o{ UserRole : ""
-Role ||--o{ UserRole : ""
-Role ||--o{ RolePermission : ""
-Permission ||--o{ RolePermission : ""
+Role ||--o{ User
 
 ' Fächer & KI & Tutoren
 Subject ||--o{ TutorConfig : "subject_id"
