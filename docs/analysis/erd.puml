@@ -57,19 +57,11 @@ entity "UserSettings" as UserSettings {
   updated_at : timestamptz
 }
 
-entity "BudgetPeriod" as BudgetPeriod {
-  * id : int <<PK>>
-  --
-  code : varchar(100)
-  name : varchar(255)
-  created_at : timestamptz
-}
-
 entity "BudgetUsageHistory" as BudgetUsageHistory {
   * id : int <<PK>>
   --
   user_id : int <<FK>>
-  budget_period_id : int <<FK>>
+  budget_period : enum (daily|weekly|monthly|yearly)
   start_date : date
   end_date : date
   created_at : timestamptz
@@ -262,7 +254,7 @@ entity "BudgetConfig" as BudgetConfig {
   * id : int <<PK>>
   --
   type : enum (role|group|user)
-  budget_period_id : int <<FK>>
+  budget_period : enum (daily|weekly|monthly|yearly)
   limit_amount : numeric(12,2)
   warning_threshold : smallint
   created_at : timestamptz
@@ -272,6 +264,7 @@ entity "BudgetConfig" as BudgetConfig {
 entity "CostEntry" as CostEntry {
   * id : int <<PK>>
   --
+  message_id : int <<FK>>
   budget_usage_history_id : int <<FK>>
   tutor_id : int <<FK>>
   input_tokens : int
@@ -306,7 +299,6 @@ School ||--o{ Subject : "school_id"
 ' Nutzer & Budget-Historie
 User ||--|| UserSettings : ""
 User ||--o{ BudgetUsageHistory : "user_id"
-BudgetPeriod ||--o{ BudgetUsageHistory : "budget_period_id"
 
 ' Gruppen (Group = Class im Frontend)
 GroupType ||--o{ Group : "group_type_id"
@@ -337,8 +329,8 @@ Message ||--o{ ChatAttachment : "message_id"
 User }o--|| BudgetConfig : "budget_config_id"
 Group }o--|| BudgetConfig : "budget_config_id"
 Role }o--|| BudgetConfig : "budget_config_id"
-BudgetPeriod ||--o{ BudgetConfig : "budget_period_id"
-BudgetUsageHistory ||--o{ CostEntry : "user_id"
+BudgetUsageHistory ||--o{ CostEntry : "budget_usage_history_id"
+CostEntry }o--|| Message: "message_id"
 TutorConfig ||--o{ CostEntry : "tutor_id"
 GlobalSettings }o--|| User : "last_modified_by"
 
