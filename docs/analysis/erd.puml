@@ -9,7 +9,7 @@ skinparam roundcorner 5
 ' ========== Schule & Entra ID ==========
 
 entity "School" as School {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
   created_at : timestamp
@@ -17,11 +17,11 @@ entity "School" as School {
 }
 
 entity "SchoolEntraConfig" as SchoolEntraConfig {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  school_id : UUID <<FK>>
-  tenant_id : UUID
-  client_id : UUID
+  school_id : int <<FK>>
+  tenant_id : int
+  client_id : int
   client_secret_encrypted : varchar(1024)
   redirect_uri : varchar(1024)
   is_enabled : boolean
@@ -32,13 +32,13 @@ entity "SchoolEntraConfig" as SchoolEntraConfig {
 ' ========== Nutzer ==========
 
 entity "User" as User {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   entra_oid : varchar(36)
   name : varchar(255)
   email : varchar(320)
-  school_id : UUID <<FK>>
-  budget_config_id : UUID <<FK>>
+  school_id : int <<FK>>
+  budget_config_id : int <<FK>>
   is_first_login : boolean
   is_active : boolean
   last_login_at : timestamp
@@ -47,9 +47,9 @@ entity "User" as User {
 }
 
 entity "UserSettings" as UserSettings {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  user_id : UUID <<FK>>
+  user_id : int <<FK>>
   language : varchar(10)
   notify_budget_warning : boolean
   created_at : timestamp
@@ -57,7 +57,7 @@ entity "UserSettings" as UserSettings {
 }
 
 entity "BudgetPeriod" as BudgetPeriod {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   code : varchar(100)
   name : varchar(255)
@@ -65,10 +65,10 @@ entity "BudgetPeriod" as BudgetPeriod {
 }
 
 entity "BudgetUsageHistory" as BudgetUsageHistory {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  user_id : UUID <<FK>>
-  budget_period_id : UUID <<FK>>
+  user_id : int <<FK>>
+  budget_period_id : int <<FK>>
   start_date : date
   end_date : date
   created_at : timestamp
@@ -78,7 +78,7 @@ entity "BudgetUsageHistory" as BudgetUsageHistory {
 ' Frontend: immer "Klasse" / Class; DB: Group + GroupType (Klasse, Freifachgruppe, …)
 
 entity "GroupType" as GroupType {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   code : varchar(100)
   name : varchar(255)
@@ -86,42 +86,42 @@ entity "GroupType" as GroupType {
 }
 
 entity "Group" as Group {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
   description : text
-  group_type_id : UUID <<FK>>
-  school_id : UUID <<FK>>
-  budget_config_id : UUID <<FK>>
+  group_type_id : int <<FK>>
+  school_id : int <<FK>>
+  budget_config_id : int <<FK>>
   is_active : boolean
   created_at : timestamp
   updated_at : timestamp
 }
 
 entity "GroupMember" as GroupMember {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  group_id : UUID <<FK>>
-  user_id : UUID <<FK>>
+  group_id : int <<FK>>
+  user_id : int <<FK>>
   created_at : timestamp
 }
 
 ' ========== Rollen & Rechte ==========
 
 entity "Role" as Role {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
   description : text
-  school_id : UUID <<FK>>
-  budget_config_id : UUID <<FK>>
+  school_id : int <<FK>>
+  budget_config_id : int <<FK>>
   is_system : boolean
   created_at : timestamp
   updated_at : timestamp
 }
 
 entity "Permission" as Permission {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
   description : text
@@ -131,27 +131,28 @@ entity "Permission" as Permission {
 }
 
 entity "RolePermission" as RolePermission {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  role_id : UUID <<FK>>
-  permission_id : UUID <<FK>>
+  role_id : int <<FK>>
+  permission_id : int <<FK>>
   created_at : timestamp
 }
 
 entity "UserRole" as UserRole {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  user_id : UUID <<FK>>
-  role_id : UUID <<FK>>
+  user_id : int <<FK>>
+  role_id : int <<FK>>
   created_at : timestamp
 }
 
 ' ========== Fächer ==========
 
 entity "Subject" as Subject {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
+  school_id : int <<FK>>
   created_at : timestamp
   updated_at : timestamp
 }
@@ -159,7 +160,7 @@ entity "Subject" as Subject {
 ' ========== KI-Infrastruktur ==========
 
 entity "AIProvider" as AIProvider {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
   api_key_configured : boolean
@@ -169,9 +170,9 @@ entity "AIProvider" as AIProvider {
 }
 
 entity "AIModel" as AIModel {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  provider_id : UUID <<FK>>
+  provider_id : int <<FK>>
   name : varchar(255)
   description : text
   cost_per_1k_input_tokens : numeric(12,6)
@@ -185,16 +186,16 @@ entity "AIModel" as AIModel {
 ' ========== Tutoren ==========
 
 entity "TutorConfig" as TutorConfig {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   name : varchar(255)
-  subject_id : UUID <<FK>>
+  subject_id : int <<FK>>
   description : text
   system_prompt : text
-  model_id : UUID <<FK>>
+  model_id : int <<FK>>
   temperature : numeric(12,2)
   max_tokens : integer
-  created_by : UUID <<FK>>
+  created_by : int <<FK>>
   is_enabled : boolean
   status : enum (draft|published)
   icon : varchar(100)
@@ -211,10 +212,10 @@ entity "TutorConfig" as TutorConfig {
 }
 
 entity "TutorGroupAssignment" as TutorGroupAssignment {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  tutor_id : UUID <<FK>>
-  group_id : UUID <<FK>>
+  tutor_id : int <<FK>>
+  group_id : int <<FK>>
   is_enabled : boolean
   enabled_until : timestamp
   created_at : timestamp
@@ -222,17 +223,17 @@ entity "TutorGroupAssignment" as TutorGroupAssignment {
 }
 
 entity "TutorStudentAssignment" as TutorStudentAssignment {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  tutor_id : UUID <<FK>>
-  user_id : UUID <<FK>>
+  tutor_id : int <<FK>>
+  user_id : int <<FK>>
   created_at : timestamp
 }
 
 entity "TutorDocument" as TutorDocument {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  tutor_id : UUID <<FK>>
+  tutor_id : int <<FK>>
   kind : enum (knowledge|assignment)
   name : varchar(255)
   type : varchar(100)
@@ -246,10 +247,10 @@ entity "TutorDocument" as TutorDocument {
 ' ========== Chat ==========
 
 entity "Chat" as Chat {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  user_id : UUID <<FK>>
-  tutor_id : UUID <<FK>>
+  user_id : int <<FK>>
+  tutor_id : int <<FK>>
   title : varchar(255)
   date : date
   created_at : timestamp
@@ -257,9 +258,9 @@ entity "Chat" as Chat {
 }
 
 entity "Message" as Message {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  chat_id : UUID <<FK>>
+  chat_id : int <<FK>>
   role : enum (user|assistant)
   content : text
   timestamp : timestamp
@@ -269,9 +270,9 @@ entity "Message" as Message {
 }
 
 entity "ChatAttachment" as ChatAttachment {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  message_id : UUID <<FK>>
+  message_id : int <<FK>>
   name : varchar(255)
   type : varchar(100)
   size : integer
@@ -283,10 +284,10 @@ entity "ChatAttachment" as ChatAttachment {
 ' ========== Budget & Kosten ==========
 
 entity "BudgetConfig" as BudgetConfig {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
   type : enum (role|group|user)
-  budget_period_id : UUID <<FK>>
+  budget_period_id : int <<FK>>
   limit_amount : numeric(12,2)
   warning_threshold : integer
   created_at : timestamp
@@ -294,10 +295,10 @@ entity "BudgetConfig" as BudgetConfig {
 }
 
 entity "CostEntry" as CostEntry {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  budget_usage_history_id : UUID <<FK>>
-  tutor_id : UUID <<FK>>
+  budget_usage_history_id : int <<FK>>
+  tutor_id : int <<FK>>
   input_tokens : integer
   output_tokens : integer
   cost : numeric(12,2)
@@ -308,11 +309,11 @@ entity "CostEntry" as CostEntry {
 ' ========== Global ==========
 
 entity "GlobalSettings" as GlobalSettings {
-  * id : UUID <<PK>>
+  * id : int <<PK>>
   --
-  school_id : UUID <<FK>>
+  school_id : int <<FK>>
   system_prompt : text
-  last_modified_by : UUID <<FK>>
+  last_modified_by : int <<FK>>
   last_modified_at : timestamp
   created_at : timestamp
   updated_at : timestamp
@@ -326,6 +327,7 @@ School ||--|| GlobalSettings : "school_id"
 School ||--o{ User : "school_id"
 School ||--o{ Group : "school_id"
 School ||--o{ Role : "school_id"
+School ||--o{ Subject : "school_id"
 
 ' Nutzer & Budget-Historie
 User ||--|| UserSettings : ""
