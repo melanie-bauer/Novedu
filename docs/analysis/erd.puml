@@ -36,7 +36,7 @@ entity "User" as User {
   --
   entra_oid : varchar(36)
   name : varchar(255)
-  email : varchar(320)
+  email : citext
   school_id : int <<FK>>
   budget_config_id : int <<FK>>
   is_first_login : boolean
@@ -263,7 +263,6 @@ entity "Message" as Message {
   chat_id : int <<FK>>
   role : enum (user|assistant)
   content : text
-  timestamptz : timestamptz
   feedback : enum (positive|negative)
   created_at : timestamptz
   updated_at : timestamptz
@@ -275,7 +274,7 @@ entity "ChatAttachment" as ChatAttachment {
   message_id : int <<FK>>
   name : varchar(255)
   type : varchar(100)
-  size : int
+  size : bigint
   uploaded_at : timestamptz
   storage_path : varchar(1024)
   created_at : timestamptz
@@ -289,7 +288,7 @@ entity "BudgetConfig" as BudgetConfig {
   type : enum (role|group|user)
   budget_period_id : int <<FK>>
   limit_amount : numeric(12,2)
-  warning_threshold : int
+  warning_threshold : smallint
   created_at : timestamptz
   updated_at : timestamptz
 }
@@ -302,7 +301,6 @@ entity "CostEntry" as CostEntry {
   input_tokens : int
   output_tokens : int
   cost : numeric(12,2)
-  timestamptz : timestamptz
   created_at : timestamptz
 }
 
