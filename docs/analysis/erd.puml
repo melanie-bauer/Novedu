@@ -12,21 +12,21 @@ entity "School" as School {
   * id : int <<PK>>
   --
   name : varchar(255)
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "SchoolEntraConfig" as SchoolEntraConfig {
   * id : int <<PK>>
   --
   school_id : int <<FK>>
-  tenant_id : int
-  client_id : int
+  tenant_id : uuid
+  client_id : uuid
   client_secret_encrypted : varchar(1024)
   redirect_uri : varchar(1024)
   is_enabled : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 ' ========== Nutzer ==========
@@ -41,9 +41,9 @@ entity "User" as User {
   budget_config_id : int <<FK>>
   is_first_login : boolean
   is_active : boolean
-  last_login_at : timestamp
-  created_at : timestamp
-  updated_at : timestamp
+  last_login_at : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "UserSettings" as UserSettings {
@@ -52,8 +52,8 @@ entity "UserSettings" as UserSettings {
   user_id : int <<FK>>
   language : varchar(10)
   notify_budget_warning : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "BudgetPeriod" as BudgetPeriod {
@@ -61,7 +61,7 @@ entity "BudgetPeriod" as BudgetPeriod {
   --
   code : varchar(100)
   name : varchar(255)
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 entity "BudgetUsageHistory" as BudgetUsageHistory {
@@ -71,7 +71,7 @@ entity "BudgetUsageHistory" as BudgetUsageHistory {
   budget_period_id : int <<FK>>
   start_date : date
   end_date : date
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 ' ========== Gruppen (inkl. Klassen) ==========
@@ -82,7 +82,7 @@ entity "GroupType" as GroupType {
   --
   code : varchar(100)
   name : varchar(255)
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 entity "Group" as Group {
@@ -94,8 +94,8 @@ entity "Group" as Group {
   school_id : int <<FK>>
   budget_config_id : int <<FK>>
   is_active : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "GroupMember" as GroupMember {
@@ -103,7 +103,7 @@ entity "GroupMember" as GroupMember {
   --
   group_id : int <<FK>>
   user_id : int <<FK>>
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 ' ========== Rollen & Rechte ==========
@@ -116,8 +116,8 @@ entity "Role" as Role {
   school_id : int <<FK>>
   budget_config_id : int <<FK>>
   is_system : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "Permission" as Permission {
@@ -127,7 +127,7 @@ entity "Permission" as Permission {
   description : text
   resource : varchar(100)
   action : varchar(100)
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 entity "RolePermission" as RolePermission {
@@ -135,7 +135,7 @@ entity "RolePermission" as RolePermission {
   --
   role_id : int <<FK>>
   permission_id : int <<FK>>
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 entity "UserRole" as UserRole {
@@ -143,7 +143,7 @@ entity "UserRole" as UserRole {
   --
   user_id : int <<FK>>
   role_id : int <<FK>>
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 ' ========== Fächer ==========
@@ -153,8 +153,8 @@ entity "Subject" as Subject {
   --
   name : varchar(255)
   school_id : int <<FK>>
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 ' ========== KI-Infrastruktur ==========
@@ -165,8 +165,8 @@ entity "AIProvider" as AIProvider {
   name : varchar(255)
   api_key_configured : boolean
   is_enabled : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "AIModel" as AIModel {
@@ -175,12 +175,12 @@ entity "AIModel" as AIModel {
   provider_id : int <<FK>>
   name : varchar(255)
   description : text
-  cost_per_1k_input_tokens : numeric(12,6)
-  cost_per_1k_output_tokens : numeric(12,6)
-  max_tokens : integer
+  cost_per_1k_input_tokens : numeric(10,6)
+  cost_per_1k_output_tokens : numeric(10,6)
+  max_tokens : int
   is_enabled : boolean
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 ' ========== Tutoren ==========
@@ -193,8 +193,8 @@ entity "TutorConfig" as TutorConfig {
   description : text
   system_prompt : text
   model_id : int <<FK>>
-  temperature : numeric(12,2)
-  max_tokens : integer
+  temperature : double precision
+  max_tokens : int
   created_by : int <<FK>>
   is_enabled : boolean
   status : enum (draft|published)
@@ -205,10 +205,10 @@ entity "TutorConfig" as TutorConfig {
   no_full_solutions : boolean
   show_sources : boolean
   hide_knowledge_base : boolean
-  expires_at : timestamp
+  expires_at : timestamptz
   assignment_text : text
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "TutorGroupAssignment" as TutorGroupAssignment {
@@ -217,9 +217,9 @@ entity "TutorGroupAssignment" as TutorGroupAssignment {
   tutor_id : int <<FK>>
   group_id : int <<FK>>
   is_enabled : boolean
-  enabled_until : timestamp
-  created_at : timestamp
-  updated_at : timestamp
+  enabled_until : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "TutorStudentAssignment" as TutorStudentAssignment {
@@ -227,7 +227,7 @@ entity "TutorStudentAssignment" as TutorStudentAssignment {
   --
   tutor_id : int <<FK>>
   user_id : int <<FK>>
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 entity "TutorDocument" as TutorDocument {
@@ -237,11 +237,11 @@ entity "TutorDocument" as TutorDocument {
   kind : enum (knowledge|assignment)
   name : varchar(255)
   type : varchar(100)
-  size : integer
-  uploaded_at : timestamp
+  size : bigint
+  uploaded_at : timestamptz
   location : varchar(1024)
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 ' ========== Chat ==========
@@ -253,8 +253,8 @@ entity "Chat" as Chat {
   tutor_id : int <<FK>>
   title : varchar(255)
   date : date
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "Message" as Message {
@@ -263,10 +263,10 @@ entity "Message" as Message {
   chat_id : int <<FK>>
   role : enum (user|assistant)
   content : text
-  timestamp : timestamp
+  timestamptz : timestamptz
   feedback : enum (positive|negative)
-  created_at : timestamp
-  updated_at : timestamp
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "ChatAttachment" as ChatAttachment {
@@ -275,10 +275,10 @@ entity "ChatAttachment" as ChatAttachment {
   message_id : int <<FK>>
   name : varchar(255)
   type : varchar(100)
-  size : integer
-  uploaded_at : timestamp
+  size : int
+  uploaded_at : timestamptz
   storage_path : varchar(1024)
-  created_at : timestamp
+  created_at : timestamptz
 }
 
 ' ========== Budget & Kosten ==========
@@ -289,9 +289,9 @@ entity "BudgetConfig" as BudgetConfig {
   type : enum (role|group|user)
   budget_period_id : int <<FK>>
   limit_amount : numeric(12,2)
-  warning_threshold : integer
-  created_at : timestamp
-  updated_at : timestamp
+  warning_threshold : int
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 entity "CostEntry" as CostEntry {
@@ -299,11 +299,11 @@ entity "CostEntry" as CostEntry {
   --
   budget_usage_history_id : int <<FK>>
   tutor_id : int <<FK>>
-  input_tokens : integer
-  output_tokens : integer
+  input_tokens : int
+  output_tokens : int
   cost : numeric(12,2)
-  timestamp : timestamp
-  created_at : timestamp
+  timestamptz : timestamptz
+  created_at : timestamptz
 }
 
 ' ========== Global ==========
@@ -314,9 +314,9 @@ entity "GlobalSettings" as GlobalSettings {
   school_id : int <<FK>>
   system_prompt : text
   last_modified_by : int <<FK>>
-  last_modified_at : timestamp
-  created_at : timestamp
-  updated_at : timestamp
+  last_modified_at : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
 }
 
 ' ========== Beziehungen ==========
