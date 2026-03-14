@@ -6,111 +6,123 @@ skinparam backgroundColor #FEFEFE
 skinparam defaultFontSize 11
 skinparam roundcorner 5
 
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#262626><&media-record></color> x
+!define table(x) entity x << (T, white) >>
+
 ' ========== Schule & Entra ID ==========
 
-entity "School" as School {
-  * id : int <<PK>>
+table(School) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  created_at : timestamptz
-  updated_at : timestamptz
+  column(name) : varchar(255)
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "SchoolEntraConfig" as SchoolEntraConfig {
-  * id : int <<PK>>
+table(SchoolEntraConfig) {
+  primary_key(id) : int
   --
-  school_id : int <<FK>>
-  tenant_id : uuid
-  client_id : uuid
-  client_secret_encrypted : varchar(1024)
-  redirect_uri : varchar(1024)
-  is_enabled : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(school_id) : int
+  --
+  column(tenant_id) : uuid
+  column(client_id) : uuid
+  column(client_secret_encrypted) : varchar(1024)
+  column(redirect_uri) : varchar(1024)
+  column(is_enabled) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== Nutzer ==========
 
-entity "User" as User {
-  * id : int <<PK>>
+table(User) {
+  primary_key(id) : int
   --
-  entra_oid : varchar(36)
-  name : varchar(255)
-  email : citext
-  school_id : int <<FK>>
-  budget_config_id : int <<FK>>
-  role_id : int <<FK>>
-  is_first_login : boolean
-  is_active : boolean
-  last_login_at : timestamptz
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(school_id) : int
+  foreign_key(budget_config_id) : int
+  foreign_key(role_id) : int
+  --
+  column(entra_oid) : varchar(36)
+  column(name) : varchar(255)
+  column(email) : citext
+  column(is_first_login) : boolean
+  column(is_active) : boolean
+  column(last_login_at) : timestamptz
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "UserSettings" as UserSettings {
-  * id : int <<PK>>
+table(UserSettings) {
+  primary_key(id) : int
   --
-  user_id : int <<FK>>
-  language : varchar(10)
-  notify_budget_warning : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(user_id) : int
+  --
+  column(language) : varchar(10)
+  column(notify_budget_warning) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "BudgetUsageHistory" as BudgetUsageHistory {
-  * id : int <<PK>>
+table(BudgetUsageHistory) {
+  primary_key(id) : int
   --
-  user_id : int <<FK>>
-  budget_period : enum (daily|weekly|monthly|yearly)
-  start_date : date
-  end_date : date
-  created_at : timestamptz
+  foreign_key(user_id) : int
+  --
+  column(budget_period) : ENUM('daily', 'weekly', 'monthly', 'yearly')
+  column(start_date) : date
+  column(end_date) : date
+  column(created_at) : timestamptz
 }
 
 ' ========== Gruppen (inkl. Klassen) ==========
 ' Frontend: immer "Klasse" / Class; DB: Group + GroupType (Klasse, Freifachgruppe, …)
 
-entity "GroupType" as GroupType {
-  * id : int <<PK>>
+table(GroupType) {
+  primary_key(id) : int
   --
-  code : varchar(100)
-  name : varchar(255)
-  created_at : timestamptz
+  column(code) : varchar(100)
+  column(name) : varchar(255)
+  column(created_at) : timestamptz
 }
 
-entity "Group" as Group {
-  * id : int <<PK>>
+table(Group) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  description : text
-  group_type_id : int <<FK>>
-  school_id : int <<FK>>
-  budget_config_id : int <<FK>>
-  is_active : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(group_type_id) : int
+  foreign_key(school_id) : int
+  foreign_key(budget_config_id) : int
+  --
+  column(name) : varchar(255)
+  column(description) : text
+  column(is_active) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "GroupMember" as GroupMember {
-  * id : int <<PK>>
+table(GroupMember) {
+  primary_key(id) : int
   --
-  group_id : int <<FK>>
-  user_id : int <<FK>>
-  created_at : timestamptz
+  foreign_key(group_id) : int
+  foreign_key(user_id) : int
+  --
+  column(created_at) : timestamptz
 }
 
 ' ========== Rollen & Rechte ==========
 
-entity "Role" as Role {
-  * id : int <<PK>>
+table(Role) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  description : text
-  school_id : int <<FK>>
-  budget_config_id : int <<FK>>
-  is_system : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(school_id) : int
+  foreign_key(budget_config_id) : int
+  --
+  column(name) : varchar(255)
+  column(description) : text
+  column(is_system) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== Fächer ==========
