@@ -127,172 +127,181 @@ table(Role) {
 
 ' ========== Fächer ==========
 
-entity "Subject" as Subject {
-  * id : int <<PK>>
+table(Subject) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  school_id : int <<FK>>
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(school_id) : int
+  --
+  column(name) : varchar(255)
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== KI-Infrastruktur ==========
 
-entity "AIProvider" as AIProvider {
-  * id : int <<PK>>
+table(AIProvider) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  api_key_configured : boolean
-  is_enabled : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  column(name) : varchar(255)
+  column(api_key_configured) : boolean
+  column(is_enabled) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "AIModel" as AIModel {
-  * id : int <<PK>>
+table(AIModel) {
+  primary_key(id) : int
   --
-  provider_id : int <<FK>>
-  name : varchar(255)
-  description : text
-  cost_per_1k_input_tokens : numeric(10,6)
-  cost_per_1k_output_tokens : numeric(10,6)
-  max_input_tokens : int
-  max_output_tokens : int
-  is_enabled : boolean
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(provider_id) : int
+  --
+  column(name) : varchar(255)
+  column(description) : text
+  column(cost_per_1k_input_tokens) : numeric(10,6)
+  column(cost_per_1k_output_tokens) : numeric(10,6)
+  column(max_input_tokens) : int
+  column(max_output_tokens) : int
+  column(is_enabled) : boolean
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== Tutoren ==========
 
-entity "TutorConfig" as TutorConfig {
-  * id : int <<PK>>
+table(TutorConfig) {
+  primary_key(id) : int
   --
-  name : varchar(255)
-  subject_id : int <<FK>>
-  description : text
-  system_prompt : text
-  model_id : int <<FK>>
-  temperature : double precision
-  max_output_tokens : int
-  created_by : int <<FK>>
-  is_enabled : boolean
-  status : enum (draft|published)
-  icon : varchar(100)
-  color : varchar(20)
-  didactic_mode : enum
-  no_personal_data : boolean
-  no_full_solutions : boolean
-  show_sources : boolean
-  hide_knowledge_base : boolean
-  expires_at : timestamptz
-  assignment_text : text
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(subject_id) : int
+  foreign_key(model_id) : int
+  foreign_key(created_by) : int
+  --
+  column(name) : varchar(255)
+  column(description) : text
+  column(system_prompt) : text
+  column(temperature) : double precision
+  column(max_output_tokens) : int
+  column(is_enabled) : boolean
+  column(status) : ENUM('draft', 'published')
+  column(icon) : varchar(100)
+  column(color) : varchar(20)
+  column(didactic_mode) : enum
+  column(no_personal_data) : boolean
+  column(no_full_solutions) : boolean
+  column(show_sources) : boolean
+  column(hide_knowledge_base) : boolean
+  column(expires_at) : timestamptz
+  column(assignment_text) : text
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "TutorGroupAssignment" as TutorGroupAssignment {
-  * id : int <<PK>>
+table(TutorGroupAssignment) {
+  primary_key(id) : int
   --
-  tutor_id : int <<FK>>
-  group_id : int <<FK>>
-  is_enabled : boolean
-  enabled_until : timestamptz
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(tutor_id) : int
+  foreign_key(group_id) : int
+  --
+  column(is_enabled) : boolean
+  column(enabled_until) : timestamptz
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "TutorStudentAssignment" as TutorStudentAssignment {
-  * id : int <<PK>>
+table(TutorStudentAssignment) {
+  primary_key(id) : int
   --
-  tutor_id : int <<FK>>
-  user_id : int <<FK>>
-  created_at : timestamptz
+  foreign_key(tutor_id) : int
+  foreign_key(user_id) : int
+  --
+  column(created_at) : timestamptz
 }
 
-entity "TutorDocument" as TutorDocument {
-  * id : int <<PK>>
+table(TutorDocument) {
+  primary_key(id) : int
   --
-  tutor_id : int <<FK>>
-  kind : enum (knowledge|assignment)
-  name : varchar(255)
-  type : varchar(100)
-  size : bigint
-  uploaded_at : timestamptz
-  location : varchar(1024)
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(tutor_id) : int
+  --
+  column(kind) : ENUM('knowledge', 'assignment')
+  column(name) : varchar(255)
+  column(type) : varchar(100)
+  column(size) : bigint
+  column(uploaded_at) : timestamptz
+  column(location) : varchar(1024)
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== Chat ==========
 
-entity "Chat" as Chat {
-  * id : int <<PK>>
+table(Chat) {
+  primary_key(id) : int
   --
-  user_id : int <<FK>>
-  tutor_id : int <<FK>>
-  title : varchar(255)
-  date : date
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(user_id) : int
+  foreign_key(tutor_id) : int
+  --
+  column(title) : varchar(255)
+  column(date) : date
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "Message" as Message {
-  * id : int <<PK>>
+table(Message) {
+  primary_key(id) : int
   --
-  chat_id : int <<FK>>
-  role : enum (user|assistant)
-  content : text
-  feedback : enum (positive|negative)
-  created_at : timestamptz
-  updated_at : timestamptz
+  foreign_key(chat_id) : int
+  --
+  column(role) : ENUM('user', 'assistant')
+  column(content) : text
+  column(feedback) : ENUM('positive', 'negative')
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "ChatAttachment" as ChatAttachment {
-  * id : int <<PK>>
+table(ChatAttachment) {
+  primary_key(id) : int
   --
-  message_id : int <<FK>>
-  name : varchar(255)
-  type : varchar(100)
-  size : bigint
-  uploaded_at : timestamptz
-  storage_path : varchar(1024)
-  created_at : timestamptz
+  foreign_key(message_id) : int
+  --
+  column(name) : varchar(255)
+  column(type) : varchar(100)
+  column(size) : bigint
+  column(uploaded_at) : timestamptz
+  column(storage_path) : varchar(1024)
+  column(created_at) : timestamptz
 }
 
 ' ========== Budget & Kosten ==========
 
-entity "BudgetConfig" as BudgetConfig {
-  * id : int <<PK>>
+table(BudgetConfig) {
+  primary_key(id) : int
   --
-  type : enum (role|group|user)
-  budget_period : enum (daily|weekly|monthly|yearly)
-  limit_amount : numeric(12,2)
-  warning_threshold : smallint
-  created_at : timestamptz
-  updated_at : timestamptz
+  column(type) : ENUM('role', 'group', 'user')
+  column(budget_period) : ENUM('daily', 'weekly', 'monthly', 'yearly')
+  column(limit_amount) : numeric(12,2)
+  column(warning_threshold) : smallint
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
-entity "CostEntry" as CostEntry {
-  * id : int <<PK>>
+table(CostEntry) {
+  primary_key(id) : int
   --
-  message_id : int <<FK>>
-  budget_usage_history_id : int <<FK>>
-  tutor_id : int <<FK>>
-  input_tokens : int
-  output_tokens : int
-  cost : numeric(12,2)
-  created_at : timestamptz
+  foreign_key(message_id) : int
+  foreign_key(budget_usage_history_id) : int
+  foreign_key(tutor_id) : int
+  --
+  column(input_tokens) : int
+  column(output_tokens) : int
+  column(cost) : numeric(12,2)
+  column(created_at) : timestamptz
 }
 
 ' ========== Global ==========
 
-entity "GlobalSettings" as GlobalSettings {
-  * id : int <<PK>>
+table(GlobalSettings) {
+  primary_key(id) : int
   --
-  school_id : int <<FK>>
-  system_prompt : text
-  last_modified_by : int <<FK>>
+  foreign_key(school_id) : int
+  foreign_key(last_modified_by) : int
   last_modified_at : timestamptz
   created_at : timestamptz
   updated_at : timestamptz
