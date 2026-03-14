@@ -302,57 +302,61 @@ table(GlobalSettings) {
   --
   foreign_key(school_id) : int
   foreign_key(last_modified_by) : int
-  last_modified_at : timestamptz
-  created_at : timestamptz
-  updated_at : timestamptz
+  --
+  column(system_prompt) : text
+  column(last_modified_at) : timestamptz
+  column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 ' ========== Beziehungen ==========
 
-' Schule & Entra & GlobalSettings
-School ||--|| SchoolEntraConfig : ""
-School ||--|| GlobalSettings : "school_id"
-School ||--o{ User : "school_id"
-School ||--o{ Group : "school_id"
-School ||--o{ Role : "school_id"
-School ||--o{ Subject : "school_id"
+' Schule
+School ||--|| SchoolEntraConfig : "has Entra config"
+School ||--|| GlobalSettings : "has global settings"
+School ||--o{ User : "has members"
+School ||--o{ Group : "has groups"
+School ||--o{ Role : "defines roles"
+School ||--o{ Subject : "offers subjects"
 
-' Nutzer & Budget-Historie
-User ||--|| UserSettings : ""
-User ||--o{ BudgetUsageHistory : "user_id"
+' Nutzer
+User ||--|| UserSettings : "has preferences"
+User ||--o{ BudgetUsageHistory : "tracks usage"
+Role ||--o{ User : "assigned to"
+GlobalSettings }o--|| User : "last modified by"
 
-' Gruppen (Group = Class im Frontend)
-GroupType ||--o{ Group : "group_type_id"
-Group ||--o{ GroupMember : ""
-User ||--o{ GroupMember : ""
+' Gruppen (Klassen, Freifächer etc.)
+GroupType ||--o{ Group : "categorizes"
+Group ||--o{ GroupMember : "has members"
+User ||--o{ GroupMember : "joins as member"
 
-' Rollen & Rechte
-Role ||--o{ User
+' KI-Infrastruktur
+AIProvider ||--|{ AIModel : "provides"
 
-' Fächer & KI & Tutoren
-Subject ||--o{ TutorConfig : "subject_id"
-AIProvider ||--|{ AIModel : "provider_id"
-User ||--o{ TutorConfig : "created_by"
-AIModel ||--o{ TutorConfig : "model_id"
-TutorConfig ||--o{ TutorGroupAssignment : ""
-Group ||--o{ TutorGroupAssignment : ""
-TutorConfig ||--o{ TutorStudentAssignment : ""
-User ||--o{ TutorStudentAssignment : ""
-TutorConfig ||--o{ TutorDocument : "tutor_id"
+' Tutoren & Fächer
+Subject ||--o{ TutorConfig : "has tutors"
+User ||--o{ TutorConfig : "created by"
+AIModel ||--o{ TutorConfig : "powered by"
+TutorConfig ||--o{ TutorDocument : "uses knowledge base"
+
+' Tutor-Zuweisungen
+TutorConfig ||--o{ TutorGroupAssignment : "assigned to group"
+Group ||..o{ TutorGroupAssignment : "receives"
+TutorConfig ||--o{ TutorStudentAssignment : "assigned to student"
+User ||..o{ TutorStudentAssignment : "receives"
 
 ' Chat
-User ||--o{ Chat : "user_id"
-TutorConfig ||--o{ Chat : "tutor_id"
-Chat ||--|{ Message : "chat_id"
-Message ||--o{ ChatAttachment : "message_id"
+User ||--o{ Chat : "participates in"
+TutorConfig ||--o{ Chat : "conducts"
+Chat ||--|{ Message : "contains"
+Message ||--o{ ChatAttachment : "has attachment"
 
-' BudgetConfig: User, Group, Role richten jeweils (optional) ein Budget ein
-User }o--|| BudgetConfig : "budget_config_id"
-Group }o--|| BudgetConfig : "budget_config_id"
-Role }o--|| BudgetConfig : "budget_config_id"
-BudgetUsageHistory ||--o{ CostEntry : "budget_usage_history_id"
-CostEntry }o--|| Message: "message_id"
-TutorConfig ||--o{ CostEntry : "tutor_id"
-GlobalSettings }o--|| User : "last_modified_by"
+' Budget & Kosten
+User }o..|| BudgetConfig : "has personal budget"
+Group }o..|| BudgetConfig : "has group budget"
+Role }o..|| BudgetConfig : "has role budget"
+BudgetUsageHistory ||--o{ CostEntry : "logs cost"
+CostEntry }o--|| Message : "triggered by"
+TutorConfig ||..o{ CostEntry : "allocates cost"
 
 @enduml
