@@ -1,0 +1,42 @@
+services:
+  backend:
+    image: ghcr.io/melanie-bauer/Novedu/backend:dev
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=database;Port=5432;Database=appdb;Username=postgres;Password=secret # TODO: change secret
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/melanie-bauer/Novedu/frontend:dev
+    ports:
+      - "3000:3000" # TODO: change port?
+    environment:
+      - BACKEND_URL=http://backend:8080 # TODO: change to real backend
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  database:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: appdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  db_data:
