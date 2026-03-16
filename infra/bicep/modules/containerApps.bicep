@@ -5,7 +5,6 @@ param liteLLMImage string
 param envId string // Resource ID der Container Apps Environment
 param userIdentityResourceId string // Resource ID der User-Assigned Managed Identity
 param keyVaultName string
-param azureOpenAIBaseUrl string
 param azureOpenAIApiVersion string
 param location string
 
@@ -32,12 +31,12 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
         transport: 'auto'
       }
       secrets: [
-        {
+        /*{
           name: 'azure-openai-key'
           // Verweis auf Key Vault Secret (neueste Version)
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/AzureOpenAIKey'
           identity: userIdentityResourceId
-        }
+        }*/
         {
           name: 'openid-client-id'
           keyVaultUrl: 'https://${keyVaultName}.vault.azure.net/secrets/OpenIDClientId'
@@ -67,7 +66,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
           env: [
             // Configure Open WebUI to use LiteLLM via the proxy URL and forward user info
             { name: 'OPENAI_API_BASE_URL', value: 'http://${liteLLMName}:4000' }
-            { name: 'OPENAI_API_KEY', secretRef: 'azure-openai-key' }
+            //{ name: 'OPENAI_API_KEY', secretRef: 'azure-openai-key' }
             { name: 'OPENAI_API_VERSION', value: azureOpenAIApiVersion }
             { name: 'ENABLE_FORWARD_USER_INFO_HEADERS', value: 'true' }
             { name: 'ENABLE_GROUPS', value: 'true' }
@@ -100,7 +99,7 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'WEBUI_AUTH_COOKIE_SECURE', value: 'true'}
             { name: 'GLOBAL_LOG_LEVEL', value: 'DEBUG'}
             // { name: 'DEFAULT_USER_ROLE', value: 'user'}
-            { name: 'ENABLE_USER_AUTO_VERIFY', value: 'true' }
+            {name: 'ENABLE_ADMIN_CHAT_ACCESS', value: 'false'}
           ]
           volumeMounts: [
             {
