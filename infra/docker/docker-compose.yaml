@@ -1,0 +1,134 @@
+  name: novedu
+
+  services:
+    # Reverse Proxy / Entry-Point von außen
+    caddy:
+      image: caddy:2
+      container_name: novedu-caddy
+      restart: unless-stopped
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+        - caddy_data:/data
+        - caddy_config:/config
+      networks:
+        - frontend
+      depends_on:
+        - openwebui
+        - litellm
+
+    postgres:
+      image: postgres:16
+      container_name: novedu-postgres
+      restart: unless-stopped
+      environment:
+        POSTGRES_DB: ${PGDATABASE:-litellm}
+        POSTGRES_USER: ${PGUSER:-litellm}
+        POSTGRES_PASSWORD: ${PGPASSWORD:?set in .env}
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      # DB-Zugriff nur lokal auf der VM; extern via SSH-Tunnel
+      ports:
+        - "127.0.0.1:${PG_PORT_LOCAL:-5432}:5432"
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
+      networks:
+        - backend
+
+    litellm:
+      image: docker.litellm.ai/berriai/litellm:${LITELLM_TAG:-main-latest}
+      container_name: novedu-litellm
+      restart: unless-stopped
+      depends_on:
+        postgres:
+          condition: service_healthy
+      environment:
+        # LiteLLM Kern-Voraussetzungen
+        DATABASE_URL: ${DATABASE_URL:?set in .env}
+        LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?set in .env}
+
+        # Provider Keys
+        OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+        ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+        # Optional: Modelle/Prompts in DB speichern
+        STORE_MODEL_IN_DB: "True"
+        STORE_PROMPTS_IN_SPEND_LOGS: "True"
+      volumes:
+        - ./config.yaml:/app/config.yaml:ro
+      command: ["--config=/app/config.yaml", "--port=4000", "--host=0.0.0.0"]
+      networks:
+        - frontend
+        - backend
+
+    openwebui:
+      image: ghcr.io/open-webui/open-webui:${OPENWEBUI_TAG:-main}
+      container_name: novedu-openwebui
+      restart: unless-stopped
+      depends_on:
+        - litellm
+      environment:
+        # Basis-URL / SSO
+        WEBUI_URL: ${WEBUI_URL:?set in .env}
+        WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?set in .env}
+
+        # Verbindung zu LiteLLM als OpenAI-kompatibles Backend
+        OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://litellm:4000/v1}
+
+        # User-Header weiterreichen für per-user tracking
+        ENABLE_FORWARD_USER_INFO_HEADERS: "True"
+
+        # Microsoft OAuth
+        OPENID_PROVIDER_URL: ${OPENID_PROVIDER_URL:?set in .env}
+        MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:?set in .env}
+        MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:?set in .env}
+        MICROSOFT_CLIENT_TENANT_ID: ${MICROSOFT_CLIENT_TENANT_ID:?set in .env}
+        MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:?set in .env}
+        MICROSOFT_OAUTH_SCOPE: ${MICROSOFT_OAUTH_SCOPE:-openid email profile offline_access}
+
+        # SSO-Defaults
+        ENABLE_OAUTH_SIGNUP: "True"
+        ENABLE_SIGNUP: "False"
+        ENABLE_LOGIN_FORM: "False"
+        OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "True"
+      volumes:
+        - openwebui_data:/app/backend/data
+      networks:
+        - frontend
+        - backend
+
+    # Optional: GUI-Zugriff auf Postgres, nur lokal via 127.0.0.1 + SSH-Tunnel
+    pgadmin:
+      image: dpage/pgadmin4:8
+      container_name: novedu-pgadmin
+      restart: unless-stopped
+      profiles:
+        - admin
+      environment:
+        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:?set in .env}
+        PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?set in .env}
+      ports:
+        - "127.0.0.1:${PGADMIN_PORT_LOCAL:-5050}:80"
+      depends_on:
+        - postgres
+      networks:
+        - backend
+      volumes:
+        - pgadmin_data:/var/lib/pgadmin
+
+  volumes:
+    caddy_data:
+    caddy_config:
+    openwebui_data:
+    postgres_data:
+    pgadmin_data:
+
+  networks:
+    frontend:
+    backend:
+      internal: true

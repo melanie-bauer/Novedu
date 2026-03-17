@@ -1,0 +1,10 @@
+# Open WebUI
+htl-leonding.novedu {
+	reverse_proxy openwebui:8080
+}
+
+# LiteLLM API
+htl-leonding.litellm {
+	respond @blocked 403
+	reverse_proxy litellm:4000
+}
