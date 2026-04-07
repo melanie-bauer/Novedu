@@ -133,6 +133,7 @@ table(Subject) {
   foreign_key(school_id) : int
   --
   column(name) : varchar(255)
+  column(icon) : varchar(100)
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
@@ -204,8 +205,6 @@ table(TutorConfig) {
   column(temperature) : double precision
   column(max_output_tokens) : int
   column(is_enabled) : boolean
-  column(icon) : varchar(100)
-  column(color) : varchar(20)
   column(didactic_mode) : enum
   column(no_personal_data) : boolean
   column(no_full_solutions) : boolean
