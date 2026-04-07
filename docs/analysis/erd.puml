@@ -155,8 +155,9 @@ table(AIModel) {
   --
   column(name) : varchar(255)
   column(description) : text
-  column(cost_per_1k_input_tokens) : numeric(10,6)
-  column(cost_per_1k_output_tokens) : numeric(10,6)
+  column(cost_per_million_input_tokens) : numeric(10,6)
+  column(cost_per_million_output_tokens) : numeric(10,6)
+  column(cost_per_million_cached_input_tokens) : numeric(10,6)
   column(max_input_tokens) : int
   column(max_output_tokens) : int
   column(created_at) : timestamptz
