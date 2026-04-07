@@ -9,6 +9,8 @@
       ports:
         - "80:80"
         - "443:443"
+        # LiteLLM per https://127.0.0.1:8444 (lokal/SSH-Tunnel), parallel zu Open WebUI auf :443
+        - "8444:8444"
       volumes:
         - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
         - caddy_data:/data
@@ -73,9 +75,10 @@
       depends_on:
         - litellm
       environment:
-        # Basis-URL / SSO
+        # Basis-URL
         WEBUI_URL: ${WEBUI_URL:?set in .env}
         WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?set in .env}
+        CORS_ALLOW_ORIGIN: ${WEBUI_URL}
 
         # Verbindung zu LiteLLM als OpenAI-kompatibles Backend
         OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://litellm:4000/v1}
@@ -83,19 +86,10 @@
         # User-Header weiterreichen für per-user tracking
         ENABLE_FORWARD_USER_INFO_HEADERS: "True"
 
-        # Microsoft OAuth
-        OPENID_PROVIDER_URL: ${OPENID_PROVIDER_URL:?set in .env}
-        MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:?set in .env}
-        MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:?set in .env}
-        MICROSOFT_CLIENT_TENANT_ID: ${MICROSOFT_CLIENT_TENANT_ID:?set in .env}
-        MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:?set in .env}
-        MICROSOFT_OAUTH_SCOPE: ${MICROSOFT_OAUTH_SCOPE:-openid email profile offline_access}
-
-        # SSO-Defaults
-        ENABLE_OAUTH_SIGNUP: "True"
-        ENABLE_SIGNUP: "False"
-        ENABLE_LOGIN_FORM: "False"
-        OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "True"
+        # Lokaler Login (Open WebUI interne User-DB); nach erstem Admin ENABLE_SIGNUP wieder auf False
+        ENABLE_OAUTH_SIGNUP: "False"
+        ENABLE_SIGNUP: "True"
+        ENABLE_LOGIN_FORM: "True"
       volumes:
         - openwebui_data:/app/backend/data
       networks:

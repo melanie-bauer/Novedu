@@ -15,7 +15,8 @@ PG_CONFIG = {
     "user": os.getenv("PG_USER"),
     "password": os.getenv("PG_PASSWORD"),
     "port": int(os.getenv("PG_PORT", 5432)),
-    "sslmode": "require"
+    # Azure: require; lokales Docker-Postgres meist ohne TLS → PG_SSLMODE=disable
+    "sslmode": os.getenv("PG_SSLMODE", "require"),
 }
 
 PG_TABLE_NAME = "LiteLLM_UserTable"
