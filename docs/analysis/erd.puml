@@ -204,7 +204,6 @@ table(TutorConfig) {
   column(temperature) : double precision
   column(max_output_tokens) : int
   column(is_enabled) : boolean
-  column(status) : ENUM('draft', 'published')
   column(icon) : varchar(100)
   column(color) : varchar(20)
   column(didactic_mode) : enum
@@ -212,7 +211,7 @@ table(TutorConfig) {
   column(no_full_solutions) : boolean
   column(show_sources) : boolean
   column(hide_knowledge_base) : boolean
-  column(expires_at) : timestamptz
+  column(expires_at?) : timestamptz
   column(assignment_text) : text
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
