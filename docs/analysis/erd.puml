@@ -205,7 +205,7 @@ table(TutorConfig) {
   column(temperature) : double precision
   column(max_output_tokens) : int
   column(is_enabled) : boolean
-  column(didactic_mode) : enum
+  column(didactic_mode) : ENUM('socratic', 'hints', 'step_by_step', 'concise')
   column(no_personal_data) : boolean
   column(no_full_solutions) : boolean
   column(show_sources) : boolean
