@@ -206,12 +206,9 @@ table(TutorConfig) {
   column(max_output_tokens) : int
   column(is_enabled) : boolean
   column(didactic_mode) : ENUM('socratic', 'hints', 'step_by_step', 'concise')
-  column(no_personal_data) : boolean
-  column(no_full_solutions) : boolean
   column(show_sources) : boolean
   column(hide_knowledge_base) : boolean
   column(expires_at?) : timestamptz
-  column(assignment_text) : text
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
