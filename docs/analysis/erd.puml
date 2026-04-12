@@ -65,7 +65,7 @@ table(UserSettings) {
   column(updated_at) : timestamptz
 }
 
-table(BudgetUsageHistory) {
+table(BudgetUsagePeriod) {
   primary_key(id) : int
   --
   foreign_key(user_id) : int
@@ -272,9 +272,7 @@ table(Message) {
   --
   column(role) : ENUM('user', 'assistant')
   column(content) : text
-  column(feedback) : ENUM('positive', 'negative')
   column(created_at) : timestamptz
-  column(updated_at) : timestamptz
 }
 
 table(ChatAttachment) {
@@ -285,8 +283,9 @@ table(ChatAttachment) {
   column(name) : varchar(255)
   column(type) : varchar(100)
   column(size) : bigint
+  column(file_id) : varchar(255)
   column(uploaded_at) : timestamptz
-  column(storage_path) : varchar(1024)
+  column(location) : varchar(1024)
   column(created_at) : timestamptz
 }
 
@@ -344,7 +343,7 @@ School ||--o{ SchoolAIModel : "enables AI models"
 
 ' Nutzer
 User ||--|| UserSettings : "has preferences"
-User ||--o{ BudgetUsageHistory : "tracks usage"
+User ||--o{ BudgetUsagePeriod : "tracks usage"
 Role ||--o{ User : "assigned to"
 GlobalSettings }o--|| User : "last modified by"
 
@@ -380,7 +379,7 @@ Message ||--o{ ChatAttachment : "has attachment"
 User }o..|| BudgetConfig : "has personal budget"
 Group }o..|| BudgetConfig : "has group budget"
 Role }o..|| BudgetConfig : "has role budget"
-BudgetUsageHistory ||--o{ CostEntry : "logs cost"
+BudgetUsagePeriod ||--o{ CostEntry : "logs cost"
 CostEntry }o--|| Message : "triggered by"
 TutorConfig ||..o{ CostEntry : "allocates cost"
 
