@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".github/workflows/build_on_push.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="ManageMigration.ps1" />
+  </Folder>
+  <Project Path="NoveduBackend.Core/NoveduBackend.Core.csproj" />
+  <Project Path="NoveduBackend.Persistence/NoveduBackend.Persistence.csproj" />
+  <Project Path="NoveduBackend.Shared/NoveduBackend.Shared.csproj" />
+  <Project Path="NoveduBackend.Test/NoveduBackend.Test.csproj" />
+  <Project Path="NoveduBackend.TestInt/NoveduBackend.TestInt.csproj" />
+  <Project Path="NoveduBackend/NoveduBackend.csproj" />
+</Solution>

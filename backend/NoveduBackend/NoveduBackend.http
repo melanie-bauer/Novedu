@@ -1,0 +1,27 @@
+@Host = http://localhost:5200
+
+# Execute in order for variables (with IDs) to work correctly
+
+### Add rocket
+POST {{Host}}/api/rockets
+Content-Type: application/json
+
+{
+    "modelName": "Ariane 5",
+    "manufacturer": "Arianespace",
+    "maxThrust": "13700000",
+    "payloadDeltaV": "205800000"
+}
+
+> {%
+    client.global.set("rocketId", response.body.id);
+%}
+
+### Get rocket by ID
+GET {{Host}}/api/rockets/{{rocketId}}
+
+### Get all rockets
+GET {{Host}}/api/rockets
+
+### Delete rocket
+DELETE {{Host}}/api/rockets/{{rocketId}}
