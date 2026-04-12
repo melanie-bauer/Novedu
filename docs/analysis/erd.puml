@@ -222,7 +222,6 @@ table(TutorGroupAssignment) {
   foreign_key(tutor_id) : int
   foreign_key(group_id) : int
   --
-  column(is_enabled) : boolean
   column(enabled_until) : timestamptz
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
@@ -234,7 +233,9 @@ table(TutorStudentAssignment) {
   foreign_key(tutor_id) : int
   foreign_key(user_id) : int
   --
+  column(enabled_until) : timestamptz
   column(created_at) : timestamptz
+  column(updated_at) : timestamptz
 }
 
 table(TutorDocument) {
@@ -246,7 +247,9 @@ table(TutorDocument) {
   column(name) : varchar(255)
   column(type) : varchar(100)
   column(size) : bigint
+  column(file_id) : varchar(255)
   column(uploaded_at) : timestamptz
+  column(last_uploaded_at) : timestamptz
   column(location) : varchar(1024)
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
@@ -261,7 +264,6 @@ table(Chat) {
   foreign_key(tutor_id) : int
   --
   column(title) : varchar(255)
-  column(date) : date
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
