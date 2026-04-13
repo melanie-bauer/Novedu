@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NoveduBackend.Persistence.Model;
 
 namespace NoveduBackend.Persistence.Util;
@@ -91,12 +92,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.HasDefaultSchema(SchemaName);
-
-            modelBuilder.HasPostgresEnum<BudgetPeriod>();
-            modelBuilder.HasPostgresEnum<BudgetConfigType>();
-            modelBuilder.HasPostgresEnum<DidacticMode>();
-            modelBuilder.HasPostgresEnum<MessageRole>();
-            modelBuilder.HasPostgresEnum<TutorDocumentKind>();
 
             ConfigureSchool(modelBuilder);
             ConfigureSchoolEntraConfig(modelBuilder);
@@ -254,6 +249,8 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             budgetUsagePeriod.HasKey(e => e.Id);
             budgetUsagePeriod.Property(e => e.Id).ValueGeneratedOnAdd();
+            budgetUsagePeriod.Property(e => e.BudgetPeriod)
+                  .HasConversion(new EnumToStringConverter<BudgetPeriod>());
 
             budgetUsagePeriod.HasMany(bup => bup.CostEntries)
                   .WithOne(ce => ce.BudgetUsagePeriod)
@@ -416,6 +413,8 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             tutorConfig.HasKey(e => e.Id);
             tutorConfig.Property(e => e.Id).ValueGeneratedOnAdd();
             tutorConfig.Property(e => e.Name).HasMaxLength(255);
+            tutorConfig.Property(e => e.DidacticMode)
+                  .HasConversion(new EnumToStringConverter<DidacticMode>());
 
             tutorConfig.HasMany(tc => tc.Documents)
                   .WithOne(td => td.Tutor)
@@ -469,6 +468,8 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             tutorDocument.HasKey(e => e.Id);
             tutorDocument.Property(e => e.Id).ValueGeneratedOnAdd();
+            tutorDocument.Property(e => e.Kind)
+                  .HasConversion(new EnumToStringConverter<TutorDocumentKind>());
             tutorDocument.Property(e => e.Name).HasMaxLength(255);
             tutorDocument.Property(e => e.Type).HasMaxLength(100);
             tutorDocument.Property(e => e.FileId).HasMaxLength(255);
@@ -495,6 +496,8 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             message.HasKey(e => e.Id);
             message.Property(e => e.Id).ValueGeneratedOnAdd();
+            message.Property(e => e.Role)
+                  .HasConversion(new EnumToStringConverter<MessageRole>());
 
             message.HasMany(msg => msg.Attachments)
                   .WithOne(att => att.Message)
@@ -525,6 +528,10 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             budgetConfig.HasKey(e => e.Id);
             budgetConfig.Property(e => e.Id).ValueGeneratedOnAdd();
+            budgetConfig.Property(e => e.Type)
+                  .HasConversion(new EnumToStringConverter<BudgetConfigType>());
+            budgetConfig.Property(e => e.BudgetPeriod)
+                  .HasConversion(new EnumToStringConverter<BudgetPeriod>());
             budgetConfig.Property(e => e.LimitAmount).HasPrecision(12, 2);
       }
 
