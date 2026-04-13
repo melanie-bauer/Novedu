@@ -6,16 +6,16 @@ namespace NoveduBackend.Persistence.Model;
 public enum BudgetPeriod
 {
     /// <summary>Budget resets every day.</summary>
-    Daily,
+    Daily = 10,
 
     /// <summary>Budget resets every week.</summary>
-    Weekly,
+    Weekly = 20,
 
     /// <summary>Budget resets every month.</summary>
-    Monthly,
+    Monthly = 30,
 
     /// <summary>Budget resets every year.</summary>
-    Yearly
+    Yearly = 40
 }
 
 /// <summary>
@@ -24,13 +24,13 @@ public enum BudgetPeriod
 public enum BudgetConfigType
 {
     /// <summary>Budget applies to a role.</summary>
-    Role,
+    Role = 10,
 
     /// <summary>Budget applies to a group.</summary>
-    Group,
+    Group = 20,
 
     /// <summary>Budget applies to an individual user.</summary>
-    User
+    User = 30
 }
 
 /// <summary>
@@ -39,16 +39,16 @@ public enum BudgetConfigType
 public enum DidacticMode
 {
     /// <summary>Guides the student through questions to reach the answer themselves.</summary>
-    Socratic,
+    Socratic = 10,
 
     /// <summary>Provides incremental hints toward the solution.</summary>
-    Hints,
+    Hints = 20,
 
     /// <summary>Walks the student through a step-by-step solution.</summary>
-    StepByStep,
+    StepByStep = 30,
 
     /// <summary>Gives brief, direct answers.</summary>
-    Concise
+    Concise = 40
 }
 
 /// <summary>
@@ -57,10 +57,10 @@ public enum DidacticMode
 public enum MessageRole
 {
     /// <summary>The message was sent by the user.</summary>
-    User,
+    User = 10,
 
     /// <summary>The message was sent by the AI assistant.</summary>
-    Assistant
+    Assistant = 20
 }
 
 /// <summary>
@@ -69,8 +69,8 @@ public enum MessageRole
 public enum TutorDocumentKind
 {
     /// <summary>A knowledge-base document providing reference material.</summary>
-    Knowledge,
+    Knowledge = 10,
 
     /// <summary>An assignment document for student tasks.</summary>
-    Assignment
+    Assignment = 20
 }
