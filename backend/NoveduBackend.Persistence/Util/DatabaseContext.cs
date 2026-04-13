@@ -152,8 +152,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
         schoolEntraConfig.HasOne(e => e.School)
               .WithOne(e => e.EntraConfig)
               .HasForeignKey<SchoolEntraConfig>(e => e.SchoolId);
-
-        schoolEntraConfig.HasIndex(e => e.SchoolId).IsUnique();
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -193,8 +191,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
         userSettings.HasOne(e => e.User)
               .WithOne(e => e.Settings)
               .HasForeignKey<UserSettings>(e => e.UserId);
-
-        userSettings.HasIndex(e => e.UserId).IsUnique();
     }
 
     private static void ConfigureBudgetUsagePeriod(ModelBuilder modelBuilder)
@@ -513,7 +509,5 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
         globalSettings.HasOne(e => e.LastModifiedBy)
               .WithMany()
               .HasForeignKey(e => e.LastModifiedById);
-
-        globalSettings.HasIndex(e => e.SchoolId).IsUnique();
     }
 }
