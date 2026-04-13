@@ -15,19 +15,19 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
       public const string SchemaName = "NoveduBackend";
 
       /// <summary>Gets the set of <see cref="School"/> entities.</summary>
-      public DbSet<School> Schools => Set<School>();
+      public DbSet<School> Schools { get; set; }
 
       /// <summary>Gets the set of <see cref="SchoolEntraConfig"/> entities.</summary>
-      public DbSet<SchoolEntraConfig> SchoolEntraConfigs => Set<SchoolEntraConfig>();
+      public DbSet<SchoolEntraConfig> SchoolEntraConfigs { get; set; }
 
       /// <summary>Gets the set of <see cref="User"/> entities.</summary>
-      public DbSet<User> Users => Set<User>();
+      public DbSet<User> Users { get; set; }
 
       /// <summary>Gets the set of <see cref="UserSettings"/> entities.</summary>
-      public DbSet<UserSettings> UserSettings => Set<UserSettings>();
+      public DbSet<UserSettings> UserSettings { get; set; }
 
       /// <summary>Gets the set of <see cref="BudgetUsagePeriod"/> entities.</summary>
-      public DbSet<BudgetUsagePeriod> BudgetUsagePeriods => Set<BudgetUsagePeriod>();
+      public DbSet<BudgetUsagePeriod> BudgetUsagePeriods { get; set; }
 
       /// <summary>Gets the set of <see cref="GroupType"/> entities.</summary>
       public DbSet<GroupType> GroupTypes { get; set; }
