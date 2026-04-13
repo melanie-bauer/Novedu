@@ -29,61 +29,61 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<BudgetUsagePeriod> BudgetUsagePeriods => Set<BudgetUsagePeriod>();
 
     /// <summary>Gets the set of <see cref="GroupType"/> entities.</summary>
-    public DbSet<GroupType> GroupTypes => Set<GroupType>();
+    public DbSet<GroupType> GroupTypes {get; set;}
 
     /// <summary>Gets the set of <see cref="Group"/> entities.</summary>
-    public DbSet<Group> Groups => Set<Group>();
+    public DbSet<Group> Groups {get; set;}
 
     /// <summary>Gets the set of <see cref="GroupMember"/> entities.</summary>
-    public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+    public DbSet<GroupMember> GroupMembers {get; set;}
 
     /// <summary>Gets the set of <see cref="Role"/> entities.</summary>
-    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Role> Roles {get; set;}
 
     /// <summary>Gets the set of <see cref="Subject"/> entities.</summary>
-    public DbSet<Subject> Subjects => Set<Subject>();
+    public DbSet<Subject> Subjects {get; set;}
 
     /// <summary>Gets the set of <see cref="AiProvider"/> entities.</summary>
-    public DbSet<AiProvider> AiProviders => Set<AiProvider>();
+    public DbSet<AiProvider> AiProviders {get; set;}
 
     /// <summary>Gets the set of <see cref="AiModel"/> entities.</summary>
-    public DbSet<AiModel> AiModels => Set<AiModel>();
+    public DbSet<AiModel> AiModels {get; set;}
 
     /// <summary>Gets the set of <see cref="SchoolAiProvider"/> entities.</summary>
-    public DbSet<SchoolAiProvider> SchoolAiProviders => Set<SchoolAiProvider>();
+    public DbSet<SchoolAiProvider> SchoolAiProviders {get; set;}
 
     /// <summary>Gets the set of <see cref="SchoolAiModel"/> entities.</summary>
-    public DbSet<SchoolAiModel> SchoolAiModels => Set<SchoolAiModel>();
+    public DbSet<SchoolAiModel> SchoolAiModels {get; set;}
 
     /// <summary>Gets the set of <see cref="TutorConfig"/> entities.</summary>
-    public DbSet<TutorConfig> TutorConfigs => Set<TutorConfig>();
+    public DbSet<TutorConfig> TutorConfigs {get; set;}
 
     /// <summary>Gets the set of <see cref="TutorGroupAssignment"/> entities.</summary>
-    public DbSet<TutorGroupAssignment> TutorGroupAssignments => Set<TutorGroupAssignment>();
+    public DbSet<TutorGroupAssignment> TutorGroupAssignments {get; set;}
 
     /// <summary>Gets the set of <see cref="TutorStudentAssignment"/> entities.</summary>
-    public DbSet<TutorStudentAssignment> TutorStudentAssignments => Set<TutorStudentAssignment>();
+    public DbSet<TutorStudentAssignment> TutorStudentAssignments {get; set;}
 
     /// <summary>Gets the set of <see cref="TutorDocument"/> entities.</summary>
-    public DbSet<TutorDocument> TutorDocuments => Set<TutorDocument>();
+    public DbSet<TutorDocument> TutorDocuments {get; set;}
 
     /// <summary>Gets the set of <see cref="Chat"/> entities.</summary>
-    public DbSet<Chat> Chats => Set<Chat>();
+    public DbSet<Chat> Chats {get; set;}
 
     /// <summary>Gets the set of <see cref="Message"/> entities.</summary>
-    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Message> Messages {get; set;}
 
     /// <summary>Gets the set of <see cref="ChatAttachment"/> entities.</summary>
-    public DbSet<ChatAttachment> ChatAttachments => Set<ChatAttachment>();
+    public DbSet<ChatAttachment> ChatAttachments {get; set;}
 
     /// <summary>Gets the set of <see cref="BudgetConfig"/> entities.</summary>
-    public DbSet<BudgetConfig> BudgetConfigs => Set<BudgetConfig>();
+    public DbSet<BudgetConfig> BudgetConfigs {get; set;}
 
     /// <summary>Gets the set of <see cref="CostEntry"/> entities.</summary>
-    public DbSet<CostEntry> CostEntries => Set<CostEntry>();
+    public DbSet<CostEntry> CostEntries {get; set;}
 
     /// <summary>Gets the set of <see cref="GlobalSettings"/> entities.</summary>
-    public DbSet<GlobalSettings> GlobalSettings => Set<GlobalSettings>();
+    public DbSet<GlobalSettings> GlobalSettings {get; set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -123,7 +123,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
         ConfigureGlobalSettings(modelBuilder);
     }
 
-    /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
