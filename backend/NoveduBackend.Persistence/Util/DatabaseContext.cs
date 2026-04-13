@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using NoveduBackend.Persistence.Model;
 
@@ -29,61 +30,61 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<BudgetUsagePeriod> BudgetUsagePeriods => Set<BudgetUsagePeriod>();
 
     /// <summary>Gets the set of <see cref="GroupType"/> entities.</summary>
-    public DbSet<GroupType> GroupTypes {get; set;}
+    public DbSet<GroupType> GroupTypes { get; set; }
 
     /// <summary>Gets the set of <see cref="Group"/> entities.</summary>
-    public DbSet<Group> Groups {get; set;}
+    public DbSet<Group> Groups { get; set; }
 
     /// <summary>Gets the set of <see cref="GroupMember"/> entities.</summary>
-    public DbSet<GroupMember> GroupMembers {get; set;}
+    public DbSet<GroupMember> GroupMembers { get; set; }
 
     /// <summary>Gets the set of <see cref="Role"/> entities.</summary>
-    public DbSet<Role> Roles {get; set;}
+    public DbSet<Role> Roles { get; set; }
 
     /// <summary>Gets the set of <see cref="Subject"/> entities.</summary>
-    public DbSet<Subject> Subjects {get; set;}
+    public DbSet<Subject> Subjects { get; set; }
 
     /// <summary>Gets the set of <see cref="AiProvider"/> entities.</summary>
-    public DbSet<AiProvider> AiProviders {get; set;}
+    public DbSet<AiProvider> AiProviders { get; set; }
 
     /// <summary>Gets the set of <see cref="AiModel"/> entities.</summary>
-    public DbSet<AiModel> AiModels {get; set;}
+    public DbSet<AiModel> AiModels { get; set; }
 
     /// <summary>Gets the set of <see cref="SchoolAiProvider"/> entities.</summary>
-    public DbSet<SchoolAiProvider> SchoolAiProviders {get; set;}
+    public DbSet<SchoolAiProvider> SchoolAiProviders { get; set; }
 
     /// <summary>Gets the set of <see cref="SchoolAiModel"/> entities.</summary>
-    public DbSet<SchoolAiModel> SchoolAiModels {get; set;}
+    public DbSet<SchoolAiModel> SchoolAiModels { get; set; }
 
     /// <summary>Gets the set of <see cref="TutorConfig"/> entities.</summary>
-    public DbSet<TutorConfig> TutorConfigs {get; set;}
+    public DbSet<TutorConfig> TutorConfigs { get; set; }
 
     /// <summary>Gets the set of <see cref="TutorGroupAssignment"/> entities.</summary>
-    public DbSet<TutorGroupAssignment> TutorGroupAssignments {get; set;}
+    public DbSet<TutorGroupAssignment> TutorGroupAssignments { get; set; }
 
     /// <summary>Gets the set of <see cref="TutorStudentAssignment"/> entities.</summary>
-    public DbSet<TutorStudentAssignment> TutorStudentAssignments {get; set;}
+    public DbSet<TutorStudentAssignment> TutorStudentAssignments { get; set; }
 
     /// <summary>Gets the set of <see cref="TutorDocument"/> entities.</summary>
-    public DbSet<TutorDocument> TutorDocuments {get; set;}
+    public DbSet<TutorDocument> TutorDocuments { get; set; }
 
     /// <summary>Gets the set of <see cref="Chat"/> entities.</summary>
-    public DbSet<Chat> Chats {get; set;}
+    public DbSet<Chat> Chats { get; set; }
 
     /// <summary>Gets the set of <see cref="Message"/> entities.</summary>
-    public DbSet<Message> Messages {get; set;}
+    public DbSet<Message> Messages { get; set; }
 
     /// <summary>Gets the set of <see cref="ChatAttachment"/> entities.</summary>
-    public DbSet<ChatAttachment> ChatAttachments {get; set;}
+    public DbSet<ChatAttachment> ChatAttachments { get; set; }
 
     /// <summary>Gets the set of <see cref="BudgetConfig"/> entities.</summary>
-    public DbSet<BudgetConfig> BudgetConfigs {get; set;}
+    public DbSet<BudgetConfig> BudgetConfigs { get; set; }
 
     /// <summary>Gets the set of <see cref="CostEntry"/> entities.</summary>
-    public DbSet<CostEntry> CostEntries {get; set;}
+    public DbSet<CostEntry> CostEntries { get; set; }
 
     /// <summary>Gets the set of <see cref="GlobalSettings"/> entities.</summary>
-    public DbSet<GlobalSettings> GlobalSettings {get; set;}
+    public DbSet<GlobalSettings> GlobalSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -132,358 +133,387 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
     private static void ConfigureSchool(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<School>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-        });
+        EntityTypeBuilder<School> school = modelBuilder.Entity<School>();
+        
+        school.HasKey(e => e.Id);
+        school.Property(e => e.Id).ValueGeneratedOnAdd();
+        school.Property(e => e.Name).HasMaxLength(255);
     }
 
     private static void ConfigureSchoolEntraConfig(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SchoolEntraConfig>(entity =>
-        {
-            entity.Property(e => e.ClientSecretEncrypted).HasMaxLength(1024);
-            entity.Property(e => e.RedirectUri).HasMaxLength(1024);
+        EntityTypeBuilder<SchoolEntraConfig> schoolEntraConfig = modelBuilder.Entity<SchoolEntraConfig>();
 
-            entity.HasOne(e => e.School)
-                  .WithOne(e => e.EntraConfig)
-                  .HasForeignKey<SchoolEntraConfig>(e => e.SchoolId);
+        schoolEntraConfig.HasKey(e => e.Id);
+        schoolEntraConfig.Property(e => e.Id).ValueGeneratedOnAdd();
+        schoolEntraConfig.Property(e => e.ClientSecretEncrypted).HasMaxLength(1024);
+        schoolEntraConfig.Property(e => e.RedirectUri).HasMaxLength(1024);
 
-            entity.HasIndex(e => e.SchoolId).IsUnique();
-        });
+        schoolEntraConfig.HasOne(e => e.School)
+              .WithOne(e => e.EntraConfig)
+              .HasForeignKey<SchoolEntraConfig>(e => e.SchoolId);
+
+        schoolEntraConfig.HasIndex(e => e.SchoolId).IsUnique();
     }
 
     private static void ConfigureUser(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.Property(e => e.EntraOid).HasMaxLength(36);
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.Email).HasColumnType("citext");
+        EntityTypeBuilder<User> user = modelBuilder.Entity<User>();
 
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.Users)
-                  .HasForeignKey(e => e.SchoolId);
+        user.HasKey(e => e.Id);
+        user.Property(e => e.Id).ValueGeneratedOnAdd();
+        user.Property(e => e.EntraOid).HasMaxLength(36);
+        user.Property(e => e.Name).HasMaxLength(255);
+        user.Property(e => e.Email).HasColumnType("citext");
 
-            entity.HasOne(e => e.Role)
-                  .WithMany(e => e.Users)
-                  .HasForeignKey(e => e.RoleId);
+        user.HasOne(e => e.School)
+              .WithMany(e => e.Users)
+              .HasForeignKey(e => e.SchoolId);
 
-            entity.HasOne(e => e.BudgetConfig)
-                  .WithMany()
-                  .HasForeignKey(e => e.BudgetConfigId);
+        user.HasOne(e => e.Role)
+              .WithMany(e => e.Users)
+              .HasForeignKey(e => e.RoleId);
 
-            entity.HasIndex(e => e.EntraOid).IsUnique();
-            entity.HasIndex(e => e.Email).IsUnique();
-        });
+        user.HasOne(e => e.BudgetConfig)
+              .WithMany()
+              .HasForeignKey(e => e.BudgetConfigId);
+
+        user.HasIndex(e => e.EntraOid).IsUnique();
+        user.HasIndex(e => e.Email).IsUnique();
     }
 
     private static void ConfigureUserSettings(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserSettings>(entity =>
-        {
-            entity.Property(e => e.Language).HasMaxLength(10);
+        EntityTypeBuilder<UserSettings> userSettings = modelBuilder.Entity<UserSettings>();
 
-            entity.HasOne(e => e.User)
-                  .WithOne(e => e.Settings)
-                  .HasForeignKey<UserSettings>(e => e.UserId);
+        userSettings.HasKey(e => e.Id);
+        userSettings.Property(e => e.Id).ValueGeneratedOnAdd();
+        userSettings.Property(e => e.Language).HasMaxLength(10);
 
-            entity.HasIndex(e => e.UserId).IsUnique();
-        });
+        userSettings.HasOne(e => e.User)
+              .WithOne(e => e.Settings)
+              .HasForeignKey<UserSettings>(e => e.UserId);
+
+        userSettings.HasIndex(e => e.UserId).IsUnique();
     }
 
     private static void ConfigureBudgetUsagePeriod(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<BudgetUsagePeriod>(entity =>
-        {
-            entity.HasOne(e => e.User)
-                  .WithMany(e => e.BudgetUsagePeriods)
-                  .HasForeignKey(e => e.UserId);
-        });
+        EntityTypeBuilder<BudgetUsagePeriod> budgetUsagePeriod = modelBuilder.Entity<BudgetUsagePeriod>();
+
+        budgetUsagePeriod.HasKey(e => e.Id);
+        budgetUsagePeriod.Property(e => e.Id).ValueGeneratedOnAdd();
+        budgetUsagePeriod.HasOne(e => e.User)
+              .WithMany(e => e.BudgetUsagePeriods)
+              .HasForeignKey(e => e.UserId);
     }
 
     private static void ConfigureGroupType(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<GroupType>(entity =>
-        {
-            entity.Property(e => e.Code).HasMaxLength(100);
-            entity.Property(e => e.Name).HasMaxLength(255);
+        EntityTypeBuilder<GroupType> groupType = modelBuilder.Entity<GroupType>();
 
-            entity.HasIndex(e => e.Code).IsUnique();
-        });
+        groupType.HasKey(e => e.Id);
+        groupType.Property(e => e.Id).ValueGeneratedOnAdd();
+        groupType.Property(e => e.Code).HasMaxLength(100);
+        groupType.Property(e => e.Name).HasMaxLength(255);
+
+        groupType.HasIndex(e => e.Code).IsUnique();
     }
 
     private static void ConfigureGroup(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Group>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
+        EntityTypeBuilder<Group> group = modelBuilder.Entity<Group>();
 
-            entity.HasOne(e => e.GroupType)
-                  .WithMany(e => e.Groups)
-                  .HasForeignKey(e => e.GroupTypeId);
+        group.HasKey(e => e.Id);
+        group.Property(e => e.Id).ValueGeneratedOnAdd();
+        group.Property(e => e.Name).HasMaxLength(255);
 
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.Groups)
-                  .HasForeignKey(e => e.SchoolId);
+        group.HasOne(e => e.GroupType)
+              .WithMany(e => e.Groups)
+              .HasForeignKey(e => e.GroupTypeId);
 
-            entity.HasOne(e => e.BudgetConfig)
-                  .WithMany()
-                  .HasForeignKey(e => e.BudgetConfigId);
-        });
+        group.HasOne(e => e.School)
+              .WithMany(e => e.Groups)
+              .HasForeignKey(e => e.SchoolId);
+
+        group.HasOne(e => e.BudgetConfig)
+              .WithMany()
+              .HasForeignKey(e => e.BudgetConfigId);
     }
 
     private static void ConfigureGroupMember(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<GroupMember>(entity =>
-        {
-            entity.HasOne(e => e.Group)
-                  .WithMany(e => e.Members)
-                  .HasForeignKey(e => e.GroupId);
+        EntityTypeBuilder<GroupMember> groupMember = modelBuilder.Entity<GroupMember>();
 
-            entity.HasOne(e => e.User)
-                  .WithMany(e => e.GroupMemberships)
-                  .HasForeignKey(e => e.UserId);
+        groupMember.HasKey(e => e.Id);
+        groupMember.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasIndex(e => new { e.GroupId, e.UserId }).IsUnique();
-        });
+        groupMember.HasOne(e => e.Group)
+              .WithMany(e => e.Members)
+              .HasForeignKey(e => e.GroupId);
+
+        groupMember.HasOne(e => e.User)
+              .WithMany(e => e.GroupMemberships)
+              .HasForeignKey(e => e.UserId);
+
+        groupMember.HasIndex(e => new { e.GroupId, e.UserId }).IsUnique();
     }
 
     private static void ConfigureRole(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
+        EntityTypeBuilder<Role> role = modelBuilder.Entity<Role>();
 
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.Roles)
-                  .HasForeignKey(e => e.SchoolId);
+        role.HasKey(e => e.Id);
+        role.Property(e => e.Id).ValueGeneratedOnAdd();
+        role.Property(e => e.Name).HasMaxLength(255);
 
-            entity.HasOne(e => e.BudgetConfig)
-                  .WithMany()
-                  .HasForeignKey(e => e.BudgetConfigId);
-        });
+        role.HasOne(e => e.School)
+              .WithMany(e => e.Roles)
+              .HasForeignKey(e => e.SchoolId);
+
+        role.HasOne(e => e.BudgetConfig)
+              .WithMany()
+              .HasForeignKey(e => e.BudgetConfigId);
     }
 
     private static void ConfigureSubject(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Subject>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.Icon).HasMaxLength(100);
+        EntityTypeBuilder<Subject> subject = modelBuilder.Entity<Subject>();
 
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.Subjects)
-                  .HasForeignKey(e => e.SchoolId);
-        });
+        subject.HasKey(e => e.Id);
+        subject.Property(e => e.Id).ValueGeneratedOnAdd();
+        subject.Property(e => e.Name).HasMaxLength(255);
+        subject.Property(e => e.Icon).HasMaxLength(100);
+
+        subject.HasOne(e => e.School)
+              .WithMany(e => e.Subjects)
+              .HasForeignKey(e => e.SchoolId);
     }
 
     private static void ConfigureAiProvider(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AiProvider>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-        });
+        EntityTypeBuilder<AiProvider> aiProvider = modelBuilder.Entity<AiProvider>();
+
+        aiProvider.HasKey(e => e.Id);
+        aiProvider.Property(e => e.Id).ValueGeneratedOnAdd();
+        aiProvider.Property(e => e.Name).HasMaxLength(255);
     }
 
     private static void ConfigureAiModel(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AiModel>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.CostPerMillionInputTokens).HasPrecision(10, 6);
-            entity.Property(e => e.CostPerMillionOutputTokens).HasPrecision(10, 6);
-            entity.Property(e => e.CostPerMillionCachedInputTokens).HasPrecision(10, 6);
+        EntityTypeBuilder<AiModel> aiModel = modelBuilder.Entity<AiModel>();
 
-            entity.HasOne(e => e.Provider)
-                  .WithMany(e => e.Models)
-                  .HasForeignKey(e => e.ProviderId);
-        });
+        aiModel.HasKey(e => e.Id);
+        aiModel.Property(e => e.Id).ValueGeneratedOnAdd();
+        aiModel.Property(e => e.Name).HasMaxLength(255);
+        aiModel.Property(e => e.CostPerMillionInputTokens).HasPrecision(10, 6);
+        aiModel.Property(e => e.CostPerMillionOutputTokens).HasPrecision(10, 6);
+        aiModel.Property(e => e.CostPerMillionCachedInputTokens).HasPrecision(10, 6);
+
+        aiModel.HasOne(e => e.Provider)
+              .WithMany(e => e.Models)
+              .HasForeignKey(e => e.ProviderId);
     }
 
     private static void ConfigureSchoolAiProvider(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SchoolAiProvider>(entity =>
-        {
-            entity.Property(e => e.ApiKeyEncrypted).HasMaxLength(1024);
+        EntityTypeBuilder<SchoolAiProvider> schoolAiProvider = modelBuilder.Entity<SchoolAiProvider>();
 
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.SchoolAiProviders)
-                  .HasForeignKey(e => e.SchoolId);
+        schoolAiProvider.HasKey(e => e.Id);
+        schoolAiProvider.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasOne(e => e.Provider)
-                  .WithMany(e => e.SchoolAiProviders)
-                  .HasForeignKey(e => e.ProviderId);
+        schoolAiProvider.Property(e => e.ApiKeyEncrypted).HasMaxLength(1024);
 
-            entity.HasIndex(e => new { e.SchoolId, e.ProviderId }).IsUnique();
-        });
+        schoolAiProvider.HasOne(e => e.School)
+              .WithMany(e => e.SchoolAiProviders)
+              .HasForeignKey(e => e.SchoolId);
+
+        schoolAiProvider.HasOne(e => e.Provider)
+              .WithMany(e => e.SchoolAiProviders)
+              .HasForeignKey(e => e.ProviderId);
+
+        schoolAiProvider.HasIndex(e => new { e.SchoolId, e.ProviderId }).IsUnique();
     }
 
     private static void ConfigureSchoolAiModel(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SchoolAiModel>(entity =>
-        {
-            entity.HasOne(e => e.School)
-                  .WithMany(e => e.SchoolAiModels)
-                  .HasForeignKey(e => e.SchoolId);
+        EntityTypeBuilder<SchoolAiModel> schoolAiModel = modelBuilder.Entity<SchoolAiModel>();
 
-            entity.HasOne(e => e.Model)
-                  .WithMany(e => e.SchoolAiModels)
-                  .HasForeignKey(e => e.ModelId);
+        schoolAiModel.HasKey(e => e.Id);
+        schoolAiModel.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasIndex(e => new { e.SchoolId, e.ModelId }).IsUnique();
-        });
+        schoolAiModel.HasOne(e => e.School)
+              .WithMany(e => e.SchoolAiModels)
+              .HasForeignKey(e => e.SchoolId);
+
+        schoolAiModel.HasOne(e => e.Model)
+              .WithMany(e => e.SchoolAiModels)
+              .HasForeignKey(e => e.ModelId);
+
+        schoolAiModel.HasIndex(e => new { e.SchoolId, e.ModelId }).IsUnique();
     }
 
     private static void ConfigureTutorConfig(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TutorConfig>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
+        EntityTypeBuilder<TutorConfig> tutorConfig = modelBuilder.Entity<TutorConfig>();
 
-            entity.HasOne(e => e.Subject)
-                  .WithMany(e => e.Tutors)
-                  .HasForeignKey(e => e.SubjectId);
+        tutorConfig.HasKey(e => e.Id);
+        tutorConfig.Property(e => e.Id).ValueGeneratedOnAdd();
+        tutorConfig.Property(e => e.Name).HasMaxLength(255);
 
-            entity.HasOne(e => e.Model)
-                  .WithMany(e => e.Tutors)
-                  .HasForeignKey(e => e.ModelId);
+        tutorConfig.HasOne(e => e.Subject)
+              .WithMany(e => e.Tutors)
+              .HasForeignKey(e => e.SubjectId);
 
-            entity.HasOne(e => e.CreatedBy)
-                  .WithMany(e => e.CreatedTutors)
-                  .HasForeignKey(e => e.CreatedById);
-        });
+        tutorConfig.HasOne(e => e.Model)
+              .WithMany(e => e.Tutors)
+              .HasForeignKey(e => e.ModelId);
+
+        tutorConfig.HasOne(e => e.CreatedBy)
+              .WithMany(e => e.CreatedTutors)
+              .HasForeignKey(e => e.CreatedById);
     }
 
     private static void ConfigureTutorGroupAssignment(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TutorGroupAssignment>(entity =>
-        {
-            entity.HasOne(e => e.Tutor)
-                  .WithMany(e => e.GroupAssignments)
-                  .HasForeignKey(e => e.TutorId);
+        EntityTypeBuilder<TutorGroupAssignment> tutorGroupAssignment = modelBuilder.Entity<TutorGroupAssignment>();
 
-            entity.HasOne(e => e.Group)
-                  .WithMany(e => e.TutorAssignments)
-                  .HasForeignKey(e => e.GroupId);
+        tutorGroupAssignment.HasKey(e => e.Id);
+        tutorGroupAssignment.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasIndex(e => new { e.TutorId, e.GroupId }).IsUnique();
-        });
+        tutorGroupAssignment.HasOne(e => e.Tutor)
+              .WithMany(e => e.GroupAssignments)
+              .HasForeignKey(e => e.TutorId);
+
+        tutorGroupAssignment.HasOne(e => e.Group)
+              .WithMany(e => e.TutorAssignments)
+              .HasForeignKey(e => e.GroupId);
+
+        tutorGroupAssignment.HasIndex(e => new { e.TutorId, e.GroupId }).IsUnique();
     }
 
     private static void ConfigureTutorStudentAssignment(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TutorStudentAssignment>(entity =>
-        {
-            entity.HasOne(e => e.Tutor)
-                  .WithMany(e => e.StudentAssignments)
-                  .HasForeignKey(e => e.TutorId);
+        EntityTypeBuilder<TutorStudentAssignment> tutorStudentAssignment = modelBuilder.Entity<TutorStudentAssignment>();
 
-            entity.HasOne(e => e.User)
-                  .WithMany(e => e.TutorAssignments)
-                  .HasForeignKey(e => e.UserId);
+        tutorStudentAssignment.HasKey(e => e.Id);
+        tutorStudentAssignment.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            entity.HasIndex(e => new { e.TutorId, e.UserId }).IsUnique();
-        });
+        tutorStudentAssignment.HasOne(e => e.Tutor)
+              .WithMany(e => e.StudentAssignments)
+              .HasForeignKey(e => e.TutorId);
+
+        tutorStudentAssignment.HasOne(e => e.User)
+              .WithMany(e => e.TutorAssignments)
+              .HasForeignKey(e => e.UserId);
+
+        tutorStudentAssignment.HasIndex(e => new { e.TutorId, e.UserId }).IsUnique();
     }
 
     private static void ConfigureTutorDocument(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TutorDocument>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.Type).HasMaxLength(100);
-            entity.Property(e => e.FileId).HasMaxLength(255);
-            entity.Property(e => e.Location).HasMaxLength(1024);
+        EntityTypeBuilder<TutorDocument> tutorDocument = modelBuilder.Entity<TutorDocument>();
 
-            entity.HasOne(e => e.Tutor)
-                  .WithMany(e => e.Documents)
-                  .HasForeignKey(e => e.TutorId);
-        });
+        tutorDocument.HasKey(e => e.Id);
+        tutorDocument.Property(e => e.Id).ValueGeneratedOnAdd();
+        tutorDocument.Property(e => e.Name).HasMaxLength(255);
+        tutorDocument.Property(e => e.Type).HasMaxLength(100);
+        tutorDocument.Property(e => e.FileId).HasMaxLength(255);
+        tutorDocument.Property(e => e.Location).HasMaxLength(1024);
+
+        tutorDocument.HasOne(e => e.Tutor)
+              .WithMany(e => e.Documents)
+              .HasForeignKey(e => e.TutorId);
     }
 
     private static void ConfigureChat(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Chat>(entity =>
-        {
-            entity.Property(e => e.Title).HasMaxLength(255);
+        EntityTypeBuilder<Chat> chat = modelBuilder.Entity<Chat>();
 
-            entity.HasOne(e => e.User)
-                  .WithMany(e => e.Chats)
-                  .HasForeignKey(e => e.UserId);
+        chat.HasKey(e => e.Id);
+        chat.Property(e => e.Id).ValueGeneratedOnAdd();
+        chat.Property(e => e.Title).HasMaxLength(255);
 
-            entity.HasOne(e => e.Tutor)
-                  .WithMany(e => e.Chats)
-                  .HasForeignKey(e => e.TutorId);
-        });
+        chat.HasOne(e => e.User)
+              .WithMany(e => e.Chats)
+              .HasForeignKey(e => e.UserId);
+
+        chat.HasOne(e => e.Tutor)
+              .WithMany(e => e.Chats)
+              .HasForeignKey(e => e.TutorId);
     }
 
     private static void ConfigureMessage(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Message>(entity =>
-        {
-            entity.HasOne(e => e.Chat)
-                  .WithMany(e => e.Messages)
-                  .HasForeignKey(e => e.ChatId);
-        });
+        EntityTypeBuilder<Message> message = modelBuilder.Entity<Message>();
+
+        message.HasKey(e => e.Id);
+        message.Property(e => e.Id).ValueGeneratedOnAdd();
+        message.HasOne(e => e.Chat)
+              .WithMany(e => e.Messages)
+              .HasForeignKey(e => e.ChatId);
     }
 
     private static void ConfigureChatAttachment(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ChatAttachment>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.Type).HasMaxLength(100);
-            entity.Property(e => e.FileId).HasMaxLength(255);
-            entity.Property(e => e.Location).HasMaxLength(1024);
+        EntityTypeBuilder<ChatAttachment> chatAttachment = modelBuilder.Entity<ChatAttachment>();
 
-            entity.HasOne(e => e.Message)
-                  .WithMany(e => e.Attachments)
-                  .HasForeignKey(e => e.MessageId);
-        });
+        chatAttachment.HasKey(e => e.Id);
+        chatAttachment.Property(e => e.Id).ValueGeneratedOnAdd();
+        chatAttachment.Property(e => e.Name).HasMaxLength(255);
+        chatAttachment.Property(e => e.Type).HasMaxLength(100);
+        chatAttachment.Property(e => e.FileId).HasMaxLength(255);
+        chatAttachment.Property(e => e.Location).HasMaxLength(1024);
+
+        chatAttachment.HasOne(e => e.Message)
+              .WithMany(e => e.Attachments)
+              .HasForeignKey(e => e.MessageId);
     }
 
     private static void ConfigureBudgetConfig(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<BudgetConfig>(entity =>
-        {
-            entity.Property(e => e.LimitAmount).HasPrecision(12, 2);
-        });
+        EntityTypeBuilder<BudgetConfig> budgetConfig = modelBuilder.Entity<BudgetConfig>();
+
+        budgetConfig.HasKey(e => e.Id);
+        budgetConfig.Property(e => e.Id).ValueGeneratedOnAdd();
+        budgetConfig.Property(e => e.LimitAmount).HasPrecision(12, 2);
     }
 
     private static void ConfigureCostEntry(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CostEntry>(entity =>
-        {
-            entity.Property(e => e.Cost).HasPrecision(12, 2);
+        EntityTypeBuilder<CostEntry> costEntry = modelBuilder.Entity<CostEntry>();
 
-            entity.HasOne(e => e.Message)
-                  .WithMany(e => e.CostEntries)
-                  .HasForeignKey(e => e.MessageId);
+        costEntry.HasKey(e => e.Id);
+        costEntry.Property(e => e.Id).ValueGeneratedOnAdd();
+        costEntry.Property(e => e.Cost).HasPrecision(12, 2);
 
-            entity.HasOne(e => e.BudgetUsagePeriod)
-                  .WithMany(e => e.CostEntries)
-                  .HasForeignKey(e => e.BudgetUsagePeriodId);
+        costEntry.HasOne(e => e.Message)
+              .WithMany(e => e.CostEntries)
+              .HasForeignKey(e => e.MessageId);
 
-            entity.HasOne(e => e.Tutor)
-                  .WithMany(e => e.CostEntries)
-                  .HasForeignKey(e => e.TutorId);
-        });
+        costEntry.HasOne(e => e.BudgetUsagePeriod)
+              .WithMany(e => e.CostEntries)
+              .HasForeignKey(e => e.BudgetUsagePeriodId);
+
+        costEntry.HasOne(e => e.Tutor)
+              .WithMany(e => e.CostEntries)
+              .HasForeignKey(e => e.TutorId);
     }
 
     private static void ConfigureGlobalSettings(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<GlobalSettings>(entity =>
-        {
-            entity.HasOne(e => e.School)
-                  .WithOne(e => e.GlobalSettings)
-                  .HasForeignKey<GlobalSettings>(e => e.SchoolId);
+        EntityTypeBuilder<GlobalSettings> globalSettings = modelBuilder.Entity<GlobalSettings>();
 
-            entity.HasOne(e => e.LastModifiedBy)
-                  .WithMany()
-                  .HasForeignKey(e => e.LastModifiedById);
+        globalSettings.HasKey(e => e.Id);
+        globalSettings.Property(e => e.Id).ValueGeneratedOnAdd();
+        globalSettings.HasOne(e => e.School)
+              .WithOne(e => e.GlobalSettings)
+              .HasForeignKey<GlobalSettings>(e => e.SchoolId);
 
-            entity.HasIndex(e => e.SchoolId).IsUnique();
-        });
+        globalSettings.HasOne(e => e.LastModifiedBy)
+              .WithMany()
+              .HasForeignKey(e => e.LastModifiedById);
+
+        globalSettings.HasIndex(e => e.SchoolId).IsUnique();
     }
 }
