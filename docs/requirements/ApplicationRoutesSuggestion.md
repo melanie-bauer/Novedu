@@ -264,41 +264,126 @@ Updates which classes may use a tutor.
 ### POST /api/chats
 **Purpose**
 Creates a new chat session for a selected tutor.  
+
 **Inputs**
+- Authorization (header, required, bearer token)
+- body:
+  - tutorId (required, string)
+
 **Output**
+- 201 Created
+```json
+{
+  "id": "chat_123",
+  "tutorId": "tutor_001",
+  "createdAt": "2026-04-27T10:00:00Z"
+}
+```
+
 **Errors**
 ---
 
 ### GET /api/chats
 **Purpose**
 Returns all chat sessions of the authenticated user.  
+
 **Inputs**
+- Authorization (header, required, bearer token)
+
 **Output**
+- 200 OK
+```json
+{
+  "items": [
+    {
+      "id": "chat_123",
+      "tutorId": "tutor_001",
+      "lastMessageAt": "2026-04-27T10:00:00Z"
+    }
+  ]
+}
+```
+
 **Errors**
+
 ---
 
 ### GET /api/chats/:chatId
 **Purpose**  
 Returns a single chat with its message history.
 **Inputs**
+- chatId (path param, required, string)
+- Authorization (header, required, bearer token)
+
 **Output**
+- 200 OK
+```json
+{
+  "id": "chat_123",
+  "tutorId": "tutor_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello",
+      "createdAt": "2026-04-27T10:00:00Z"
+    }
+  ]
+}
+```
+
 **Errors**
+- `401 Unauthorized`
+- `404 Not Found`
 ---
 
 ### POST /api/chats/:chatId/messages
 **Purpose**
 Adds a new message to a chat and returns the AI response.  
+
 **Inputs**
+- chatId (path param, required, string)
+- Authorization (header, required, bearer token)
+- body:
+  - message (required, string)
+
 **Output**
+- 200 OK
+```json
+{
+  "userMessage": {
+    "role": "user",
+    "content": "Hello"
+  },
+  "assistantMessage": {
+    "role": "assistant",
+    "content": "Hi!"
+  }
+}
+```
 **Errors**
+- `400 Bad Request`
+- `401 Unauthorized`
+- `404 Not Found`
 ---
 
 ## 4. Usage / Budgets
 ### GET /api/me/usage
 **Purpose**  
 **Inputs**
+- Authorization (header, required, bearer token)
+
 **Output**
+- 200 OK
+```json
+{
+  "userId": "usr_123",
+  "messagesUsed": 120,
+  "messagesLimit": 1000,
+  "cost": 4.20
+}
+```
 **Errors**
+- `401 Unauthorized`
 ---
 
 ### GET /api/classes/:classId/usage
