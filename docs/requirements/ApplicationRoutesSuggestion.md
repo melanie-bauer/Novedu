@@ -74,7 +74,7 @@ Logs the current user out
 ### GET /api/tutors
 
 **Purpose** 
-Returns all visible tutors
+Returns all visible tutors, students only see tutors assigned to their own class.
 
 **Inputs**
 - `Authorization` (header, required, bearer token)
@@ -262,14 +262,16 @@ Updates which classes may use a tutor.
 
 ## 3. Chat / Tutor Interaction
 ### POST /api/chats
-**Purpose**  
+**Purpose**
+Creates a new chat session for a selected tutor.  
 **Inputs**
 **Output**
 **Errors**
 ---
 
 ### GET /api/chats
-**Purpose**  
+**Purpose**
+Returns all chat sessions of the authenticated user.  
 **Inputs**
 **Output**
 **Errors**
@@ -277,13 +279,15 @@ Updates which classes may use a tutor.
 
 ### GET /api/chats/:chatId
 **Purpose**  
+Returns a single chat with its message history.
 **Inputs**
 **Output**
 **Errors**
 ---
 
 ### POST /api/chats/:chatId/messages
-**Purpose**  
+**Purpose**
+Adds a new message to a chat and returns the AI response.  
 **Inputs**
 **Output**
 **Errors**
@@ -311,7 +315,7 @@ Updates which classes may use a tutor.
 **Errors**
 ---
 
-## 6. Teacher / Class Management
+## 5. Teacher / Class Management
 ### GET /api/classes
 **Purpose**  
 **Inputs**
@@ -326,7 +330,7 @@ Updates which classes may use a tutor.
 **Errors**
 ---
 
-## 7. Admin / System Overview
+## 6. Admin / System Overview
 ### GET /api/admin/dashboard/usage
 **Purpose**  
 **Inputs**
@@ -334,4 +338,4 @@ Updates which classes may use a tutor.
 **Errors**
 ---
 
-## 8. Other Routes after finishing backend
+## 7. Other Routes after finishing backend
