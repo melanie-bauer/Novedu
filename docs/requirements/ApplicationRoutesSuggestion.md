@@ -156,14 +156,18 @@ Creates a new Tutor or workspace configuration
 - `201 Created`
 ```json
 {
-  "id": "tutor_002",
-  "name": "German Tutor",
-  "description": "Supports text analysis",
-  "subject": "German",
-  "systemPrompt": "You are a German tutor...",
-  "model": "gpt-4o-mini",
-  "allowedClassIds": ["2AHITM"],
-  "isActive": true
+  "name": "Mathematik Tutor",
+  "description": "Hilft bei Analysis",
+  "subjectId": "subj_987", 
+  "systemPrompt": "Du bist ein sokratischer Tutor...",
+  "modelId": "model_gpt4",
+  "isActive": true,
+  "settings": {
+    "didacticMode": "socratic",
+    "temperature": 0.7,
+    "maxOutputTokens": 1000,
+    "showSources": true
+  }
 }
 ```
 
@@ -213,6 +217,41 @@ Updates an existing Tutor
 - `404 Not Found`
 
 ---
+
+### POST /api/tutors/:tutorId/documents
+**Purpose**
+Uploads an PDF or text document as knowledge base for the tutor.
+
+**Inputs**
+
+* `tutorId` (path param, required, string)
+* `Authorization` (header, required, bearer token)
+* request body: **multipart/form-data**
+  * `file` (required, File → pdf | txt | docx)
+  * `kind` (optional, string → `"knowledge"` | `"assignment"`)
+
+**Output**
+- `201 Created`
+```json
+{
+  "id": "doc_456",
+  "tutorId": "tutor_001",
+  "fileName": "analysis_uebungen.pdf",
+  "kind": "knowledge",
+  "fileType": "pdf",
+  "fileId": "file_abc123",
+  "size": 102455,
+  "uploadedAt": "2026-04-27T10:00:00Z"
+}
+```
+
+**Errors**
+
+* `400 Bad Request` (missing file / invalid type)
+* `401 Unauthorized`
+* `403 Forbidden`
+* `404 Not Found`
+
 
 ### DELETE /api/tutors/:tutorId
 **Purpose**  
