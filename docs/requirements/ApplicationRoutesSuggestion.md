@@ -24,7 +24,7 @@ It describes for each route:
     - `401 Unauthorized`            Missing or Invalid Authentication
     - `403 Forbidden`               Authenticated but insufficient permissions
     - `404 Not Found`               Resource does not exist
-    - `409 Conflict`                Conflicting state or sum
+    - `409 Conflict`                Conflicting state or duplicate resource
     - `429 Too Many Requests`       usage limit or rate limit exceeded
     - `500 Internal Server Error`   Server Error
 
@@ -70,6 +70,8 @@ Logs the current user out
 - `204 No Content`
 
 **Errors**
+- `401 Unauthorized`
+- `500 Internal Server Error`
 
 ## 2. Tutors / Workspaces
 ### GET /api/tutors
@@ -172,7 +174,6 @@ Creates a new Tutor or workspace configuration
 - `400 Bad Request`
 - `401 Unauthorized`
 - `403 Forbidden`
-- `422 Unprocessable Entity`
 
 ---
 
@@ -194,7 +195,6 @@ Updates an exisiting Tutor
   - `isActive` (optional, boolean)
 
 **Output**
-**Output**
 - `200 OK`
 ```json
 {
@@ -210,12 +210,10 @@ Updates an exisiting Tutor
 ```
 
 **Errors**
-**Errors**
 - `400 Bad Request`
 - `401 Unauthorized`
 - `403 Forbidden`
 - `404 Not Found`
-- `422 Unprocessable Entity`
 
 ---
 
@@ -249,6 +247,7 @@ Updates which classes may use a tutor.
   - `allowedClassIds` (required, string[])
 
 **Output**
+- `200 OK`
 ```json
 {
   "id": "tutor_001",
