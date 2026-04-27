@@ -70,6 +70,8 @@ export interface TutorConfig {
   expiresAt?: Date;
   assignment?: string;
   assignmentDocuments?: AssignmentDocument[];
+  visibility?: 'private' | 'internal' | 'public';
+  internalVisibility?: 'groups' | 'allTeachers';
 }
 
 export interface ChatAttachment {

@@ -36,9 +36,9 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { TutorConfig } from '@/types';
-import { modelOptions, subjectOptions, tutorIcons, didacticModes, mockClasses, mockUsers, mockAIProviders } from '@/data/mockData';
+import { modelOptions, subjectOptions, tutorIcons, didacticModes, mockAIProviders } from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, Eye, Upload, FileText, X, Info, Send, Bot, User, ChevronDown, HelpCircle, Search, Calendar as CalendarIcon, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Upload, FileText, X, Info, Send, Bot, User, ChevronDown, HelpCircle, Calendar as CalendarIcon, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -52,12 +52,6 @@ const TutorEditorPage: React.FC = () => {
   
   const isNew = id === 'new';
   const existingTutor = isNew ? null : tutors.find(t => t.id === id);
-
-  const isAdmin = user?.role === 'admin';
-  const myClasses = isAdmin 
-    ? mockClasses 
-    : mockClasses.filter(c => c.teacherId === user?.id);
-  const allStudents = mockUsers.filter(u => u.role === 'student');
 
   // Get all enabled models from providers
   const availableModels = mockAIProviders
@@ -92,8 +86,6 @@ const TutorEditorPage: React.FC = () => {
   });
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [classSearch, setClassSearch] = useState('');
-  const [studentSearch, setStudentSearch] = useState('');
   const [testMessages, setTestMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [testInput, setTestInput] = useState('');
 
@@ -157,35 +149,29 @@ const TutorEditorPage: React.FC = () => {
       expiresAt: formData.expiresAt || undefined,
       assignment: formData.assignment || undefined,
       assignmentDocuments: existingTutor?.assignmentDocuments || [],
+      visibility: existingTutor?.visibility,
+      internalVisibility: existingTutor?.internalVisibility,
     };
 
     if (existingTutor) {
-      updateTutor(existingTutor.id, tutorData);
+      updateTutor(existingTutor.id, {
+        ...tutorData,
+        status: publish ? 'published' : 'draft',
+        visibility: publish ? 'private' : tutorData.visibility,
+        internalVisibility: publish ? undefined : tutorData.internalVisibility,
+      });
       toast({ title: publish ? 'Tutor veröffentlicht' : 'Änderungen gespeichert' });
     } else {
-      addTutor(tutorData);
+      addTutor({
+        ...tutorData,
+        status: publish ? 'published' : 'draft',
+        visibility: publish ? 'private' : tutorData.visibility,
+        internalVisibility: publish ? undefined : tutorData.internalVisibility,
+      });
       toast({ title: publish ? 'Tutor erstellt und veröffentlicht' : 'Tutor als Entwurf gespeichert' });
     }
 
     navigate('/app/tutors');
-  };
-
-  const toggleClass = (classId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      assignedClasses: prev.assignedClasses.includes(classId)
-        ? prev.assignedClasses.filter(id => id !== classId)
-        : [...prev.assignedClasses, classId],
-    }));
-  };
-
-  const toggleStudent = (studentId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      assignedStudents: prev.assignedStudents.includes(studentId)
-        ? prev.assignedStudents.filter(id => id !== studentId)
-        : [...prev.assignedStudents, studentId],
-    }));
   };
 
   const handleTestSend = () => {
@@ -207,17 +193,6 @@ const TutorEditorPage: React.FC = () => {
     'Kannst du mir ein Beispiel geben?',
     'Ich verstehe das nicht',
   ];
-
-  // Filtered lists for search
-  const filteredClasses = myClasses.filter(c => 
-    !classSearch || c.name.toLowerCase().includes(classSearch.toLowerCase())
-  );
-
-  const filteredStudents = allStudents.filter(s => 
-    !studentSearch || 
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.email.toLowerCase().includes(studentSearch.toLowerCase())
-  );
 
   return (
     <div className="h-full flex flex-col">
@@ -252,11 +227,10 @@ const TutorEditorPage: React.FC = () => {
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="basic" className="h-full flex flex-col">
           <div className="px-6 pt-4 border-b bg-card">
-            <TabsList className="w-full max-w-3xl grid grid-cols-5">
+            <TabsList className="w-full max-w-3xl grid grid-cols-4">
               <TabsTrigger value="basic">Basis</TabsTrigger>
               <TabsTrigger value="behavior">Verhalten</TabsTrigger>
               <TabsTrigger value="knowledge">Wissen</TabsTrigger>
-              <TabsTrigger value="permissions">Freigaben</TabsTrigger>
               <TabsTrigger value="preview">Vorschau</TabsTrigger>
             </TabsList>
           </div>
@@ -651,133 +625,7 @@ const TutorEditorPage: React.FC = () => {
                 </Card>
               </TabsContent>
 
-              {/* Tab 4: Permissions */}
-              <TabsContent value="permissions" className="mt-0 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Freigabe für Klassen</CardTitle>
-                    <CardDescription>
-                      Alle Schüler der ausgewählten Klassen können den Tutor nutzen
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Klasse suchen..."
-                        value={classSearch}
-                        onChange={(e) => setClassSearch(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                    {filteredClasses.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        {myClasses.length === 0 ? 'Keine Klassen verfügbar' : 'Keine Klassen gefunden'}
-                      </p>
-                    ) : (
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {filteredClasses.map(cls => (
-                          <div
-                            key={cls.id}
-                            className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50"
-                            onClick={() => toggleClass(cls.id)}
-                          >
-                            <Checkbox
-                              checked={formData.assignedClasses.includes(cls.id)}
-                              onCheckedChange={() => toggleClass(cls.id)}
-                            />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{cls.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {cls.studentIds.length} Schüler • {cls.schoolYear}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Freigabe für Einzelpersonen</CardTitle>
-                    <CardDescription>
-                      Zusätzliche Schüler außerhalb der Klassen
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Schüler suchen (Name oder E-Mail)..."
-                        value={studentSearch}
-                        onChange={(e) => setStudentSearch(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-                      {filteredStudents
-                        .filter(s => !myClasses.some(c => 
-                          formData.assignedClasses.includes(c.id) && c.studentIds.includes(s.id)
-                        ))
-                        .map(student => (
-                          <Badge
-                            key={student.id}
-                            variant={formData.assignedStudents.includes(student.id) ? 'default' : 'outline'}
-                            className="cursor-pointer"
-                            onClick={() => toggleStudent(student.id)}
-                          >
-                            {student.name}
-                          </Badge>
-                        ))
-                      }
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {(formData.assignedClasses.length > 0 || formData.assignedStudents.length > 0) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Aktive Freigaben</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex flex-wrap gap-2">
-                        {formData.assignedClasses.map(classId => {
-                          const cls = mockClasses.find(c => c.id === classId);
-                          return cls && (
-                            <Badge key={classId} variant="secondary" className="gap-1">
-                              {cls.name}
-                              <button 
-                                onClick={() => toggleClass(classId)} 
-                                className="ml-1 hover:text-destructive"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          );
-                        })}
-                        {formData.assignedStudents.map(studentId => {
-                          const student = mockUsers.find(u => u.id === studentId);
-                          return student && (
-                            <Badge key={studentId} variant="outline" className="gap-1">
-                              {student.name}
-                              <button 
-                                onClick={() => toggleStudent(studentId)} 
-                                className="ml-1 hover:text-destructive"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              {/* Tab 5: Preview */}
+              {/* Tab 4: Preview */}
               <TabsContent value="preview" className="mt-0 space-y-4">
                 <Card className="overflow-hidden">
                   <CardHeader className="bg-muted/50 pb-3">
