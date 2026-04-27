@@ -14,8 +14,6 @@ It describes for each route:
 * response shape
 * possible status codes and errors
 
-> Note: This is a proposed frontend API overview, it should be refined / reworked together with the actual backend implementation. The actual final Version should be grouped together by domains (e.g: Auth, Users, Tutors)
-
 * Possible Status Codes:
     - `200 OK`                      Request successful
     - `201 Created`                 Resource created
@@ -36,7 +34,6 @@ Returns the currently authenticated user including the role
 
 **Inputs:** 
 - Authorization (header, required, bearer token)
-- auth context (required)
 
 **Output**
 - `200 OK`
@@ -179,7 +176,7 @@ Creates a new Tutor or workspace configuration
 
 ### PUT /api/tutors/:tutorId 
 **Purpose**  
-Updates an exisiting Tutor
+Updates an existing Tutor
 
 **Inputs**
 - `tutorId` (path param, required, string)
@@ -337,4 +334,4 @@ Updates which classes may use a tutor.
 **Errors**
 ---
 
-## 8. Weite Routen nach Fertigstellung vom Backend
+## 8. Other Routes after finishing backend
