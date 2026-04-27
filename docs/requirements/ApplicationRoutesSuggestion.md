@@ -305,6 +305,9 @@ Returns all chat sessions of the authenticated user.
 ```
 
 **Errors**
+- `401 Unauthorized`
+- `404 Not Found`
+- `403 Forbidden`
 
 ---
 
@@ -387,17 +390,51 @@ Adds a new message to a chat and returns the AI response.
 ---
 
 ### GET /api/classes/:classId/usage
-**Purpose**  
+**Purpose**
+
 **Inputs**
+- classId (path param, required, string)
+- Authorization (header, required, bearer token)
+
 **Output**
+- 200 OK
+```json
+{
+  "classId": "3AHITM",
+  "totalMessages": 5000,
+  "totalCost": 120.50
+}
+```
+
 **Errors**
+- `401 Unauthorized`
+- `403 Forbidden`
+- `404 Not Found`
 ---
 
 ### PUT /api/users/:userId/budget
-**Purpose**  
+**Purpose**
+
 **Inputs**
+- userId (path param, required, string)
+- Authorization (header, required, bearer token)
+- body:
+  - budgetLimit (required, number)
+
 **Output**
+- 200 OK
+```json
+{
+  "userId": "usr_123",
+  "budgetLimit": 1000
+}
+```
+
 **Errors**
+- `400 Bad Request`
+- `401 Unauthorized`
+- `403 Forbidden`
+- `404 Not Found`
 ---
 
 ## 5. Teacher / Class Management
