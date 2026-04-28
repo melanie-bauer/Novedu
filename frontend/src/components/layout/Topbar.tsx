@@ -17,7 +17,7 @@ interface TopbarProps {
   schoolName?: string;
 }
 
-const Topbar: React.FC<TopbarProps> = ({ schoolName = 'EduTutor AI' }) => {
+const Topbar: React.FC<TopbarProps> = ({ schoolName = 'Novedu' }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 

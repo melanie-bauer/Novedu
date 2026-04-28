@@ -28,6 +28,8 @@ import {
   Globe,
   Building2,
   ArrowRightLeft,
+  ChevronLeft,
+  ChevronRight,
   X,
 } from 'lucide-react';
 
@@ -65,6 +67,7 @@ const TutorOverviewPage: React.FC = () => {
   const [middleSearch, setMiddleSearch] = useState('');
   const [classSearch, setClassSearch] = useState('');
   const [internalScope, setInternalScope] = useState<InternalScope>('groups');
+  const [draftsCollapsed, setDraftsCollapsed] = useState(false);
   const [dragPayload, setDragPayload] = useState<DragPayload | null>(null);
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
   const [selectedTutorIds, setSelectedTutorIds] = useState<string[]>(() =>
@@ -113,6 +116,12 @@ const TutorOverviewPage: React.FC = () => {
   const leftColumnTutors = useMemo(() => {
     return myCreatedTutors.filter((tutor) => !visibilityByTutor[tutor.id]);
   }, [myCreatedTutors, visibilityByTutor]);
+
+  useEffect(() => {
+    if (leftColumnTutors.length === 0) {
+      setDraftsCollapsed(true);
+    }
+  }, [leftColumnTutors.length]);
 
   const middleSearchLower = middleSearch.trim().toLowerCase();
   const classSearchLower = classSearch.trim().toLowerCase();
@@ -290,67 +299,99 @@ const TutorOverviewPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 flex-1 min-h-0">
-        <Card className="min-h-0 flex flex-col">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              I) Meine erstellten Tutoren
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Alle von dir erstellten Tutoren. Ziehe sie in die Mitte.
-            </p>
-          </CardHeader>
-          <CardContent className="min-h-0 overflow-auto space-y-2">
-            {leftColumnTutors.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Noch keine Tutoren erstellt.</p>
-            ) : (
-              leftColumnTutors.map((tutor) => {
-                const colorClass = subjectColors[tutor.subject] || subjectColors.default;
-                const isSelected = selectedTutorIds.includes(tutor.id);
-
-                return (
-                  <div
-                    key={tutor.id}
-                    draggable
-                    onDragStart={() => onDragStart(tutor.id, 'left')}
-                    className={cn(
-                      'rounded-lg border p-3 bg-card cursor-grab active:cursor-grabbing transition-colors',
-                      isSelected && 'border-primary/50 bg-primary/5',
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg">{tutor.icon}</span>
-                        <div className="min-w-0">
-                          <button
-                            type="button"
-                            className="text-sm font-medium truncate hover:underline text-left"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/app/tutors/${tutor.id}/edit`);
-                            }}
-                          >
-                            {tutor.name}
-                          </button>
-                          <p className="text-xs text-muted-foreground truncate">{tutor.subject}</p>
-                        </div>
-                      </div>
-                      {isSelected && <Badge variant="secondary">Ausgewählt</Badge>}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{tutor.description}</p>
-                  </div>
-                );
-              })
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-4 flex-1 min-h-0',
+          draftsCollapsed ? 'xl:grid-cols-[3.5rem_minmax(0,1.4fr)_minmax(0,1fr)]' : 'xl:grid-cols-3',
+        )}
+      >
+        <Card className="min-h-0 flex flex-col overflow-hidden">
+          <CardHeader
+            className={cn(
+              'relative pb-3 transition-all duration-200',
+              draftsCollapsed ? 'px-3 py-3 pb-3' : 'pr-12',
             )}
-          </CardContent>
+          >
+            {!draftsCollapsed ? (
+              <>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Entwürfe
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Alle von dir erstellten Tutoren. Ziehe sie in die Mitte.
+                </p>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-2 min-w-0">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <Badge variant="secondary" className="text-[10px] px-1.5">
+                  {leftColumnTutors.length}
+                </Badge>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setDraftsCollapsed((prev) => !prev)}
+              aria-label={draftsCollapsed ? 'Entwürfe öffnen' : 'Entwürfe einklappen'}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground hover:bg-muted"
+            >
+              {draftsCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </Button>
+          </CardHeader>
+          {!draftsCollapsed && (
+            <CardContent className="min-h-0 overflow-auto space-y-2">
+              {leftColumnTutors.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Noch keine Tutoren erstellt.</p>
+              ) : (
+                leftColumnTutors.map((tutor) => {
+                  const colorClass = subjectColors[tutor.subject] || subjectColors.default;
+                  const isSelected = selectedTutorIds.includes(tutor.id);
+
+                  return (
+                    <div
+                      key={tutor.id}
+                      draggable
+                      onDragStart={() => onDragStart(tutor.id, 'left')}
+                      className={cn(
+                        'rounded-lg border p-3 bg-card cursor-grab active:cursor-grabbing transition-colors',
+                        isSelected && 'border-primary/50 bg-primary/5',
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-lg">{tutor.icon}</span>
+                          <div className="min-w-0">
+                            <button
+                              type="button"
+                              className="text-sm font-medium truncate hover:underline text-left"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/app/tutors/${tutor.id}/edit`);
+                              }}
+                            >
+                              {tutor.name}
+                            </button>
+                            <p className="text-xs text-muted-foreground truncate">{tutor.subject}</p>
+                          </div>
+                        </div>
+                        {isSelected && <Badge variant="secondary">Ausgewählt</Badge>}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{tutor.description}</p>
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          )}
         </Card>
 
         <Card className="min-h-0 flex flex-col">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <ArrowRightLeft className="w-4 h-4" />
-              II) Sichtbarkeit verwalten
+              Sichtbarkeit verwalten
             </CardTitle>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -469,7 +510,7 @@ const TutorOverviewPage: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="w-4 h-4" />
-              III) Klassen zuweisen
+              Klassen zuweisen
             </CardTitle>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

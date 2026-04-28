@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto mb-4 flex items-center justify-center">
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">EduTutor AI</CardTitle>
+            <CardTitle className="text-2xl">Novedu</CardTitle>
             <CardDescription>
               Anmeldung mit Schulaccount
             </CardDescription>
