@@ -19,7 +19,6 @@ general_settings:
   store_prompts_in_spend_logs: true
   store_model_in_db: true
 
-  max_end_user_budget_id: "minimal_test_budget"
   
 # LiteLLM Settings
 litellm_settings:
@@ -36,7 +35,10 @@ litellm_settings:
 
   extra_spend_tag_headers:
     - "x-openwebui-user-email"
+    - "x-openwebui-user-id"
   
+  max_end_user_budget_id: "minimal_test_budget"
+
 model_list:
   - model_name: gpt-5.1
     litellm_params:
