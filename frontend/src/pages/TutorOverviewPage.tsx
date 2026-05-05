@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -23,19 +22,16 @@ import { TutorConfig } from '@/types';
 import {
   Plus,
   Search,
-  Users,
   Lock,
   Globe,
   Building2,
   ArrowRightLeft,
-  ChevronLeft,
-  ChevronRight,
   X,
 } from 'lucide-react';
 
 type Visibility = 'private' | 'internal' | 'public';
 type InternalScope = 'groups' | 'allTeachers';
-type DragSource = 'left' | 'middle';
+type DragSource = 'middle';
 
 interface DragPayload {
   tutorId: string;
@@ -57,81 +53,21 @@ const getTeacherName = (teacherId: string): string => {
 const TutorOverviewPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const { tutors, classes, updateTutor } = useData();
-
-  const myCreatedTutors = useMemo(() => {
-    return tutors.filter((t) => t.createdBy === user?.id);
-  }, [tutors, user?.id]);
 
   const [middleSearch, setMiddleSearch] = useState('');
   const [classSearch, setClassSearch] = useState('');
   const [internalScope, setInternalScope] = useState<InternalScope>('groups');
-  const [draftsCollapsed, setDraftsCollapsed] = useState(false);
   const [dragPayload, setDragPayload] = useState<DragPayload | null>(null);
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
-  const [selectedTutorIds, setSelectedTutorIds] = useState<string[]>(() =>
-    tutors.filter((t) => !!t.visibility).map((t) => t.id),
-  );
-  const [visibilityByTutor, setVisibilityByTutor] = useState<Record<string, Visibility>>(() => {
-    const initial: Record<string, Visibility> = {};
-    tutors.forEach((tutor) => {
-      if (tutor.visibility) {
-        initial[tutor.id] = tutor.visibility;
-      }
-    });
-    return initial;
-  });
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const autoPrivateTutorIds = tutors
-      .filter(
-        (tutor) =>
-          tutor.createdBy === user.id &&
-          !tutor.visibility &&
-          (tutor.assignedClasses.length > 0 || tutor.assignedStudents.length > 0),
-      )
-      .map((tutor) => tutor.id);
-
-    if (autoPrivateTutorIds.length === 0) return;
-
-    setSelectedTutorIds((prev) => Array.from(new Set([...prev, ...autoPrivateTutorIds])));
-    setVisibilityByTutor((prev) => {
-      const next = { ...prev };
-      let changed = false;
-
-      autoPrivateTutorIds.forEach((id) => {
-        if (!next[id]) {
-          next[id] = 'private';
-          changed = true;
-        }
-      });
-
-      return changed ? next : prev;
-    });
-  }, [tutors, user?.id]);
-
-  const leftColumnTutors = useMemo(() => {
-    return myCreatedTutors.filter((tutor) => !visibilityByTutor[tutor.id]);
-  }, [myCreatedTutors, visibilityByTutor]);
-
-  useEffect(() => {
-    if (leftColumnTutors.length === 0) {
-      setDraftsCollapsed(true);
-    }
-  }, [leftColumnTutors.length]);
 
   const middleSearchLower = middleSearch.trim().toLowerCase();
   const classSearchLower = classSearch.trim().toLowerCase();
 
   const selectedTutors = useMemo(() => {
-    const base = tutors.filter((t) => selectedTutorIds.includes(t.id));
+    if (!middleSearchLower) return tutors;
 
-    if (!middleSearchLower) return base;
-
-    return base.filter((tutor) => {
+    return tutors.filter((tutor) => {
       const teacherName = getTeacherName(tutor.createdBy).toLowerCase();
       return (
         tutor.name.toLowerCase().includes(middleSearchLower) ||
@@ -140,7 +76,7 @@ const TutorOverviewPage: React.FC = () => {
         teacherName.includes(middleSearchLower)
       );
     });
-  }, [middleSearchLower, tutors, selectedTutorIds]);
+  }, [middleSearchLower, tutors]);
 
   const tutorsByVisibility = useMemo(() => {
     const byVisibility: Record<Visibility, TutorConfig[]> = {
@@ -150,13 +86,12 @@ const TutorOverviewPage: React.FC = () => {
     };
 
     selectedTutors.forEach((tutor) => {
-      const visibility = visibilityByTutor[tutor.id];
-      if (!visibility) return;
+      const visibility = tutor.visibility ?? 'private';
       byVisibility[visibility].push(tutor);
     });
 
     return byVisibility;
-  }, [selectedTutors, visibilityByTutor]);
+  }, [selectedTutors]);
 
   const filteredClasses = useMemo(() => {
     if (!classSearchLower) return classes;
@@ -184,12 +119,6 @@ const TutorOverviewPage: React.FC = () => {
         ? Array.from(new Set([...tutor.assignedClasses, ...allClassIds]))
         : tutor.assignedClasses;
 
-    setSelectedTutorIds((prev) => (prev.includes(tutorId) ? prev : [...prev, tutorId]));
-    setVisibilityByTutor((prev) => ({
-      ...prev,
-      [tutorId]: visibility,
-    }));
-
     updateTutor(tutorId, {
       visibility,
       internalVisibility: visibility === 'internal' ? internalScope : undefined,
@@ -204,16 +133,6 @@ const TutorOverviewPage: React.FC = () => {
 
     const tutor = tutors.find((t) => t.id === dragPayload.tutorId);
     if (!tutor) {
-      setDragPayload(null);
-      return;
-    }
-
-    if (dragPayload.source === 'left') {
-      toast({
-        title: 'Ungültige Aktion',
-        description: 'Ziehe den Tutor zuerst in der Mitte auf Private, Internal oder Public.',
-        variant: 'destructive',
-      });
       setDragPayload(null);
       return;
     }
@@ -270,27 +189,91 @@ const TutorOverviewPage: React.FC = () => {
     setPendingRemoval(null);
   };
 
-  const removeFromMiddle = (tutorId: string) => {
-    setSelectedTutorIds((prev) => prev.filter((id) => id !== tutorId));
-    setVisibilityByTutor((prev) => {
-      const next = { ...prev };
-      delete next[tutorId];
-      return next;
-    });
+  const visibilitySections: Array<{
+    key: Visibility;
+    title: string;
+    description: string;
+    icon: React.ElementType;
+  }> = [
+    {
+      key: 'private',
+      title: 'Private',
+      description: 'Nur für den Ersteller sichtbar. Entwürfe landen hier ebenfalls.',
+      icon: Lock,
+    },
+    {
+      key: 'internal',
+      title: 'Internal',
+      description:
+        internalScope === 'groups' ? 'Sichtbar für ausgewählte Lehrergruppen.' : 'Sichtbar für alle Lehrer.',
+      icon: Building2,
+    },
+    {
+      key: 'public',
+      title: 'Public',
+      description: 'Für die ganze Schule freigegeben.',
+      icon: Globe,
+    },
+  ];
 
-    updateTutor(tutorId, {
-      visibility: undefined,
-      internalVisibility: undefined,
-    });
+  const renderTutorCard = (tutor: TutorConfig, zone: Visibility) => {
+    const colorClass = subjectColors[tutor.subject] || subjectColors.default;
+    const isDraft = !tutor.visibility;
+
+    return (
+      <div
+        key={tutor.id}
+        draggable
+        onDragStart={() => onDragStart(tutor.id, 'middle')}
+        className={cn(
+          'rounded-xl border bg-background px-3 py-2.5 shadow-sm cursor-grab active:cursor-grabbing transition-colors',
+          zone === 'private' && isDraft && 'border-dashed border-muted-foreground/30 bg-muted/20',
+        )}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-base">{tutor.icon}</span>
+              <div className="min-w-0">
+                <button
+                  type="button"
+                  className="text-sm font-medium truncate hover:underline text-left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/app/tutors/${tutor.id}/edit`);
+                  }}
+                >
+                  {tutor.name}
+                </button>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {tutor.subject} • {getTeacherName(tutor.createdBy)}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{tutor.description}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Badge variant="outline" className={cn('text-[10px] whitespace-nowrap', colorClass)}>
+              {tutor.subject}
+            </Badge>
+            {isDraft && zone === 'private' && (
+              <Badge variant="secondary" className="text-[10px] whitespace-nowrap">
+                Entwurf
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="h-full flex flex-col p-6 gap-4">
-      <div className="flex items-center justify-between">
+    <div className="h-full min-h-0 flex flex-col gap-4 p-4 lg:p-6 bg-muted/20 overflow-y-auto scrollbar-thin">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Tutor Start-Tab</h1>
-          <p className="text-sm text-muted-foreground">
-            Links erstellen, in der Mitte freigeben und rechts Klassen zuweisen.
+          <h1 className="text-2xl font-semibold">Tutor Management</h1>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Tutoren in Private, Internal und Public einsortieren und rechts Klassen zuweisen.
           </p>
         </div>
         <Button onClick={() => navigate('/app/tutors/new')} className="gap-2">
@@ -299,218 +282,47 @@ const TutorOverviewPage: React.FC = () => {
         </Button>
       </div>
 
-      <div
-        className={cn(
-          'grid grid-cols-1 gap-4 flex-1 min-h-0',
-          draftsCollapsed ? 'xl:grid-cols-[3.5rem_minmax(0,1.4fr)_minmax(0,1fr)]' : 'xl:grid-cols-3',
-        )}
-      >
-        <Card className="min-h-0 flex flex-col overflow-hidden">
-          <CardHeader
-            className={cn(
-              'relative pb-3 transition-all duration-200',
-              draftsCollapsed ? 'px-3 py-3 pb-3' : 'pr-12',
-            )}
-          >
-            {!draftsCollapsed ? (
-              <>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Entwürfe
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  Alle von dir erstellten Tutoren. Ziehe sie in die Mitte.
-                </p>
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-2 min-w-0">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <Badge variant="secondary" className="text-[10px] px-1.5">
-                  {leftColumnTutors.length}
-                </Badge>
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setDraftsCollapsed((prev) => !prev)}
-              aria-label={draftsCollapsed ? 'Entwürfe öffnen' : 'Entwürfe einklappen'}
-              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground hover:bg-muted"
-            >
-              {draftsCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </Button>
-          </CardHeader>
-          {!draftsCollapsed && (
-            <CardContent className="min-h-0 overflow-auto space-y-2">
-              {leftColumnTutors.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Noch keine Tutoren erstellt.</p>
-              ) : (
-                leftColumnTutors.map((tutor) => {
-                  const colorClass = subjectColors[tutor.subject] || subjectColors.default;
-                  const isSelected = selectedTutorIds.includes(tutor.id);
+      <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.75fr)]">
+        <div className="min-h-0 space-y-4">
+          {visibilitySections.map((zone) => {
+            const ZoneIcon = zone.icon;
 
-                  return (
-                    <div
-                      key={tutor.id}
-                      draggable
-                      onDragStart={() => onDragStart(tutor.id, 'left')}
-                      className={cn(
-                        'rounded-lg border p-3 bg-card cursor-grab active:cursor-grabbing transition-colors',
-                        isSelected && 'border-primary/50 bg-primary/5',
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-lg">{tutor.icon}</span>
-                          <div className="min-w-0">
-                            <button
-                              type="button"
-                              className="text-sm font-medium truncate hover:underline text-left"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/app/tutors/${tutor.id}/edit`);
-                              }}
-                            >
-                              {tutor.name}
-                            </button>
-                            <p className="text-xs text-muted-foreground truncate">{tutor.subject}</p>
-                          </div>
-                        </div>
-                        {isSelected && <Badge variant="secondary">Ausgewählt</Badge>}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{tutor.description}</p>
+            return (
+              <Card key={zone.key} className="min-h-0 overflow-hidden border-border/70 shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/20">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <ZoneIcon className="w-4 h-4" />
+                        {zone.title}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground mt-1">{zone.description}</p>
                     </div>
-                  );
-                })
-              )}
-            </CardContent>
-          )}
-        </Card>
-
-        <Card className="min-h-0 flex flex-col">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <ArrowRightLeft className="w-4 h-4" />
-              Sichtbarkeit verwalten
-            </CardTitle>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={middleSearch}
-                onChange={(e) => setMiddleSearch(e.target.value)}
-                className="pl-9"
-                placeholder="Suche: Name, Fach, Ersteller..."
-              />
-            </div>
-          </CardHeader>
-          <CardContent className="min-h-0 overflow-auto space-y-3">
-            {(
-              [
-                {
-                  key: 'private' as Visibility,
-                  title: 'Private',
-                  description: 'Nur für diesen Lehrer sichtbar',
-                  icon: Lock,
-                },
-                {
-                  key: 'internal' as Visibility,
-                  title: 'Internal',
-                  description:
-                    internalScope === 'groups'
-                      ? 'Für Lehrergruppen sichtbar'
-                      : 'Für alle Lehrer sichtbar',
-                  icon: Building2,
-                },
-                {
-                  key: 'public' as Visibility,
-                  title: 'Public',
-                  description: 'Für alle Schüler und Lehrer freigegeben',
-                  icon: Globe,
-                },
-              ]
-            ).map((zone) => {
-              const ZoneIcon = zone.icon;
-
-              return (
-                <div
-                  key={zone.key}
+                    <Badge variant="secondary">{tutorsByVisibility[zone.key].length}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent
+                  className="min-h-0 max-h-[22rem] overflow-auto space-y-2 pt-4"
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => onDropToVisibility(zone.key)}
-                  className="rounded-lg border border-dashed p-3 bg-muted/20"
                 >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <ZoneIcon className="w-4 h-4" />
-                        <p className="text-sm font-medium">{zone.title}</p>
-                        <Badge variant="outline">{tutorsByVisibility[zone.key].length}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{zone.description}</p>
+                  {tutorsByVisibility[zone.key].map((tutor) => renderTutorCard(tutor, zone.key))}
+                  {tutorsByVisibility[zone.key].length === 0 && (
+                    <div className="rounded-xl border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground text-center">
+                      Tutor hierhin ziehen...
                     </div>
-                    {zone.key === 'internal' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() =>
-                          setInternalScope((prev) => (prev === 'groups' ? 'allTeachers' : 'groups'))
-                        }
-                      >
-                        {internalScope === 'groups' ? 'Lehrergruppen' : 'Alle Lehrer'}
-                      </Button>
-                    )}
-                  </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-                  <div className="space-y-2">
-                    {tutorsByVisibility[zone.key].map((tutor) => {
-                      const colorClass = subjectColors[tutor.subject] || subjectColors.default;
-
-                      return (
-                        <div
-                          key={tutor.id}
-                          draggable
-                          onDragStart={() => onDragStart(tutor.id, 'middle')}
-                          className="rounded-md border bg-background p-2 cursor-grab active:cursor-grabbing"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{tutor.icon} {tutor.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {tutor.subject} • {getTeacherName(tutor.createdBy)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Badge variant="outline" className={cn('text-[10px]', colorClass)}>
-                                {tutor.subject}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => removeFromMiddle(tutor.id)}
-                                aria-label="Tutor aus Mitte entfernen"
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {tutorsByVisibility[zone.key].length === 0 && (
-                      <p className="text-xs text-muted-foreground">Tutor hierhin ziehen...</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <Card className="min-h-0 flex flex-col">
-          <CardHeader className="pb-3">
+        <Card className="min-h-0 flex flex-col overflow-hidden xl:max-h-[calc(100vh-11rem)]">
+          <CardHeader className="pb-3 border-b bg-muted/20">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Klassen zuweisen
+              <ArrowRightLeft className="w-4 h-4" />
+              Klassenzuordnung
             </CardTitle>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -518,14 +330,12 @@ const TutorOverviewPage: React.FC = () => {
                 value={classSearch}
                 onChange={(e) => setClassSearch(e.target.value)}
                 className="pl-9"
-                placeholder="Klassen suchen (z.B. 4, ahif, ... )"
+                placeholder="Klassen suchen (z.B. 4, ahif, ...)"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Nur Drag & Drop aus der Mitte ist erlaubt.
-            </p>
+            <p className="text-xs text-muted-foreground">Tutoren aus der Mitte per Drag & Drop zuweisen.</p>
           </CardHeader>
-          <CardContent className="min-h-0 overflow-auto space-y-3">
+          <CardContent className="min-h-0 overflow-auto space-y-3 pt-4">
             {filteredClasses.map((classItem) => {
               const assignedTutors = tutors.filter((tutor) => tutor.assignedClasses.includes(classItem.id));
 
@@ -534,7 +344,7 @@ const TutorOverviewPage: React.FC = () => {
                   key={classItem.id}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => onDropToClass(classItem.id)}
-                  className="rounded-lg border p-3 bg-card"
+                  className="rounded-xl border p-3 bg-card shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-medium text-sm">{classItem.name}</p>

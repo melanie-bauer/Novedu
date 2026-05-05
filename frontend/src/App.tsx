@@ -64,6 +64,7 @@ const App = () => (
                   <Route path="tutors" element={<TutorOverviewPage />} />
                   <Route path="tutors/:id/edit" element={<TutorEditorPage />} />
                   <Route path="tutors/new" element={<TutorEditorPage />} />
+                  <Route path="classes" element={<GroupManagementPage />} />
                   <Route path="admin" element={<AdminDashboard />} />
                   <Route path="admin/users" element={<UserManagementPage />} />
                   {/* Budgets page removed - managed in Klassen & Rollen */}

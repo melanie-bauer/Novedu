@@ -47,6 +47,12 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ collapsed = false, onToggle }) 
       roles: ['teacher', 'admin'],
     },
     {
+      path: '/app/classes',
+      icon: UsersRound,
+      label: 'Klassen',
+      roles: ['teacher', 'admin'],
+    },
+    {
       path: '/app/admin',
       icon: LayoutDashboard,
       label: 'Dashboard',
