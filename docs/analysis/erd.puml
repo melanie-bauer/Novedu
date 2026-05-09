@@ -1,6 +1,6 @@
 @startuml Novedu ERD
 !theme plain
-title Novedu – Entity Relationship Diagram
+title Novedu – Entity Relationship Diagram (v2)
 
 skinparam backgroundColor #FEFEFE
 skinparam defaultFontSize 11
@@ -65,19 +65,21 @@ table(UserSettings) {
   column(updated_at) : timestamptz
 }
 
+' CHANGED: budget_period entfernt, FK zu BudgetConfig hinzugefügt
 table(BudgetUsagePeriod) {
   primary_key(id) : int
   --
   foreign_key(user_id) : int
+  foreign_key(budget_config_id) : int
   --
-  column(budget_period) : ENUM('daily', 'weekly', 'monthly', 'yearly')
   column(start_date) : date
   column(end_date) : date
   column(created_at) : timestamptz
 }
 
-' ========== Gruppen (inkl. Klassen) ==========
-' Frontend: immer "Klasse" / Class; DB: Group + GroupType (Klasse, Freifachgruppe, …)
+' ========== Gruppen (Klassen, Lehrerteams, Freifächer …) ==========
+' GroupType steuert ob Klasse, Lehrerteam, Freifachgruppe etc.
+' Lehrerteams = Group mit GroupType.code = "teacher_team"
 
 table(GroupType) {
   primary_key(id) : int
@@ -86,6 +88,13 @@ table(GroupType) {
   column(name) : varchar(255)
   column(created_at) : timestamptz
 }
+
+note bottom of GroupType
+  Vordefinierte Typen:
+  ── "class" (Klasse)
+  ── "teacher_team" (Lehrerteam)
+  ── "elective" (Freifachgruppe)
+end note
 
 table(Group) {
   primary_key(id) : int
@@ -101,14 +110,22 @@ table(Group) {
   column(updated_at) : timestamptz
 }
 
+' CHANGED: role hinzugefügt für Lehrerteam-Rollen (owner/member)
 table(GroupMember) {
   primary_key(id) : int
   --
   foreign_key(group_id) : int
   foreign_key(user_id) : int
   --
+  column(role) : varchar(50)
   column(created_at) : timestamptz
 }
+
+note bottom of GroupMember
+  role-Werte kontextabhängig:
+  ── teacher_team: "owner" | "member"
+  ── class: "teacher" | "student"
+end note
 
 ' ========== Rollen & Rechte ==========
 
@@ -149,6 +166,7 @@ table(AIProvider) {
   column(updated_at) : timestamptz
 }
 
+' CHANGED: recommendation_tag hinzugefügt; "auto"-Eintrag als spezieller Datensatz
 table(AIModel) {
   primary_key(id) : int
   --
@@ -156,14 +174,23 @@ table(AIModel) {
   --
   column(name) : varchar(255)
   column(description) : text
+  column(recommendation_tag) : varchar(255)
   column(cost_per_million_input_tokens) : numeric(10,6)
   column(cost_per_million_output_tokens) : numeric(10,6)
   column(cost_per_million_cached_input_tokens) : numeric(10,6)
   column(max_input_tokens) : int
   column(max_output_tokens) : int
+  column(is_auto) : boolean
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
+
+note bottom of AIModel
+  Spezieller Datensatz mit is_auto=true
+  für automatische Modellauswahl.
+  recommendation_tag zeigt Eignung:
+  z.B. "Empfohlen für kreative Aufgaben"
+end note
 
 ' ========== KI-Infrastruktur (Schulspezifisch) ==========
 
@@ -192,37 +219,91 @@ table(SchoolAIModel) {
 
 ' ========== Tutoren ==========
 
+' CHANGED: visibility + default_internal_permission statt is_enabled/expires_at;
+'          copied_from_id für Tutor-Kopie; anonymize_pii für LLM-Anonymisierung
 table(TutorConfig) {
   primary_key(id) : int
   --
   foreign_key(subject_id) : int
   foreign_key(model_id) : int
   foreign_key(created_by) : int
+  foreign_key(copied_from_id?) : int
   --
   column(name) : varchar(255)
   column(description) : text
   column(system_prompt) : text
+  column(visibility) : ENUM('private', 'internal', 'public')
+  column(default_internal_permission) : ENUM('read_only', 'editable')
   column(temperature) : double precision
   column(max_output_tokens) : int
-  column(is_enabled) : boolean
   column(didactic_mode) : ENUM('socratic', 'hints', 'step_by_step', 'concise')
   column(show_sources) : boolean
   column(hide_knowledge_base) : boolean
-  column(expires_at?) : timestamptz
+  column(anonymize_pii) : boolean
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
 
+note bottom of TutorConfig
+  visibility:
+  ── private: nur Ersteller (Entwurf)
+  ── internal: alle Lehrer der Schule
+  ── public: auch Schüler sehen ihn
+  default_internal_permission:
+  Gilt wenn visibility=internal. Explizite
+  Shares (TutorCollaborator) überschreiben.
+  copied_from_id:
+  nullable – verweist auf Original bei Kopie.
+  anonymize_pii:
+  PII-Daten vor LLM-Versand anonymisieren.
+end note
+
+' NEU: Explizites Sharing mit Personen oder Teams
+table(TutorCollaborator) {
+  primary_key(id) : int
+  --
+  foreign_key(tutor_id) : int
+  foreign_key(user_id?) : int
+  foreign_key(group_id?) : int
+  foreign_key(shared_by) : int
+  --
+  column(permission) : ENUM('read_only', 'editable')
+  column(created_at) : timestamptz
+}
+
+note bottom of TutorCollaborator
+  Einladung von Personen ODER
+  Lehrerteams (group_id → Group
+  mit GroupType "teacher_team").
+  Genau einer von user_id / group_id
+  muss gesetzt sein (CHECK-Constraint).
+end note
+
+' CHANGED: enabled_from hinzugefügt; budget_config_id für Tutor-spezifische Budget-Overrides
 table(TutorGroupAssignment) {
   primary_key(id) : int
   --
   foreign_key(tutor_id) : int
   foreign_key(group_id) : int
+  foreign_key(assigned_by) : int
+  foreign_key(budget_config_id?) : int
   --
-  column(enabled_until) : timestamptz
+  column(enabled_from) : timestamptz
+  column(enabled_until?) : timestamptz
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
+
+note bottom of TutorGroupAssignment
+  Freigabe eines Tutors für eine Klasse.
+  enabled_from / enabled_until:
+  ── Beide NULL → unbefristete Freigabe
+  ── Zeitfenster z.B. "nächsten 50 Min."
+  ── Oder "nächsten Dienstag, 3.EH"
+  budget_config_id:
+  Überschreibt Schüler-Budget für diesen
+  Tutor/Klasse (z.B. mehr Tokens bei Tests).
+end note
 
 table(TutorStudentAssignment) {
   primary_key(id) : int
@@ -230,7 +311,8 @@ table(TutorStudentAssignment) {
   foreign_key(tutor_id) : int
   foreign_key(user_id) : int
   --
-  column(enabled_until) : timestamptz
+  column(enabled_from) : timestamptz
+  column(enabled_until?) : timestamptz
   column(created_at) : timestamptz
   column(updated_at) : timestamptz
 }
@@ -289,12 +371,38 @@ table(ChatAttachment) {
   column(created_at) : timestamptz
 }
 
+' ========== Chat-Monitoring (KI-Überwachung) ==========
+
+' NEU: Anonymisierte KI-Überwachung auf Nachrichtebene
+table(MessageMonitoringFlag) {
+  primary_key(id) : int
+  --
+  foreign_key(message_id) : int
+  foreign_key(reviewed_by?) : int
+  --
+  column(flag_type) : ENUM('spam', 'nonsense', 'off_topic', 'inappropriate', 'other')
+  column(severity) : ENUM('low', 'medium', 'high')
+  column(details) : text
+  column(is_reviewed) : boolean
+  column(reviewed_at?) : timestamptz
+  column(created_at) : timestamptz
+}
+
+note bottom of MessageMonitoringFlag
+  Automatische, anonymisierte
+  KI-Analyse auf Metaebene.
+  Erkennt Spam, sinnlose Fragen,
+  Off-Topic etc. pro Nachricht.
+  Lehrer sehen nur aggregierte /
+  anonymisierte Auswertung.
+end note
+
 ' ========== Budget & Kosten ==========
 
 table(BudgetConfig) {
   primary_key(id) : int
   --
-  column(type) : ENUM('role', 'group', 'user')
+  column(type) : ENUM('role', 'group', 'user', 'tutor_override')
   column(budget_period) : ENUM('daily', 'weekly', 'monthly', 'yearly')
   column(limit_amount) : numeric(12,2)
   column(warning_threshold) : smallint
@@ -302,11 +410,19 @@ table(BudgetConfig) {
   column(updated_at) : timestamptz
 }
 
+note bottom of BudgetConfig
+  type "tutor_override":
+  Wird via TutorGroupAssignment
+  referenziert und überschreibt das
+  Schüler-Budget für diesen Tutor
+  (z.B. mehr Tokens während Tests).
+end note
+
 table(CostEntry) {
   primary_key(id) : int
   --
   foreign_key(message_id) : int
-  foreign_key(budget_usage_history_id) : int
+  foreign_key(budget_usage_period_id) : int
   foreign_key(tutor_id) : int
   --
   column(input_tokens) : int
@@ -331,7 +447,7 @@ table(GlobalSettings) {
 
 ' ========== Beziehungen ==========
 
-' Schule
+' --- Schule ---
 School ||--|| SchoolEntraConfig : "has Entra config"
 School ||--|| GlobalSettings : "has global settings"
 School ||--o{ User : "has members"
@@ -341,41 +457,58 @@ School ||--o{ Subject : "offers subjects"
 School ||--o{ SchoolAIProvider : "configures AI providers"
 School ||--o{ SchoolAIModel : "enables AI models"
 
-' Nutzer
+' --- Nutzer ---
 User ||--|| UserSettings : "has preferences"
 User ||--o{ BudgetUsagePeriod : "tracks usage"
 Role ||--o{ User : "assigned to"
 GlobalSettings }o--|| User : "last modified by"
 
-' Gruppen (Klassen, Freifächer etc.)
+' --- BudgetUsagePeriod → BudgetConfig (NEU) ---
+BudgetConfig ||--o{ BudgetUsagePeriod : "defines period for"
+
+' --- Gruppen (Klassen, Lehrerteams, Freifächer) ---
 GroupType ||--o{ Group : "categorizes"
 Group ||--o{ GroupMember : "has members"
 User ||--o{ GroupMember : "joins as member"
 
-' KI-Infrastruktur
+' --- KI-Infrastruktur ---
 AIProvider ||--|{ AIModel : "provides"
 AIProvider ||--o{ SchoolAIProvider : "configured by schools"
 AIModel ||--o{ SchoolAIModel : "enabled by schools"
 
-' Tutoren & Fächer
+' --- Tutoren & Fächer ---
 Subject ||--o{ TutorConfig : "has tutors"
 User ||--o{ TutorConfig : "created by"
 AIModel ||--o{ TutorConfig : "powered by"
 TutorConfig ||--o{ TutorDocument : "uses knowledge base"
+TutorConfig |o..o| TutorConfig : "copied from"
 
-' Tutor-Zuweisungen
-TutorConfig ||--o{ TutorGroupAssignment : "assigned to group"
-Group ||..o{ TutorGroupAssignment : "receives"
+' --- Tutor-Kollaboration (NEU) ---
+TutorConfig ||--o{ TutorCollaborator : "shared with"
+User ||..o{ TutorCollaborator : "invited user"
+Group ||..o{ TutorCollaborator : "invited team"
+User ||..o{ TutorCollaborator : "shared by"
+
+' --- Tutor-Zuweisungen ---
+TutorConfig ||--o{ TutorGroupAssignment : "assigned to class"
+Group ||..o{ TutorGroupAssignment : "receives tutor"
+User ||..o{ TutorGroupAssignment : "assigned by"
+BudgetConfig ||..o{ TutorGroupAssignment : "overrides budget"
+
 TutorConfig ||--o{ TutorStudentAssignment : "assigned to student"
 User ||..o{ TutorStudentAssignment : "receives"
 
-' Chat
+' --- Chat ---
 User ||--o{ Chat : "participates in"
 TutorConfig ||--o{ Chat : "conducts"
 Chat ||--|{ Message : "contains"
 Message ||--o{ ChatAttachment : "has attachment"
 
-' Budget & Kosten
+' --- Chat-Monitoring (NEU) ---
+Message ||--o{ MessageMonitoringFlag : "flagged by AI"
+User ||..o{ MessageMonitoringFlag : "reviewed by"
+
+' --- Budget & Kosten ---
 User }o..|| BudgetConfig : "has personal budget"
 Group }o..|| BudgetConfig : "has group budget"
 Role }o..|| BudgetConfig : "has role budget"
