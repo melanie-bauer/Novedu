@@ -65,7 +65,7 @@ table(UserSettings) {
   column(updated_at) : timestamptz
 }
 
-' CHANGED: budget_period entfernt, FK zu BudgetConfig hinzugefügt
+' budget_period entfernt; FK zu BudgetConfig hinzugefügt.
 table(BudgetUsagePeriod) {
   primary_key(id) : int
   --
@@ -78,8 +78,8 @@ table(BudgetUsagePeriod) {
 }
 
 ' ========== Gruppen (Klassen, Lehrerteams, Freifächer …) ==========
-' GroupType steuert ob Klasse, Lehrerteam, Freifachgruppe etc.
-' Lehrerteams = Group mit GroupType.code = "teacher_team"
+' GroupType: steuert, ob Klasse, Lehrerteam oder Freifachgruppe.
+' Lehrerteams: Group mit GroupType.code = "teacher_team".
 
 table(GroupType) {
   primary_key(id) : int
@@ -110,7 +110,7 @@ table(Group) {
   column(updated_at) : timestamptz
 }
 
-' CHANGED: role hinzugefügt für Lehrerteam-Rollen (owner/member)
+' role hinzugefügt für Lehrerteam-Rollen (owner / member).
 table(GroupMember) {
   primary_key(id) : int
   --
@@ -166,7 +166,7 @@ table(AIProvider) {
   column(updated_at) : timestamptz
 }
 
-' CHANGED: recommendation_tag hinzugefügt; "auto"-Eintrag als spezieller Datensatz
+' recommendation_tag hinzugefügt; "auto" ist ein spezieller Datensatz.
 table(AIModel) {
   primary_key(id) : int
   --
@@ -219,8 +219,8 @@ table(SchoolAIModel) {
 
 ' ========== Tutoren ==========
 
-' CHANGED: visibility + default_internal_permission statt is_enabled/expires_at;
-'          copied_from_id für Tutor-Kopie; anonymize_pii für LLM-Anonymisierung
+' visibility und default_internal_permission statt is_enabled / expires_at.
+' copied_from_id für Tutor-Kopie; anonymize_pii steuert PII-Anonymisierung für LLM.
 table(TutorConfig) {
   primary_key(id) : int
   --
@@ -258,7 +258,7 @@ note bottom of TutorConfig
   PII-Daten vor LLM-Versand anonymisieren.
 end note
 
-' NEU: Explizites Sharing mit Personen oder Teams
+' Explizites Sharing mit Personen oder Teams.
 table(TutorCollaborator) {
   primary_key(id) : int
   --
@@ -279,7 +279,7 @@ note bottom of TutorCollaborator
   muss gesetzt sein (CHECK-Constraint).
 end note
 
-' CHANGED: enabled_from hinzugefügt; budget_config_id für Tutor-spezifische Budget-Overrides
+' enabled_from hinzugefügt; budget_config_id für tutor-spezifische Budget-Overrides.
 table(TutorGroupAssignment) {
   primary_key(id) : int
   --
@@ -373,7 +373,7 @@ table(ChatAttachment) {
 
 ' ========== Chat-Monitoring (KI-Überwachung) ==========
 
-' NEU: Anonymisierte KI-Überwachung auf Nachrichtebene
+' Anonymisierte KI-Überwachung auf Nachricht-Ebene.
 table(MessageMonitoringFlag) {
   primary_key(id) : int
   --
