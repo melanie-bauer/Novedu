@@ -114,6 +114,30 @@ const TutorEditorPage: React.FC = () => {
     }
   }, [existingTutor]);
 
+  const buildClassAssignmentsFromForm = (
+    existing: TutorConfig | null,
+    newClassIds: string[],
+    assignerId: string,
+  ): { classId: string; assignedById: string }[] => {
+    const prev =
+      existing?.classAssignments && existing.classAssignments.length > 0
+        ? existing.classAssignments
+        : (existing?.assignedClasses ?? []).map((cid) => ({
+            classId: cid,
+            assignedById: existing!.createdBy,
+          }));
+    const newIdSet = new Set(newClassIds);
+    const next = prev.filter((a) => newIdSet.has(a.classId));
+    const have = new Set(next.map((a) => a.classId));
+    newClassIds.forEach((cid) => {
+      if (!have.has(cid)) {
+        next.push({ classId: cid, assignedById: assignerId });
+        have.add(cid);
+      }
+    });
+    return next;
+  };
+
   const handleSave = (publish: boolean = false) => {
     if (!formData.name || !formData.subject) {
       toast({
@@ -123,6 +147,12 @@ const TutorEditorPage: React.FC = () => {
       });
       return;
     }
+
+    const classAssignments = buildClassAssignmentsFromForm(
+      existingTutor,
+      formData.assignedClasses,
+      user!.id,
+    );
 
     const tutorData: TutorConfig = {
       id: existingTutor?.id || `tutor-${Date.now()}`,
@@ -140,6 +170,7 @@ const TutorEditorPage: React.FC = () => {
       isEnabled: formData.isEnabled,
       status: publish ? 'published' : formData.status,
       assignedClasses: formData.assignedClasses,
+      classAssignments,
       assignedStudents: formData.assignedStudents,
       icon: formData.icon,
       color: 'blue',

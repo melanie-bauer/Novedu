@@ -69,6 +69,12 @@
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Schulfarben HTL (+ Lesbarkeit Light Mode) */
+    --school-primary: 211 88% 32%;
+    --school-secondary: 207 51% 68%;
+    --school-accent: 32 79% 48%;
+    --school-danger: 351 79% 36%;
   }
 
   .dark {
@@ -112,6 +118,11 @@
     --gradient-primary: linear-gradient(135deg, hsl(173 58% 45%), hsl(199 89% 55%));
     --gradient-hero: linear-gradient(135deg, hsl(220 25% 6%), hsl(220 25% 12%));
     --gradient-card: linear-gradient(180deg, hsl(220 25% 12%), hsl(220 25% 10%));
+
+    --school-primary: 211 88% 55%;
+    --school-secondary: 207 51% 72%;
+    --school-accent: 32 79% 55%;
+    --school-danger: 351 69% 52%;
   }
 }
 

@@ -101,6 +101,23 @@ const TutorEditor: React.FC<TutorEditorProps> = ({ open, onOpenChange, tutor }) 
       return;
     }
 
+    const prevAssignments =
+      tutor?.classAssignments && tutor.classAssignments.length > 0
+        ? tutor.classAssignments
+        : (tutor?.assignedClasses ?? []).map((cid) => ({
+            classId: cid,
+            assignedById: tutor!.createdBy,
+          }));
+    const newIdSet = new Set(formData.assignedClasses);
+    const classAssignments = prevAssignments.filter((a) => newIdSet.has(a.classId));
+    const have = new Set(classAssignments.map((a) => a.classId));
+    formData.assignedClasses.forEach((cid) => {
+      if (!have.has(cid)) {
+        classAssignments.push({ classId: cid, assignedById: user!.id });
+        have.add(cid);
+      }
+    });
+
     const tutorData: TutorConfig = {
       id: tutor?.id || `tutor-${Date.now()}`,
       name: formData.name,
@@ -116,6 +133,7 @@ const TutorEditor: React.FC<TutorEditorProps> = ({ open, onOpenChange, tutor }) 
       isEnabled: formData.isEnabled,
       status: tutor?.status || 'draft',
       assignedClasses: formData.assignedClasses,
+      classAssignments,
       assignedStudents: formData.assignedStudents,
       icon: formData.icon,
       color: 'blue',

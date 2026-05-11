@@ -10,9 +10,15 @@ interface DataContextType {
   costs: CostEntry[];
   globalSettings: GlobalSettings;
   addTutor: (tutor: TutorConfig) => void;
-  updateTutor: (id: string, updates: Partial<TutorConfig>) => void;
+  updateTutor: (
+    id: string,
+    updates: Partial<TutorConfig>,
+    meta?: { assignerIdForNewClassAssignments?: string },
+  ) => void;
   deleteTutor: (id: string) => void;
   toggleTutor: (id: string) => void;
+  assignTutorToClass: (tutorId: string, classId: string, assignerId: string) => void;
+  unassignTutorFromClass: (tutorId: string, classId: string) => void;
   addChat: (chat: Chat) => void;
   updateChat: (id: string, updates: Partial<Chat>) => void;
   deleteChat: (id: string) => void;
@@ -38,8 +44,70 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTutors(prev => [...prev, tutor]);
   }, []);
 
-  const updateTutor = useCallback((id: string, updates: Partial<TutorConfig>) => {
-    setTutors(prev => prev.map(t => t.id === id ? { ...t, ...updates, updatedAt: new Date() } : t));
+  const updateTutor = useCallback(
+    (id: string, updates: Partial<TutorConfig>, meta?: { assignerIdForNewClassAssignments?: string }) => {
+      setTutors((prev) =>
+        prev.map((t) => {
+          if (t.id !== id) return t;
+          const merged: TutorConfig = { ...t, ...updates, updatedAt: new Date() };
+          const assigner = meta?.assignerIdForNewClassAssignments ?? merged.createdBy;
+
+          if (updates.classAssignments !== undefined) {
+            merged.classAssignments = updates.classAssignments;
+            merged.assignedClasses = [...new Set(updates.classAssignments.map((a) => a.classId))];
+          } else if (updates.assignedClasses !== undefined) {
+            const prevAssignments =
+              t.classAssignments && t.classAssignments.length > 0
+                ? t.classAssignments
+                : t.assignedClasses.map((cid) => ({ classId: cid, assignedById: t.createdBy }));
+            const newIds = new Set(merged.assignedClasses);
+            const next = prevAssignments.filter((a) => newIds.has(a.classId));
+            const have = new Set(next.map((a) => a.classId));
+            merged.assignedClasses.forEach((cid) => {
+              if (!have.has(cid)) {
+                next.push({ classId: cid, assignedById: assigner });
+                have.add(cid);
+              }
+            });
+            merged.classAssignments = next;
+          }
+
+          return merged;
+        }),
+      );
+    },
+    [],
+  );
+
+  const assignTutorToClass = useCallback((tutorId: string, classId: string, assignerId: string) => {
+    setTutors((prev) =>
+      prev.map((t) => {
+        if (t.id !== tutorId) return t;
+        const base =
+          t.classAssignments && t.classAssignments.length > 0
+            ? [...t.classAssignments]
+            : t.assignedClasses.map((cid) => ({ classId: cid, assignedById: t.createdBy }));
+        if (base.some((a) => a.classId === classId)) return t;
+        const classAssignments = [...base, { classId, assignedById: assignerId }];
+        const assignedClasses = [...new Set(classAssignments.map((a) => a.classId))];
+        return { ...t, classAssignments, assignedClasses, updatedAt: new Date() };
+      }),
+    );
+  }, []);
+
+  const unassignTutorFromClass = useCallback((tutorId: string, classId: string) => {
+    setTutors((prev) =>
+      prev.map((t) => {
+        if (t.id !== tutorId) return t;
+        const base =
+          t.classAssignments && t.classAssignments.length > 0
+            ? t.classAssignments
+            : t.assignedClasses.map((cid) => ({ classId: cid, assignedById: t.createdBy }));
+        const classAssignments = base.filter((a) => a.classId !== classId);
+        const assignedClasses = [...new Set(classAssignments.map((a) => a.classId))];
+        return { ...t, classAssignments, assignedClasses, updatedAt: new Date() };
+      }),
+    );
   }, []);
 
   const deleteTutor = useCallback((id: string) => {
@@ -109,6 +177,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateTutor,
       deleteTutor,
       toggleTutor,
+      assignTutorToClass,
+      unassignTutorFromClass,
       addChat,
       updateChat,
       deleteChat,

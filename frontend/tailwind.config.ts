@@ -73,6 +73,12 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
+        school: {
+          primary: "hsl(var(--school-primary))",
+          secondary: "hsl(var(--school-secondary))",
+          accent: "hsl(var(--school-accent))",
+          danger: "hsl(var(--school-danger))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

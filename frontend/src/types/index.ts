@@ -19,6 +19,7 @@ export interface User {
 export interface Class {
   id: string;
   name: string;
+  department: string;
   teacherId: string;
   studentIds: string[];
   schoolYear?: string;
@@ -57,6 +58,8 @@ export interface TutorConfig {
   isEnabled: boolean;
   status: 'draft' | 'published';
   assignedClasses: string[];
+  /** Wer hat welche Klasse zugewiesen (primäre Quelle; assignedClasses bleibt synchron) */
+  classAssignments?: { classId: string; assignedById: string }[];
   assignedStudents: string[];
   icon: string;
   color: string;
