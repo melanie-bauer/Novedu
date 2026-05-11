@@ -25,4 +25,10 @@ public class BudgetConfig
 
     /// <summary>Gets or sets the timestamp when this record was last updated.</summary>
     public Instant UpdatedAt { get; set; }
+
+    /// <summary>Gets or sets the collection of budget usage periods governed by this config.</summary>
+    public ICollection<BudgetUsagePeriod> UsagePeriods { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of tutor/group assignments that override their budget with this config.</summary>
+    public ICollection<TutorGroupAssignment> TutorGroupAssignments { get; set; } = [];
 }

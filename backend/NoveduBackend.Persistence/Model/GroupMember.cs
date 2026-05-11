@@ -14,6 +14,12 @@ public class GroupMember
     /// <summary>Gets or sets the foreign key to the <see cref="Model.User"/>.</summary>
     public int UserId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the contextual role of this membership.
+    /// For teacher_team groups: "owner" | "member". For class groups: "teacher" | "student".
+    /// </summary>
+    public required string Role { get; set; }
+
     /// <summary>Gets or sets the timestamp when this membership was created.</summary>
     public Instant CreatedAt { get; set; }
 

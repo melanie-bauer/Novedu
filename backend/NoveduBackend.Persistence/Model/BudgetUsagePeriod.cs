@@ -11,8 +11,8 @@ public class BudgetUsagePeriod
     /// <summary>Gets or sets the foreign key to the <see cref="Model.User"/>.</summary>
     public int UserId { get; set; }
 
-    /// <summary>Gets or sets the budget period type (daily, weekly, monthly, yearly).</summary>
-    public BudgetPeriod BudgetPeriod { get; set; }
+    /// <summary>Gets or sets the foreign key to the <see cref="Model.BudgetConfig"/> that defines this period.</summary>
+    public int BudgetConfigId { get; set; }
 
     /// <summary>Gets or sets the start date of this usage period.</summary>
     public LocalDate StartDate { get; set; }
@@ -25,6 +25,9 @@ public class BudgetUsagePeriod
 
     /// <summary>Gets or sets the navigation property to the owning <see cref="Model.User"/>.</summary>
     public User User { get; set; } = null!;
+
+    /// <summary>Gets or sets the navigation property to the <see cref="Model.BudgetConfig"/> defining this period.</summary>
+    public BudgetConfig BudgetConfig { get; set; } = null!;
 
     /// <summary>Gets or sets the collection of cost entries recorded within this period.</summary>
     public ICollection<CostEntry> CostEntries { get; set; } = [];

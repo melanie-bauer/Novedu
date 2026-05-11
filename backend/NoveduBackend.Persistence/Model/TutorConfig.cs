@@ -17,6 +17,9 @@ public class TutorConfig
     /// <summary>Gets or sets the foreign key to the <see cref="User"/> who created this tutor.</summary>
     public int CreatedById { get; set; }
 
+    /// <summary>Gets or sets the optional foreign key to the original <see cref="TutorConfig"/> this one was copied from.</summary>
+    public int? CopiedFromId { get; set; }
+
     /// <summary>Gets or sets the tutor name.</summary>
     public required string Name { get; set; }
 
@@ -26,14 +29,20 @@ public class TutorConfig
     /// <summary>Gets or sets the custom system prompt for this tutor.</summary>
     public string? SystemPrompt { get; set; }
 
+    /// <summary>Gets or sets the visibility scope of this tutor.</summary>
+    public TutorVisibility Visibility { get; set; }
+
+    /// <summary>
+    /// Gets or sets the default permission granted when <see cref="Visibility"/> is <see cref="TutorVisibility.Internal"/>.
+    /// Explicit shares via <see cref="TutorCollaborator"/> override this default.
+    /// </summary>
+    public TutorPermission DefaultInternalPermission { get; set; }
+
     /// <summary>Gets or sets the sampling temperature for AI responses.</summary>
     public double Temperature { get; set; }
 
     /// <summary>Gets or sets the maximum number of output tokens per response.</summary>
     public int MaxOutputTokens { get; set; }
-
-    /// <summary>Gets or sets a value indicating whether this tutor is enabled.</summary>
-    public bool IsEnabled { get; set; }
 
     /// <summary>Gets or sets the didactic interaction mode (e.g. Socratic, Hints).</summary>
     public DidacticMode DidacticMode { get; set; }
@@ -44,8 +53,8 @@ public class TutorConfig
     /// <summary>Gets or sets a value indicating whether the knowledge base is hidden from students.</summary>
     public bool HideKnowledgeBase { get; set; }
 
-    /// <summary>Gets or sets the optional expiration timestamp after which this tutor is disabled.</summary>
-    public Instant? ExpiresAt { get; set; }
+    /// <summary>Gets or sets a value indicating whether PII is anonymized before being sent to the LLM.</summary>
+    public bool AnonymizePii { get; set; }
 
     /// <summary>Gets or sets the timestamp when this record was created.</summary>
     public Instant CreatedAt { get; set; }
@@ -62,8 +71,17 @@ public class TutorConfig
     /// <summary>Gets or sets the navigation property to the <see cref="User"/> who created this tutor.</summary>
     public User CreatedBy { get; set; } = null!;
 
+    /// <summary>Gets or sets the optional navigation property to the original tutor this one was copied from.</summary>
+    public TutorConfig? CopiedFrom { get; set; }
+
+    /// <summary>Gets or sets the collection of tutors that were copied from this one.</summary>
+    public ICollection<TutorConfig> Copies { get; set; } = [];
+
     /// <summary>Gets or sets the collection of documents attached to this tutor.</summary>
     public ICollection<TutorDocument> Documents { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of explicit shares (collaborators) on this tutor.</summary>
+    public ICollection<TutorCollaborator> Collaborators { get; set; } = [];
 
     /// <summary>Gets or sets the collection of group assignments for this tutor.</summary>
     public ICollection<TutorGroupAssignment> GroupAssignments { get; set; } = [];

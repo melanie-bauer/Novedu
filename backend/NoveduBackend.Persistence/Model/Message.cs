@@ -28,4 +28,7 @@ public class Message
 
     /// <summary>Gets or sets the collection of cost entries associated with this message.</summary>
     public ICollection<CostEntry> CostEntries { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of AI-generated monitoring flags for this message.</summary>
+    public ICollection<MessageMonitoringFlag> MonitoringFlags { get; set; } = [];
 }

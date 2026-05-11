@@ -46,4 +46,10 @@ public class Group
 
     /// <summary>Gets or sets the collection of tutor assignments for this group.</summary>
     public ICollection<TutorGroupAssignment> TutorAssignments { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the collection of tutor collaborator entries where this group is the invited team.
+    /// Only valid for groups whose <see cref="GroupType"/> is "teacher_team".
+    /// </summary>
+    public ICollection<TutorCollaborator> TutorCollaborations { get; set; } = [];
 }

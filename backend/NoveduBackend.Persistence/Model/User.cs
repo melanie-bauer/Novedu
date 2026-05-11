@@ -62,9 +62,21 @@ public class User
     /// <summary>Gets or sets the collection of tutors created by this user.</summary>
     public ICollection<TutorConfig> CreatedTutors { get; set; } = [];
 
+    /// <summary>Gets or sets the collection of tutor collaborator entries where this user is the recipient.</summary>
+    public ICollection<TutorCollaborator> TutorCollaborations { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of tutor collaborator entries created (shared) by this user.</summary>
+    public ICollection<TutorCollaborator> SharedTutorCollaborations { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of tutor/group assignments performed by this user.</summary>
+    public ICollection<TutorGroupAssignment> TutorGroupAssignmentsMade { get; set; } = [];
+
     /// <summary>Gets or sets the collection of tutor assignments for this user.</summary>
     public ICollection<TutorStudentAssignment> TutorAssignments { get; set; } = [];
 
     /// <summary>Gets or sets the collection of chats owned by this user.</summary>
     public ICollection<Chat> Chats { get; set; } = [];
+
+    /// <summary>Gets or sets the collection of message monitoring flags reviewed by this user.</summary>
+    public ICollection<MessageMonitoringFlag> ReviewedMonitoringFlags { get; set; } = [];
 }

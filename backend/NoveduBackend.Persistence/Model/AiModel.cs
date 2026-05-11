@@ -17,6 +17,12 @@ public class AiModel
     /// <summary>Gets or sets an optional human-readable description.</summary>
     public string? Description { get; set; }
 
+    /// <summary>
+    /// Gets or sets a tag indicating the model's recommended use case
+    /// (e.g. "Recommended for creative tasks").
+    /// </summary>
+    public string? RecommendationTag { get; set; }
+
     /// <summary>Gets or sets the cost per one million input tokens.</summary>
     public decimal CostPerMillionInputTokens { get; set; }
 
@@ -31,6 +37,12 @@ public class AiModel
 
     /// <summary>Gets or sets the maximum number of output tokens the model can produce.</summary>
     public int MaxOutputTokens { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this is the special "auto" record
+    /// used to delegate model selection to the system.
+    /// </summary>
+    public bool IsAuto { get; set; }
 
     /// <summary>Gets or sets the timestamp when this record was created.</summary>
     public Instant CreatedAt { get; set; }

@@ -15,6 +15,9 @@ public class TutorStudentAssignment
     /// <summary>Gets or sets the foreign key to the <see cref="Model.User"/>.</summary>
     public int UserId { get; set; }
 
+    /// <summary>Gets or sets the timestamp from which this assignment is active.</summary>
+    public Instant EnabledFrom { get; set; }
+
     /// <summary>Gets or sets the optional timestamp until which this assignment is active.</summary>
     public Instant? EnabledUntil { get; set; }
 

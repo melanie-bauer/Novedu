@@ -60,6 +60,9 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
       /// <summary>Gets the set of <see cref="TutorConfig"/> entities.</summary>
       public DbSet<TutorConfig> TutorConfigs { get; set; }
 
+      /// <summary>Gets the set of <see cref="TutorCollaborator"/> entities.</summary>
+      public DbSet<TutorCollaborator> TutorCollaborators { get; set; }
+
       /// <summary>Gets the set of <see cref="TutorGroupAssignment"/> entities.</summary>
       public DbSet<TutorGroupAssignment> TutorGroupAssignments { get; set; }
 
@@ -77,6 +80,9 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
       /// <summary>Gets the set of <see cref="ChatAttachment"/> entities.</summary>
       public DbSet<ChatAttachment> ChatAttachments { get; set; }
+
+      /// <summary>Gets the set of <see cref="MessageMonitoringFlag"/> entities.</summary>
+      public DbSet<MessageMonitoringFlag> MessageMonitoringFlags { get; set; }
 
       /// <summary>Gets the set of <see cref="BudgetConfig"/> entities.</summary>
       public DbSet<BudgetConfig> BudgetConfigs { get; set; }
@@ -108,12 +114,14 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             ConfigureSchoolAiProvider(modelBuilder);
             ConfigureSchoolAiModel(modelBuilder);
             ConfigureTutorConfig(modelBuilder);
+            ConfigureTutorCollaborator(modelBuilder);
             ConfigureTutorGroupAssignment(modelBuilder);
             ConfigureTutorStudentAssignment(modelBuilder);
             ConfigureTutorDocument(modelBuilder);
             ConfigureChat(modelBuilder);
             ConfigureMessage(modelBuilder);
             ConfigureChatAttachment(modelBuilder);
+            ConfigureMessageMonitoringFlag(modelBuilder);
             ConfigureBudgetConfig(modelBuilder);
             ConfigureCostEntry(modelBuilder);
             ConfigureGlobalSettings(modelBuilder);
@@ -249,8 +257,11 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             budgetUsagePeriod.HasKey(e => e.Id);
             budgetUsagePeriod.Property(e => e.Id).ValueGeneratedOnAdd();
-            budgetUsagePeriod.Property(e => e.BudgetPeriod)
-                  .HasConversion(new EnumToStringConverter<BudgetPeriod>());
+
+            budgetUsagePeriod.HasOne(bup => bup.BudgetConfig)
+                  .WithMany(bc => bc.UsagePeriods)
+                  .HasForeignKey(bup => bup.BudgetConfigId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             budgetUsagePeriod.HasMany(bup => bup.CostEntries)
                   .WithOne(ce => ce.BudgetUsagePeriod)
@@ -305,6 +316,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 
             groupMember.HasKey(e => e.Id);
             groupMember.Property(e => e.Id).ValueGeneratedOnAdd();
+            groupMember.Property(e => e.Role).HasMaxLength(50);
 
             groupMember.HasIndex(e => new { e.GroupId, e.UserId }).IsUnique();
       }
@@ -369,6 +381,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             aiModel.HasKey(e => e.Id);
             aiModel.Property(e => e.Id).ValueGeneratedOnAdd();
             aiModel.Property(e => e.Name).HasMaxLength(255);
+            aiModel.Property(e => e.RecommendationTag).HasMaxLength(255);
             aiModel.Property(e => e.CostPerMillionInputTokens).HasPrecision(10, 6);
             aiModel.Property(e => e.CostPerMillionOutputTokens).HasPrecision(10, 6);
             aiModel.Property(e => e.CostPerMillionCachedInputTokens).HasPrecision(10, 6);
@@ -413,12 +426,26 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             tutorConfig.HasKey(e => e.Id);
             tutorConfig.Property(e => e.Id).ValueGeneratedOnAdd();
             tutorConfig.Property(e => e.Name).HasMaxLength(255);
+            tutorConfig.Property(e => e.Visibility)
+                  .HasConversion(new EnumToStringConverter<TutorVisibility>());
+            tutorConfig.Property(e => e.DefaultInternalPermission)
+                  .HasConversion(new EnumToStringConverter<TutorPermission>());
             tutorConfig.Property(e => e.DidacticMode)
                   .HasConversion(new EnumToStringConverter<DidacticMode>());
+
+            tutorConfig.HasOne(tc => tc.CopiedFrom)
+                  .WithMany(tc => tc.Copies)
+                  .HasForeignKey(tc => tc.CopiedFromId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             tutorConfig.HasMany(tc => tc.Documents)
                   .WithOne(td => td.Tutor)
                   .HasForeignKey(td => td.TutorId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            tutorConfig.HasMany(tc => tc.Collaborators)
+                  .WithOne(co => co.Tutor)
+                  .HasForeignKey(co => co.TutorId)
                   .OnDelete(DeleteBehavior.Cascade);
 
             tutorConfig.HasMany(tc => tc.GroupAssignments)
@@ -442,12 +469,55 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
                   .OnDelete(DeleteBehavior.Restrict);
       }
 
+      private static void ConfigureTutorCollaborator(ModelBuilder modelBuilder)
+      {
+            EntityTypeBuilder<TutorCollaborator> tutorCollaborator = modelBuilder.Entity<TutorCollaborator>();
+
+            tutorCollaborator.HasKey(e => e.Id);
+            tutorCollaborator.Property(e => e.Id).ValueGeneratedOnAdd();
+            tutorCollaborator.Property(e => e.Permission)
+                  .HasConversion(new EnumToStringConverter<TutorPermission>());
+
+            tutorCollaborator.HasOne(co => co.User)
+                  .WithMany(usr => usr.TutorCollaborations)
+                  .HasForeignKey(co => co.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            tutorCollaborator.HasOne(co => co.Group)
+                  .WithMany(grp => grp.TutorCollaborations)
+                  .HasForeignKey(co => co.GroupId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            tutorCollaborator.HasOne(co => co.SharedBy)
+                  .WithMany(usr => usr.SharedTutorCollaborations)
+                  .HasForeignKey(co => co.SharedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // Exactly one of UserId / GroupId must be set.
+            tutorCollaborator.ToTable(t => t.HasCheckConstraint(
+                  "CK_TutorCollaborator_UserOrGroup",
+                  "(\"UserId\" IS NOT NULL AND \"GroupId\" IS NULL) OR (\"UserId\" IS NULL AND \"GroupId\" IS NOT NULL)"));
+
+            tutorCollaborator.HasIndex(e => new { e.TutorId, e.UserId }).IsUnique();
+            tutorCollaborator.HasIndex(e => new { e.TutorId, e.GroupId }).IsUnique();
+      }
+
       private static void ConfigureTutorGroupAssignment(ModelBuilder modelBuilder)
       {
             EntityTypeBuilder<TutorGroupAssignment> tutorGroupAssignment = modelBuilder.Entity<TutorGroupAssignment>();
 
             tutorGroupAssignment.HasKey(e => e.Id);
             tutorGroupAssignment.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            tutorGroupAssignment.HasOne(tga => tga.AssignedBy)
+                  .WithMany(usr => usr.TutorGroupAssignmentsMade)
+                  .HasForeignKey(tga => tga.AssignedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            tutorGroupAssignment.HasOne(tga => tga.BudgetConfig)
+                  .WithMany(bc => bc.TutorGroupAssignments)
+                  .HasForeignKey(tga => tga.BudgetConfigId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             tutorGroupAssignment.HasIndex(e => new { e.TutorId, e.GroupId }).IsUnique();
       }
@@ -508,6 +578,11 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
                   .WithOne(ce => ce.Message)
                   .HasForeignKey(ce => ce.MessageId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            message.HasMany(msg => msg.MonitoringFlags)
+                  .WithOne(mf => mf.Message)
+                  .HasForeignKey(mf => mf.MessageId)
+                  .OnDelete(DeleteBehavior.Cascade);
       }
 
       private static void ConfigureChatAttachment(ModelBuilder modelBuilder)
@@ -520,6 +595,23 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
             chatAttachment.Property(e => e.Type).HasMaxLength(100);
             chatAttachment.Property(e => e.FileId).HasMaxLength(255);
             chatAttachment.Property(e => e.Location).HasMaxLength(1024);
+      }
+
+      private static void ConfigureMessageMonitoringFlag(ModelBuilder modelBuilder)
+      {
+            EntityTypeBuilder<MessageMonitoringFlag> monitoringFlag = modelBuilder.Entity<MessageMonitoringFlag>();
+
+            monitoringFlag.HasKey(e => e.Id);
+            monitoringFlag.Property(e => e.Id).ValueGeneratedOnAdd();
+            monitoringFlag.Property(e => e.FlagType)
+                  .HasConversion(new EnumToStringConverter<MonitoringFlagType>());
+            monitoringFlag.Property(e => e.Severity)
+                  .HasConversion(new EnumToStringConverter<MonitoringSeverity>());
+
+            monitoringFlag.HasOne(mf => mf.ReviewedBy)
+                  .WithMany(usr => usr.ReviewedMonitoringFlags)
+                  .HasForeignKey(mf => mf.ReviewedById)
+                  .OnDelete(DeleteBehavior.Restrict);
       }
 
       private static void ConfigureBudgetConfig(ModelBuilder modelBuilder)
