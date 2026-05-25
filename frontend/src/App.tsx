@@ -14,6 +14,7 @@ import StudentHomePage from "@/pages/StudentHomePage";
 import StudentTutorDetailPage from "@/pages/StudentTutorDetailPage";
 import TutorOverviewPage from "@/pages/TutorOverviewPage";
 import TutorEditorPage from "@/pages/TutorEditorPage";
+import TutorReadOnlyPage from "@/pages/TutorReadOnlyPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import UserManagementPage from "@/pages/admin/UserManagementPage";
 // BudgetManagementPage removed - budgets managed in Klassen & Rollen
@@ -62,6 +63,7 @@ const App = () => (
                   <Route path="tutor/:id" element={<StudentTutorDetailPage />} />
                   <Route path="chat" element={<ChatPage />} />
                   <Route path="tutors" element={<TutorOverviewPage />} />
+                  <Route path="tutors/:id/view" element={<TutorReadOnlyPage />} />
                   <Route path="tutors/:id/edit" element={<TutorEditorPage />} />
                   <Route path="tutors/new" element={<TutorEditorPage />} />
                   <Route path="admin" element={<AdminDashboard />} />

@@ -75,6 +75,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getAvailableTutors = useCallback((userId: string, classId?: string): TutorConfig[] => {
     return tutors.filter(t => {
       if (!t.isEnabled || t.status !== 'published') return false;
+      if (t.visibility === 'public') return true;
       if (t.assignedStudents.includes(userId)) return true;
       if (classId && t.assignedClasses.includes(classId)) return true;
       return false;
