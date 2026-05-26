@@ -384,7 +384,7 @@ const ProviderManagementPage: React.FC = () => {
                 <Label htmlFor="modelName">Modellname</Label>
                 <Input
                   id="modelName"
-                  placeholder="z.B. gpt-5, claude-4"
+                  placeholder="z.B. gpt-5.5, claude-sonnet-4-6"
                   value={newModelForm.name}
                   onChange={(e) => setNewModelForm(prev => ({ ...prev, name: e.target.value }))}
                 />

@@ -141,7 +141,7 @@ export const mockTutors: TutorConfig[] = [
     subject: 'Mathematik',
     description: 'Hilft bei allen mathematischen Fragen von Algebra bis Analysis',
     systemPrompt: 'Du bist ein freundlicher Mathematik-Tutor für Schüler der 5AHIF',
-    model: 'gpt-4',
+    model: 'gpt-5.5',
     temperature: 0.7,
     maxTokens: 2048,
     knowledgeFiles: [
@@ -172,7 +172,7 @@ export const mockTutors: TutorConfig[] = [
     subject: 'Deutsch',
     description: 'Unterstützt bei Grammatik, Rechtschreibung und Textanalyse',
     systemPrompt: 'Du bist ein Deutsch-Tutor.',
-    model: 'gpt-4',
+    model: 'gpt-5.4',
     temperature: 0.8,
     maxTokens: 2048,
     knowledgeFiles: [],
@@ -194,7 +194,7 @@ export const mockTutors: TutorConfig[] = [
     subject: 'Physik',
     description: 'Erklärt physikalische Phänomene verständlich',
     systemPrompt: 'Du bist ein Physik-Tutor.',
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-5.4-mini',
     temperature: 0.6,
     maxTokens: 1024,
     knowledgeFiles: [
@@ -219,7 +219,7 @@ export const mockTutors: TutorConfig[] = [
     subject: 'Englisch',
     description: 'Verbessert Englischkenntnisse und Konversation',
     systemPrompt: 'You are an English tutor for German students.',
-    model: 'gpt-4',
+    model: 'gpt-5.4',
     temperature: 0.7,
     maxTokens: 2048,
     knowledgeFiles: [],
@@ -301,10 +301,10 @@ export const mockBudgets: BudgetConfig[] = [
 ];
 
 export const mockCosts: CostEntry[] = [
-  { id: 'cost-1', userId: 'student-1', userName: 'Anna Bauer', tutorId: 'tutor-1', tutorName: 'Mathe-Meister', model: 'gpt-4', tokens: 1250, cost: 0.12, timestamp: new Date('2024-03-01T10:00:00') },
-  { id: 'cost-2', userId: 'student-1', userName: 'Anna Bauer', tutorId: 'tutor-2', tutorName: 'Deutsch-Detektiv', model: 'gpt-4', tokens: 980, cost: 0.09, timestamp: new Date('2024-03-02T14:00:00') },
-  { id: 'cost-3', userId: 'student-2', userName: 'Ben Weber', tutorId: 'tutor-1', tutorName: 'Mathe-Meister', model: 'gpt-4', tokens: 2100, cost: 0.21, timestamp: new Date('2024-03-03T11:00:00') },
-  { id: 'cost-4', userId: 'student-4', userName: 'David Koch', tutorId: 'tutor-3', tutorName: 'Physik-Profi', model: 'gpt-3.5-turbo', tokens: 850, cost: 0.04, timestamp: new Date('2024-03-04T09:30:00') },
+  { id: 'cost-1', userId: 'student-1', userName: 'Anna Bauer', tutorId: 'tutor-1', tutorName: 'Mathe-Meister', model: 'gpt-5.5', tokens: 1250, cost: 0.12, timestamp: new Date('2024-03-01T10:00:00') },
+  { id: 'cost-2', userId: 'student-1', userName: 'Anna Bauer', tutorId: 'tutor-2', tutorName: 'Deutsch-Detektiv', model: 'gpt-5.4', tokens: 980, cost: 0.09, timestamp: new Date('2024-03-02T14:00:00') },
+  { id: 'cost-3', userId: 'student-2', userName: 'Ben Weber', tutorId: 'tutor-1', tutorName: 'Mathe-Meister', model: 'gpt-5.5', tokens: 2100, cost: 0.21, timestamp: new Date('2024-03-03T11:00:00') },
+  { id: 'cost-4', userId: 'student-4', userName: 'David Koch', tutorId: 'tutor-3', tutorName: 'Physik-Profi', model: 'gpt-5.4-mini', tokens: 850, cost: 0.04, timestamp: new Date('2024-03-04T09:30:00') },
 ];
 
 export const mockGlobalSettings: GlobalSettings = {
@@ -320,10 +320,9 @@ export const mockAIProviders: AIProvider[] = [
     apiKeyConfigured: true,
     isEnabled: true,
     models: [
-      { id: 'gpt-4', name: 'GPT-4', providerId: 'openai', description: 'Leistungsstärkstes Modell', costPer1kTokens: 0.03, maxTokens: 8192, isEnabled: true },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', providerId: 'openai', description: 'Schnellere Version von GPT-4', costPer1kTokens: 0.01, maxTokens: 128000, isEnabled: true },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', providerId: 'openai', description: 'Schnell und kostengünstig', costPer1kTokens: 0.0015, maxTokens: 4096, isEnabled: true },
-      { id: 'gpt-5.2', name: 'GPT-5.2', providerId: 'openai', description: 'Neuestes Flaggschiff-Modell', costPer1kTokens: 0.06, maxTokens: 200000, isEnabled: false },
+      { id: 'gpt-5.5', name: 'GPT-5.5', providerId: 'openai', description: 'Flaggschiff für komplexes Reasoning und Coding', costPer1kTokens: 0.005, maxTokens: 1000000, isEnabled: true },
+      { id: 'gpt-5.4', name: 'GPT-5.4', providerId: 'openai', description: 'Günstigeres Modell für professionelle Aufgaben', costPer1kTokens: 0.0025, maxTokens: 1000000, isEnabled: true },
+      { id: 'gpt-5.4-mini', name: 'GPT-5.4 mini', providerId: 'openai', description: 'Schnelles, kostengünstiges Mini-Modell', costPer1kTokens: 0.00075, maxTokens: 400000, isEnabled: true },
     ],
   },
   {
@@ -332,9 +331,9 @@ export const mockAIProviders: AIProvider[] = [
     apiKeyConfigured: true,
     isEnabled: true,
     models: [
-      { id: 'claude-3-opus', name: 'Claude 3 Opus', providerId: 'anthropic', description: 'Höchste Qualität', costPer1kTokens: 0.015, maxTokens: 200000, isEnabled: true },
-      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', providerId: 'anthropic', description: 'Ausgewogenes Preis-Leistungs-Verhältnis', costPer1kTokens: 0.003, maxTokens: 200000, isEnabled: true },
-      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', providerId: 'anthropic', description: 'Schnellstes Modell', costPer1kTokens: 0.00025, maxTokens: 200000, isEnabled: true },
+      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', providerId: 'anthropic', description: 'Höchste Qualität für komplexes Reasoning', costPer1kTokens: 0.005, maxTokens: 1000000, isEnabled: true },
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', providerId: 'anthropic', description: 'Ausgewogenes Preis-Leistungs-Verhältnis', costPer1kTokens: 0.003, maxTokens: 1000000, isEnabled: true },
+      { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', providerId: 'anthropic', description: 'Schnellstes Modell für kurze Antworten', costPer1kTokens: 0.001, maxTokens: 200000, isEnabled: true },
     ],
   },
   {

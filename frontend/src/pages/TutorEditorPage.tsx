@@ -67,7 +67,7 @@ const TutorEditorPage: React.FC = () => {
     description: '',
     targetGroup: '',
     systemPrompt: '',
-    model: availableModels[0]?.id || 'gpt-4',
+    model: availableModels[0]?.id || 'gpt-5.5',
     temperature: 0.7,
     maxTokens: 2048,
     icon: '📚',
