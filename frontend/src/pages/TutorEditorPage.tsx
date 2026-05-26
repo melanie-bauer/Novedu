@@ -203,23 +203,25 @@ const TutorEditorPage: React.FC = () => {
     return { generatedSystem, teacherPrompt, finalPrompt };
   }, [didacticModeExplanation.system, didacticModeExplanation.title, formData.description, formData.safetyRules.noFullSolutions, formData.safetyRules.noPersonalData, formData.showSources, formData.subject, formData.systemPrompt, globalSettings.systemPrompt]);
 
-  const comparisonModels = useMemo(() => availableModels.slice(0, 3), [availableModels]);
-  const comparisonPrompt = comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach';
-
   const comparisonSelectedModels = useMemo(() => {
-    const selected = comparisonModelIds
+    return comparisonModelIds
       .map((modelId) => availableModels.find((model) => model.id === modelId))
       .filter((model): model is (typeof availableModels)[number] => Boolean(model));
+  }, [availableModels, comparisonModelIds]);
 
-    if (selected.length > 0) return selected;
-    return comparisonModels;
-  }, [availableModels, comparisonModelIds, comparisonModels]);
+  const pickComparisonDefaults = () => {
+    if (availableModels.length <= 3) return availableModels.map((model) => model.id);
 
-  useEffect(() => {
-    if (comparisonOpen && comparisonModelIds.length === 0 && comparisonModels.length > 0) {
-      setComparisonModelIds(comparisonModels.map((model) => model.id));
-    }
-  }, [comparisonModelIds.length, comparisonModels, comparisonOpen]);
+    const sorted = [...availableModels].sort((a, b) => a.maxTokens - b.maxTokens);
+    const lowBucket = sorted.slice(0, Math.max(1, Math.ceil(sorted.length / 3)));
+    const midBucket = sorted.slice(Math.floor(sorted.length / 3), Math.floor((sorted.length * 2) / 3));
+    const highBucket = sorted.slice(Math.floor((sorted.length * 2) / 3));
+
+    const pickFrom = (bucket: typeof availableModels) => bucket[Math.floor(Math.random() * bucket.length)]?.id;
+    const picks = [pickFrom(lowBucket), pickFrom(midBucket), pickFrom(highBucket)].filter(Boolean) as string[];
+
+    return Array.from(new Set(picks)).slice(0, 3);
+  };
 
   useEffect(() => {
     if (!comparisonOpen) return;
@@ -240,7 +242,14 @@ const TutorEditorPage: React.FC = () => {
     ));
   };
 
-  const buildComparisonResponse = (modelName: string, providerName: string, modelCost: number, prompt: string) => {
+  const buildComparisonResponse = (
+    modelName: string,
+    providerName: string,
+    modelCost: number,
+    maxTokens: number,
+    score: number,
+    prompt: string,
+  ) => {
     const style = formData.didacticMode === 'socratic'
       ? 'fragt zuerst nach dem Denkweg'
       : formData.didacticMode === 'hints'
@@ -249,16 +258,56 @@ const TutorEditorPage: React.FC = () => {
           ? 'antwortet knapp und direkt'
           : 'erklärt sehr schrittweise';
 
-    const depth = modelCost >= 0.01 ? 'detailreich' : 'kostenbewusst';
-    return `${modelName} (${providerName}) antwortet voraussichtlich ${depth} und ${style} auf: "${prompt}"`;
+    const depth = modelCost <= 0.001
+      ? 'sehr kostenbewusst'
+      : modelCost <= 0.003
+        ? 'kostenbewusst'
+        : modelCost <= 0.006
+          ? 'ausgewogen'
+          : 'detailreich';
+    const costTone = modelCost <= 0.001
+      ? 'sehr kosteneffizient'
+      : modelCost <= 0.003
+        ? 'kosteneffizient'
+        : modelCost <= 0.006
+          ? 'ausgewogen bei den Kosten'
+          : 'preisintensiver';
+    const contextTone = maxTokens >= 1000000
+      ? 'sehr großes Kontextfenster'
+      : maxTokens >= 400000
+        ? 'großes Kontextfenster'
+        : maxTokens >= 200000
+          ? 'solides Kontextfenster'
+          : 'kleineres Kontextfenster';
+    const strength = score >= 85
+      ? 'sehr stark'
+      : score >= 72
+        ? 'stark'
+        : score >= 60
+          ? 'ausgewogen'
+          : score >= 50
+            ? 'grundlegend'
+            : 'schwach';
+
+    return `${modelName} (${providerName}) wirkt insgesamt ${strength}. Antwortprofil: ${depth}, ${style}. Schwerpunkt: ${costTone} und ${contextTone}. Anfrage: "${prompt}"`;
   };
 
   const modelScore = (modelCost: number, maxTokens: number) => {
-    const costScore = Math.max(8, Math.min(35, Math.round(40 - Math.log10(modelCost * 100000) * 10)));
-    const capacityScore = maxTokens >= 1000000 ? 30 : maxTokens >= 400000 ? 26 : maxTokens >= 200000 ? 22 : 18;
-    const clarityScore = formData.didacticMode === 'step-by-step' ? 24 : formData.didacticMode === 'concise' ? 20 : 22;
+    const costScore = modelCost <= 0.001
+      ? 40
+      : modelCost <= 0.002
+        ? 34
+        : modelCost <= 0.003
+          ? 28
+          : modelCost <= 0.004
+            ? 22
+            : modelCost <= 0.006
+              ? 18
+              : 12;
+    const capacityScore = maxTokens >= 1000000 ? 38 : maxTokens >= 400000 ? 28 : maxTokens >= 200000 ? 18 : 12;
+    const clarityScore = formData.didacticMode === 'step-by-step' ? 20 : formData.didacticMode === 'concise' ? 16 : 18;
     const total = costScore + capacityScore + clarityScore;
-    return Math.min(95, Math.max(45, total));
+    return Math.min(95, Math.max(35, total));
   };
 
   const comparisonScores = useMemo(() => {
@@ -996,7 +1045,7 @@ const TutorEditorPage: React.FC = () => {
                       {!comparisonOpen ? (
                         <Button size="sm" onClick={() => {
                           setComparisonOpen(true);
-                          setComparisonModelIds((prev) => prev.length > 0 ? prev : comparisonModels.map((model) => model.id));
+                          setComparisonModelIds((prev) => (prev.length > 0 ? prev : pickComparisonDefaults()));
                           setComparisonPromptInput((prev) => prev || 'Erkläre mir das Thema einfach');
                         }} disabled={availableModels.length < 2}>
                           Vergleich öffnen
@@ -1089,8 +1138,15 @@ const TutorEditorPage: React.FC = () => {
                             <div className="grid gap-3">
                               {comparisonExecutedModels.map((model) => {
                                 const stats = modelTokenStats(comparisonExecutedPrompt, model.costPer1kTokens, model.maxTokens);
-                                const response = buildComparisonResponse(model.name, model.providerName, model.costPer1kTokens, comparisonExecutedPrompt);
                                 const score = comparisonScores.scores[model.id] ?? 0;
+                                const response = buildComparisonResponse(
+                                  model.name,
+                                  model.providerName,
+                                  model.costPer1kTokens,
+                                  model.maxTokens,
+                                  score,
+                                  comparisonExecutedPrompt,
+                                );
                                 const isWinner = comparisonScores.winnerIds.includes(model.id) && comparisonExecutedModels.length > 1;
 
                                 return (
