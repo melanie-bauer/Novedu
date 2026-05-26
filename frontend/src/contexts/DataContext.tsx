@@ -6,6 +6,7 @@ interface DataContextType {
   tutors: TutorConfig[];
   chats: Chat[];
   classes: Class[];
+  favoriteClassIds: string[];
   budgets: BudgetConfig[];
   costs: CostEntry[];
   globalSettings: GlobalSettings;
@@ -17,6 +18,7 @@ interface DataContextType {
   updateChat: (id: string, updates: Partial<Chat>) => void;
   deleteChat: (id: string) => void;
   addMessage: (chatId: string, message: Message) => void;
+  toggleFavoriteClass: (classId: string) => void;
   getAvailableTutors: (userId: string, classId?: string) => TutorConfig[];
   getChatsByUser: (userId: string) => Chat[];
   getTutorById: (id: string) => TutorConfig | undefined;
@@ -30,6 +32,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tutors, setTutors] = useState<TutorConfig[]>(mockTutors);
   const [chats, setChats] = useState<Chat[]>(mockChats);
   const [classes] = useState<Class[]>(mockClasses);
+  const [favoriteClassIds, setFavoriteClassIds] = useState<string[]>([]);
   const [budgets, setBudgets] = useState<BudgetConfig[]>(mockBudgets);
   const [costs] = useState<CostEntry[]>(mockCosts);
   const [globalSettings, setGlobalSettings] = useState<GlobalSettings>(mockGlobalSettings);
@@ -72,6 +75,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ));
   }, []);
 
+  const toggleFavoriteClass = useCallback((classId: string) => {
+    setFavoriteClassIds(prev => (
+      prev.includes(classId)
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    ));
+  }, []);
+
   const getAvailableTutors = useCallback((userId: string, classId?: string): TutorConfig[] => {
     return tutors.filter(t => {
       if (!t.isEnabled || t.status !== 'published') return false;
@@ -103,6 +114,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tutors,
       chats,
       classes,
+      favoriteClassIds,
       budgets,
       costs,
       globalSettings,
@@ -114,6 +126,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateChat,
       deleteChat,
       addMessage,
+      toggleFavoriteClass,
       getAvailableTutors,
       getChatsByUser,
       getTutorById,

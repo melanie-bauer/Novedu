@@ -25,8 +25,15 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { getTeacherName, subjectOptions } from '@/data/mockData';
+import { getTeacherName, mockAIProviders, subjectOptions } from '@/data/mockData';
 import { Class, TutorConfig } from '@/types';
 import {
   ArrowRightLeft,
@@ -39,6 +46,7 @@ import {
   Lock,
   Pencil,
   Plus,
+  Pin,
   Search,
   SlidersHorizontal,
   Trash2,
@@ -143,7 +151,7 @@ const TutorOverviewPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { tutors, classes, updateTutor, deleteTutor } = useData();
+  const { tutors, classes, favoriteClassIds, toggleFavoriteClass, updateTutor, deleteTutor } = useData();
   const pageRef = useRef<HTMLDivElement | null>(null);
 
   const [nameQuery, setNameQuery] = useState('');
@@ -166,7 +174,10 @@ const TutorOverviewPage: React.FC = () => {
   const [dragOverClassId, setDragOverClassId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [mobileAssignTutor, setMobileAssignTutor] = useState<TutorConfig | null>(null);
+  const [selectedTutorDetail, setSelectedTutorDetail] = useState<TutorConfig | null>(null);
   const [orderedTutorIds, setOrderedTutorIds] = useState<string[]>(() => tutors.map((tutor) => tutor.id));
+  const [classPanelWidth, setClassPanelWidth] = useState(430);
+  const [isResizingColumns, setIsResizingColumns] = useState(false);
   const [assignmentOwners, setAssignmentOwners] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     tutors.forEach((tutor) => {
@@ -179,6 +190,18 @@ const TutorOverviewPage: React.FC = () => {
 
   const currentUserId = user?.id || '';
   const activeFilter = isFilterActive(nameQuery, selectedSubjects, showDrafts, showMineOnly);
+  const favoriteClassIdSet = useMemo(() => new Set(favoriteClassIds), [favoriteClassIds]);
+
+  const selectedTutorModel = useMemo(() => {
+    if (!selectedTutorDetail) return null;
+
+    for (const provider of mockAIProviders) {
+      const model = provider.models.find((item) => item.id === selectedTutorDetail.model);
+      if (model) return { provider, model };
+    }
+
+    return null;
+  }, [selectedTutorDetail]);
 
   const autoScrollDuringDrag = (event: React.DragEvent) => {
     if (!dragPayload || !pageRef.current) return;
@@ -219,6 +242,35 @@ const TutorOverviewPage: React.FC = () => {
       return next;
     });
   }, [tutors]);
+
+  useEffect(() => {
+    if (!isResizingColumns) return;
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const container = pageRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const minWidth = 320;
+      const maxWidth = Math.max(minWidth, rect.width - 360);
+      const nextWidth = rect.right - event.clientX;
+      setClassPanelWidth(Math.max(minWidth, Math.min(maxWidth, nextWidth)));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingColumns(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+    };
+  }, [isResizingColumns]);
 
   const subjectSuggestions = useMemo(() => {
     const query = subjectQuery.trim().toLowerCase();
@@ -284,14 +336,24 @@ const TutorOverviewPage: React.FC = () => {
     return classes.filter((classItem) => classItem.name.toLowerCase().includes(query));
   }, [classSearch, classes]);
 
+  const orderedClasses = useMemo(() => {
+    return [...filteredClasses].sort((left, right) => {
+      const leftPinned = favoriteClassIdSet.has(left.id) ? 1 : 0;
+      const rightPinned = favoriteClassIdSet.has(right.id) ? 1 : 0;
+
+      if (leftPinned !== rightPinned) return rightPinned - leftPinned;
+      return left.name.localeCompare(right.name, 'de');
+    });
+  }, [favoriteClassIdSet, filteredClasses]);
+
   const classesByDepartment = useMemo(() => {
-    return filteredClasses.reduce<Record<string, Class[]>>((acc, classItem) => {
+    return orderedClasses.reduce<Record<string, Class[]>>((acc, classItem) => {
       const department = getClassDepartment(classItem);
       acc[department] = acc[department] || [];
       acc[department].push(classItem);
       return acc;
     }, {});
-  }, [filteredClasses]);
+  }, [orderedClasses]);
 
   const addSubjectFilter = (subject: string) => {
     setSelectedSubjects((prev) => (prev.includes(subject) ? prev : [...prev, subject]));
@@ -563,6 +625,7 @@ const TutorOverviewPage: React.FC = () => {
     const assignedTutors = tutors.filter((tutor) => tutor.assignedClasses.includes(classItem.id));
     const isActiveDrop = dragOverClassId === classItem.id;
     const isCollapsed = collapsedClasses[classItem.id] ?? false;
+    const isFavorite = favoriteClassIdSet.has(classItem.id);
 
     return (
       <div
@@ -578,25 +641,40 @@ const TutorOverviewPage: React.FC = () => {
           isActiveDrop && 'border-[#0a529a] bg-[#86b5d7]/15 shadow-md ring-2 ring-[#86b5d7]/40',
         )}
       >
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-2 border-b bg-muted/25 px-3 py-3 text-left"
-          onClick={(event) => {
-            event.stopPropagation();
-            setCollapsedClasses((prev) => ({
-              ...prev,
-              [classItem.id]: !prev[classItem.id],
-            }));
-          }}
-        >
-          <p className="font-semibold">{classItem.name}</p>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className={cn(badgePillClass, countBadgeClass)}>
-              {assignedTutors.length}
-            </Badge>
-            <ChevronDown className={cn('h-4 w-4 transition-transform', isCollapsed && '-rotate-90')} />
-          </div>
-        </button>
+        <div className="flex items-center gap-2 border-b bg-muted/25 px-3 py-3">
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left"
+            onClick={() => {
+              setCollapsedClasses((prev) => ({
+                ...prev,
+                [classItem.id]: !prev[classItem.id],
+              }));
+            }}
+          >
+            <p className="truncate font-semibold">{classItem.name}</p>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className={cn(badgePillClass, countBadgeClass)}>
+                {assignedTutors.length}
+              </Badge>
+              <ChevronDown className={cn('h-4 w-4 transition-transform', isCollapsed && '-rotate-90')} />
+            </div>
+          </button>
+
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className={cn('shrink-0', isFavorite ? 'text-[#dc931a] hover:text-[#dc931a]' : 'text-muted-foreground')}
+            onClick={(event) => {
+              event.stopPropagation();
+              toggleFavoriteClass(classItem.id);
+            }}
+            aria-label={isFavorite ? 'Klasse abpinnen' : 'Klasse anpinnen'}
+            title={isFavorite ? 'Klasse abpinnen' : 'Klasse anpinnen'}
+          >
+            <Pin className={cn('h-4 w-4', isFavorite && 'fill-current')} />
+          </Button>
+        </div>
 
         {!isCollapsed && (
           <div className="p-3">
@@ -615,13 +693,23 @@ const TutorOverviewPage: React.FC = () => {
                       className="flex items-center justify-between gap-2 rounded-md border bg-background px-2.5 py-2"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <button
+                          type="button"
+                          className="truncate text-left text-sm font-medium hover:text-primary"
+                          onClick={() => setSelectedTutorDetail(tutor)}
+                          title="Tutor- und Modelldetails anzeigen"
+                        >
                           {tutor.icon} {tutor.name}
-                        </p>
+                        </button>
                         <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
-                          <span className="truncate text-xs text-muted-foreground">
+                          <button
+                            type="button"
+                            className="truncate text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => setSelectedTutorDetail(tutor)}
+                            title="Modelldetails anzeigen"
+                          >
                             {tutor.subject} - {getTeacherName(tutor.createdBy)}
-                          </span>
+                          </button>
                           {!isOwnAssignment && (
                             <Badge variant="outline" className={cn('shrink-0', badgePillClass, foreignBadgeClass)}>
                               von anderer Lehrperson
@@ -715,8 +803,8 @@ const TutorOverviewPage: React.FC = () => {
       className="h-full overflow-auto bg-[#f3f7fa] dark:bg-background"
     >
 
-      <div className="grid items-start grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_430px]">
-        <Card className={cn('overflow-hidden rounded-lg border shadow-sm', panelBgClass)}>
+      <div className="flex items-stretch gap-0 p-4">
+        <Card className={cn('min-w-0 flex-1 overflow-hidden rounded-lg border shadow-sm', panelBgClass)}>
           <CardHeader className={cn('border-b pb-4', panelBgClass)}>
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
@@ -895,7 +983,23 @@ const TutorOverviewPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className={cn('hidden overflow-hidden rounded-lg border shadow-sm md:block', panelBgClass)}>
+        <div
+          className="hidden w-3 shrink-0 cursor-col-resize items-stretch justify-center py-4 md:flex"
+          onMouseDown={(event) => {
+            event.preventDefault();
+            setIsResizingColumns(true);
+          }}
+        >
+          <div className="w-px rounded-full bg-border" />
+          <div className="-ml-[1px] flex w-6 items-center justify-center rounded-full border bg-background shadow-sm">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
+
+        <Card
+          className={cn('hidden overflow-hidden rounded-lg border shadow-sm md:block', panelBgClass)}
+          style={{ width: classPanelWidth }}
+        >
           <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" />
@@ -970,6 +1074,75 @@ const TutorOverviewPage: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!selectedTutorDetail} onOpenChange={(open) => !open && setSelectedTutorDetail(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-2xl">{selectedTutorDetail?.icon}</span>
+              <span>{selectedTutorDetail?.name}</span>
+            </DialogTitle>
+            <DialogDescription>Tutor- und Modelldetails für die ausgewählte Zuordnung.</DialogDescription>
+          </DialogHeader>
+
+          {selectedTutorDetail && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border bg-muted/25 p-4">
+                <p className="text-sm font-semibold">Tutor</p>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <dt className="text-muted-foreground">Fach</dt>
+                    <dd className="text-right font-medium">{selectedTutorDetail.subject}</dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <dt className="text-muted-foreground">Erstellt von</dt>
+                    <dd className="text-right font-medium">{getTeacherName(selectedTutorDetail.createdBy)}</dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <dt className="text-muted-foreground">Status</dt>
+                    <dd className="text-right font-medium capitalize">{selectedTutorDetail.status}</dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <dt className="text-muted-foreground">Modell</dt>
+                    <dd className="text-right font-medium">{selectedTutorDetail.model}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div className="rounded-lg border bg-muted/25 p-4">
+                <p className="text-sm font-semibold">Modell</p>
+                {selectedTutorModel ? (
+                  <dl className="mt-3 space-y-2 text-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <dt className="text-muted-foreground">Provider</dt>
+                      <dd className="text-right font-medium">{selectedTutorModel.provider.name}</dd>
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <dt className="text-muted-foreground">Modell</dt>
+                      <dd className="text-right font-medium">{selectedTutorModel.model.name}</dd>
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <dt className="text-muted-foreground">Kosten</dt>
+                      <dd className="text-right font-medium">${selectedTutorModel.model.costPer1kTokens.toFixed(4)} / 1k Tokens</dd>
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <dt className="text-muted-foreground">Max. Tokens</dt>
+                      <dd className="text-right font-medium">{selectedTutorModel.model.maxTokens.toLocaleString('de-AT')}</dd>
+                    </div>
+                    <div className="pt-2 text-sm text-muted-foreground">
+                      {selectedTutorModel.model.description || 'Keine Beschreibung vorhanden.'}
+                    </div>
+                  </dl>
+                ) : (
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Für dieses Tutor-Modell sind keine Providerdaten gefunden.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Drawer open={!!mobileAssignTutor} onOpenChange={(open) => !open && setMobileAssignTutor(null)}>
         <DrawerContent className="md:hidden">

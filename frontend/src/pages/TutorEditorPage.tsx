@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
@@ -88,6 +88,10 @@ const TutorEditorPage: React.FC = () => {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [testMessages, setTestMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [testInput, setTestInput] = useState('');
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [comparisonPromptInput, setComparisonPromptInput] = useState('');
+  const [comparisonModelIds, setComparisonModelIds] = useState<string[]>([]);
+  const [comparisonExecutedPrompt, setComparisonExecutedPrompt] = useState<string | null>(null);
 
   useEffect(() => {
     if (existingTutor) {
@@ -114,7 +118,169 @@ const TutorEditorPage: React.FC = () => {
     }
   }, [existingTutor]);
 
+  const canPublish = useMemo(() => {
+    return formData.name.trim().length > 0 && formData.subject.trim().length > 0;
+  }, [formData.name, formData.subject]);
+
+  const currentModel = useMemo(
+    () => availableModels.find((model) => model.id === formData.model) || availableModels[0] || null,
+    [availableModels, formData.model],
+  );
+
+  const didacticModeExplanation = useMemo(() => {
+    const explanations: Record<string, { title: string; effect: string; system: string; teacher: string }> = {
+      'socratic': {
+        title: 'Sokratisch',
+        effect: 'stellt Rückfragen und führt über Denken zur Lösung',
+        system: 'Bevorzuge Fragen statt fertiger Lösungen und fordere Begründungen ein.',
+        teacher: 'Füge konkrete Leitfragen und typische Denkfehler hinzu.',
+      },
+      'hints': {
+        title: 'Hinweise',
+        effect: 'gibt gezielte Hinweise statt direkter Lösungen',
+        system: 'Antworte mit kurzen Tipps, die den nächsten sinnvollen Schritt zeigen.',
+        teacher: 'Formuliere, wann der Tutor stoppen und nur andeuten soll.',
+      },
+      'step-by-step': {
+        title: 'Schritt für Schritt',
+        effect: 'zerlegt Antworten in kleine, nachvollziehbare Schritte',
+        system: 'Gliedere Erklärungen in nummerierte Schritte und prüfe das Verständnis zwischendurch.',
+        teacher: 'Definiere die gewünschte Detailtiefe und wann Beispiele verwendet werden sollen.',
+      },
+      'concise': {
+        title: 'Kurz & präzise',
+        effect: 'hält Antworten knapp und direkt',
+        system: 'Bleibe knapp, liefere die Kernaussage zuerst und vermeide Umwege.',
+        teacher: 'Lege fest, wie kurz die Antwort maximal sein soll.',
+      },
+    };
+
+    return explanations[formData.didacticMode] || explanations['step-by-step'];
+  }, [formData.didacticMode]);
+
+  const didacticPromptExamples = useMemo(() => {
+    const examples: Record<string, string[]> = {
+      'socratic': [
+        'Welche Information fehlt dir noch, um die Aufgabe selbst zu lösen?',
+        'Kannst du den ersten Schritt der Lösung in eigenen Worten beschreiben?',
+        'Warum könnte dieser Weg besser sein als ein direkter Lösungsweg?',
+      ],
+      'hints': [
+        'Gib mir nur einen Hinweis, nicht die ganze Lösung.',
+        'Welche Formel oder Regel könnte hier weiterhelfen?',
+        'Zeig mir den nächsten Schritt, aber löse es nicht komplett auf.',
+      ],
+      'step-by-step': [
+        'Erkläre die Aufgabe Schritt für Schritt mit einem kleinen Beispiel.',
+        'Zeige mir jeden Rechenschritt und erkläre kurz, warum er nötig ist.',
+        'Führe mich langsam durch die Lösung und prüfe nach jedem Schritt mein Verständnis.',
+      ],
+      'concise': [
+        'Gib mir eine kurze, direkte Erklärung in 3 Sätzen.',
+        'Fasse die wichtigste Regel knapp zusammen.',
+        'Nenne nur die entscheidenden Schritte ohne Zusatzdetails.',
+      ],
+    };
+
+    return examples[formData.didacticMode] || examples['step-by-step'];
+  }, [formData.didacticMode]);
+
+  const promptPreview = useMemo(() => {
+    const generatedSystem = [
+      `Du bist ein ${formData.subject || 'Fach'}-Tutor für Schülerinnen und Schüler.`,
+      `Arbeite nach der Lernmethode "${didacticModeExplanation.title}".`,
+      didacticModeExplanation.system,
+      formData.showSources ? 'Nenne verwendete Quellen, wenn sie hilfreich sind.' : 'Nenne keine Quellen, außer sie werden explizit verlangt.',
+      formData.safetyRules.noPersonalData ? 'Fordere keine personenbezogenen Daten an.' : '',
+      formData.safetyRules.noFullSolutions ? 'Gib keine kompletten Lösungen bei Hausaufgaben.' : '',
+    ].filter(Boolean).join(' ');
+
+    const teacherPrompt = formData.systemPrompt.trim() || `Erkläre Inhalte verständlich und geduldig. Fokus: ${formData.description || 'kein zusätzlicher Fokus angegeben'}.`;
+
+    const finalPrompt = [globalSettings.systemPrompt, generatedSystem, teacherPrompt].join('\n\n');
+
+    return { generatedSystem, teacherPrompt, finalPrompt };
+  }, [didacticModeExplanation.system, didacticModeExplanation.title, formData.description, formData.safetyRules.noFullSolutions, formData.safetyRules.noPersonalData, formData.showSources, formData.subject, formData.systemPrompt, globalSettings.systemPrompt]);
+
+  const comparisonModels = useMemo(() => availableModels.slice(0, 3), [availableModels]);
+  const comparisonPrompt = comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach';
+
+  const comparisonSelectedModels = useMemo(() => {
+    const selected = comparisonModelIds
+      .map((modelId) => availableModels.find((model) => model.id === modelId))
+      .filter((model): model is (typeof availableModels)[number] => Boolean(model));
+
+    if (selected.length > 0) return selected;
+    return comparisonModels;
+  }, [availableModels, comparisonModelIds, comparisonModels]);
+
+  useEffect(() => {
+    if (comparisonOpen && comparisonModelIds.length === 0 && comparisonModels.length > 0) {
+      setComparisonModelIds(comparisonModels.map((model) => model.id));
+    }
+  }, [comparisonModelIds.length, comparisonModels, comparisonOpen]);
+
+  useEffect(() => {
+    if (!comparisonOpen) return;
+
+    const validIds = comparisonModelIds.filter((modelId) => availableModels.some((model) => model.id === modelId));
+    if (validIds.length !== comparisonModelIds.length) {
+      setComparisonModelIds(validIds);
+    }
+  }, [availableModels, comparisonModelIds, comparisonOpen]);
+
+  const toggleComparisonModel = (modelId: string) => {
+    setComparisonModelIds((prev) => (
+      prev.includes(modelId)
+        ? prev.filter((id) => id !== modelId)
+        : [...prev, modelId]
+    ));
+  };
+
+  const buildComparisonResponse = (modelName: string, providerName: string, modelCost: number, prompt: string) => {
+    const style = formData.didacticMode === 'socratic'
+      ? 'fragt zuerst nach dem Denkweg'
+      : formData.didacticMode === 'hints'
+        ? 'gibt vorsichtige Hinweise'
+        : formData.didacticMode === 'concise'
+          ? 'antwortet knapp und direkt'
+          : 'erklärt sehr schrittweise';
+
+    const depth = modelCost >= 0.01 ? 'detailreich' : 'kostenbewusst';
+    return `${modelName} (${providerName}) würde ${depth} und ${style} antworten auf: "${prompt}"`;
+  };
+
+  const modelScore = (modelCost: number, maxTokens: number) => {
+    const efficiency = Math.max(12, Math.round(42 / Math.max(0.00025, modelCost)));
+    const capacity = Math.min(28, Math.round(maxTokens / 6000));
+    const clarity = formData.didacticMode === 'step-by-step' ? 22 : formData.didacticMode === 'concise' ? 16 : 18;
+    return Math.min(100, Math.max(35, efficiency + capacity + clarity));
+  };
+
+  const modelTokenStats = (prompt: string, modelCost: number, maxTokens: number) => {
+    const promptTokens = Math.max(18, Math.round(prompt.length / 3.5));
+    const responseTokens = Math.max(48, Math.min(Math.round(80 + maxTokens / 180), 260));
+    const totalTokens = promptTokens + responseTokens;
+    const estimatedCost = ((totalTokens / 1000) * modelCost).toFixed(4);
+
+    return {
+      promptTokens,
+      responseTokens,
+      totalTokens,
+      estimatedCost,
+    };
+  };
+
   const handleSave = (publish: boolean = false) => {
+    if (publish && !canPublish) {
+      toast({
+        title: 'Fehler',
+        description: 'Bitte fülle alle Pflichtfelder aus (Name und Fach), bevor du veröffentlichst.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!formData.name || !formData.subject) {
       toast({
         title: 'Fehler',
@@ -216,7 +382,7 @@ const TutorEditorPage: React.FC = () => {
             <Save className="w-4 h-4 mr-1" />
             Als Entwurf speichern
           </Button>
-          <Button size="sm" onClick={() => handleSave(true)}>
+          <Button size="sm" onClick={() => handleSave(true)} disabled={!canPublish}>
             <Eye className="w-4 h-4 mr-1" />
             Veröffentlichen
           </Button>
@@ -433,6 +599,37 @@ const TutorEditorPage: React.FC = () => {
                   </div>
                 </div>
 
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Prompt-Beispiele zur Lernmethode</CardTitle>
+                    <CardDescription>
+                      Diese Beispiele zeigen, wie sich die aktuell gewählte Lernmethode auf Prompts auswirkt.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="rounded-lg border bg-muted/25 p-3">
+                      <p className="text-sm font-medium">{didacticModeExplanation.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{didacticModeExplanation.effect}</p>
+                    </div>
+                    <div className="space-y-2">
+                      {didacticPromptExamples.map((example) => (
+                        <button
+                          key={example}
+                          type="button"
+                          className="flex w-full items-center justify-between rounded-lg border bg-background px-3 py-2 text-left text-sm transition-colors hover:bg-muted/40"
+                          onClick={() => setFormData(prev => ({ ...prev, systemPrompt: prev.systemPrompt.trim() || example }))}
+                        >
+                          <span className="pr-3">{example}</span>
+                          <Badge variant="secondary" className="shrink-0">Beispiel</Badge>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Klick auf ein Beispiel übernimmt es nur dann in das Anweisungsfeld, wenn dort noch kein Text steht.
+                    </p>
+                  </CardContent>
+                </Card>
+
                 {/* System Prompt */}
                 <div className="space-y-2">
                   <Label htmlFor="systemPrompt">
@@ -542,6 +739,82 @@ const TutorEditorPage: React.FC = () => {
                     Der globale Systemprompt der Schule wird automatisch zu jedem Tutor hinzugefügt.
                   </AlertDescription>
                 </Alert>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Prompt-Struktur</CardTitle>
+                    <CardDescription>
+                      So setzt sich der Prompt aus System, Lernmethode und deinem Text zusammen
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 lg:grid-cols-3">
+                      <div className="rounded-lg border bg-muted/30 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">System generiert</p>
+                        <p className="mt-2 text-sm font-medium">{didacticModeExplanation.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{didacticModeExplanation.effect}</p>
+                      </div>
+                      <div className="rounded-lg border bg-muted/30 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Von der Lehrkraft</p>
+                        <p className="mt-2 text-sm font-medium">Freitext, Aufgabe und Spezialregeln</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{didacticModeExplanation.teacher}</p>
+                      </div>
+                      <div className="rounded-lg border bg-muted/30 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Auswirkung auf den Prompt</p>
+                        <p className="mt-2 text-sm font-medium">{currentModel?.name || 'Modell wählen'}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Die Lernmethode bestimmt Ton, Tiefe und wie direkt das Modell antwortet.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="rounded-lg border p-4">
+                        <p className="text-sm font-semibold">System generiert</p>
+                        <pre className="mt-3 whitespace-pre-wrap rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-muted-foreground">
+{promptPreview.generatedSystem}
+                        </pre>
+                      </div>
+                      <div className="rounded-lg border p-4">
+                        <p className="text-sm font-semibold">Lehrkraft schreibt</p>
+                        <pre className="mt-3 whitespace-pre-wrap rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-muted-foreground">
+{promptPreview.teacherPrompt}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm font-semibold">Finaler Prompt</p>
+                      <pre className="mt-3 max-h-56 overflow-auto whitespace-pre-wrap rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-muted-foreground">
+{promptPreview.finalPrompt}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {canPublish ? (
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="flex items-center justify-between gap-3 p-4">
+                      <div>
+                        <p className="font-medium text-sm">Bereit zum Veröffentlichen</p>
+                        <p className="text-xs text-muted-foreground">
+                          Name und Fach sind ausgefüllt, du kannst den Tutor jetzt freigeben.
+                        </p>
+                      </div>
+                      <Button onClick={() => handleSave(true)}>
+                        <Eye className="w-4 h-4 mr-1" />
+                        Veröffentlichen
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      Sobald Name und Fach ausgefüllt sind, erscheint hier der Veröffentlichungs-Button.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </TabsContent>
 
               {/* Tab 3: Knowledge Base & Assignment */}
@@ -692,6 +965,157 @@ const TutorEditorPage: React.FC = () => {
                         </Button>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-sm">Modellvergleich</CardTitle>
+                        <CardDescription>
+                          Starte hier einen Vergleich mit mehreren Modellen, gib einen Prompt ein und sieh Antworten, Tokens und Kosten nebeneinander.
+                        </CardDescription>
+                      </div>
+                      {!comparisonOpen ? (
+                        <Button size="sm" onClick={() => {
+                          setComparisonOpen(true);
+                          setComparisonModelIds((prev) => prev.length > 0 ? prev : comparisonModels.map((model) => model.id));
+                          setComparisonPromptInput((prev) => prev || 'Erkläre mir das Thema einfach');
+                        }}>
+                          Vergleich starten
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => setComparisonOpen(false)}>
+                          Vergleich schließen
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {!comparisonOpen ? (
+                      <Alert>
+                        <Bot className="h-4 w-4" />
+                        <AlertDescription className="text-xs">
+                          Öffne den Vergleich, wähle 1 bis 3 Modelle aus und starte dann einen Testprompt.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <Label>Modelle auswählen</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {availableModels.map((model) => {
+                              const selected = comparisonModelIds.includes(model.id);
+                              return (
+                                <Button
+                                  key={model.id}
+                                  type="button"
+                                  variant={selected ? 'default' : 'outline'}
+                                  size="sm"
+                                  className="text-xs"
+                                  onClick={() => toggleComparisonModel(model.id)}
+                                >
+                                  {model.name} {selected ? '• aktiv' : ''}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="comparisonPrompt">Vergleichs-Prompt</Label>
+                          <Textarea
+                            id="comparisonPrompt"
+                            value={comparisonPromptInput}
+                            onChange={(event) => setComparisonPromptInput(event.target.value)}
+                            rows={3}
+                            placeholder="Schreibe hier deinen Testprompt..."
+                          />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {examplePrompts.map((prompt, index) => (
+                            <Button
+                              key={prompt}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => setComparisonPromptInput(prompt)}
+                            >
+                              Beispiel {index + 1}
+                            </Button>
+                          ))}
+                          <Button
+                            size="sm"
+                            onClick={() => setComparisonExecutedPrompt(comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach')}
+                            disabled={comparisonModelIds.length === 0}
+                          >
+                            Vergleich ausführen
+                          </Button>
+                        </div>
+
+                        {comparisonExecutedPrompt ? (
+                          <div className="space-y-3">
+                            <div className="rounded-lg border bg-muted/25 p-3 text-sm">
+                              <p className="font-medium">Prompt</p>
+                              <p className="mt-1 text-muted-foreground">{comparisonExecutedPrompt}</p>
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                Auswahl: {comparisonSelectedModels.length} Modell{comparisonSelectedModels.length === 1 ? '' : 'e'}
+                              </p>
+                            </div>
+
+                            <div className="grid gap-3">
+                              {comparisonSelectedModels.map((model) => {
+                                const stats = modelTokenStats(comparisonExecutedPrompt, model.costPer1kTokens, model.maxTokens);
+                                const response = buildComparisonResponse(model.name, model.providerName, model.costPer1kTokens, comparisonExecutedPrompt);
+
+                                return (
+                                  <div key={model.id} className="rounded-lg border p-4">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <p className="font-semibold text-sm">{model.name}</p>
+                                        <p className="text-xs text-muted-foreground">{model.providerName}</p>
+                                      </div>
+                                      <Badge variant="secondary">{modelScore(model.costPer1kTokens, model.maxTokens)}/100</Badge>
+                                    </div>
+
+                                    <div className="mt-3 space-y-3 text-sm">
+                                      <p className="rounded-md bg-muted/40 p-3">{response}</p>
+                                      <div className="grid gap-2 sm:grid-cols-4 text-xs text-muted-foreground">
+                                        <div className="rounded-md border bg-muted/20 p-2">
+                                          <span className="block font-medium text-foreground">Prompt Tokens</span>
+                                          {stats.promptTokens}
+                                        </div>
+                                        <div className="rounded-md border bg-muted/20 p-2">
+                                          <span className="block font-medium text-foreground">Antwort Tokens</span>
+                                          {stats.responseTokens}
+                                        </div>
+                                        <div className="rounded-md border bg-muted/20 p-2">
+                                          <span className="block font-medium text-foreground">Gesamt Tokens</span>
+                                          {stats.totalTokens}
+                                        </div>
+                                        <div className="rounded-md border bg-muted/20 p-2">
+                                          <span className="block font-medium text-foreground">Kosten</span>
+                                          {stats.estimatedCost} €
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <Alert>
+                            <Bot className="h-4 w-4" />
+                            <AlertDescription className="text-xs">
+                              Wähle Modelle aus, schreibe einen Prompt und starte den Vergleich.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
