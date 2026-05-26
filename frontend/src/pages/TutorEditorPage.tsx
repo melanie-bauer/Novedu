@@ -50,7 +50,7 @@ const TutorEditorPage: React.FC = () => {
   const { tutors, addTutor, updateTutor, globalSettings } = useData();
   const { toast } = useToast();
   
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
   const existingTutor = isNew ? null : tutors.find(t => t.id === id);
 
   // Get all enabled models from providers
@@ -161,23 +161,23 @@ const TutorEditorPage: React.FC = () => {
   const didacticPromptExamples = useMemo(() => {
     const examples: Record<string, string[]> = {
       'socratic': [
-        'Welche Information fehlt dir noch, um die Aufgabe selbst zu lösen?',
-        'Kannst du den ersten Schritt der Lösung in eigenen Worten beschreiben?',
-        'Warum könnte dieser Weg besser sein als ein direkter Lösungsweg?',
+        'Stelle zuerst Rückfragen und fordere Begründungen ein, bevor du erklärst.',
+        'Führe Lernende mit Leitfragen Schritt für Schritt zur Lösung.',
+        'Gib keine fertige Lösung, sondern begleite nur den Denkprozess.',
       ],
       'hints': [
-        'Gib mir nur einen Hinweis, nicht die ganze Lösung.',
-        'Welche Formel oder Regel könnte hier weiterhelfen?',
-        'Zeig mir den nächsten Schritt, aber löse es nicht komplett auf.',
+        'Gib kurze Hinweise statt vollständiger Lösungen.',
+        'Nenne nur den nächsten sinnvollen Schritt und stoppe danach.',
+        'Lass Lernende selbst rechnen; gib nur Tipps und benötigte Formeln.',
       ],
       'step-by-step': [
-        'Erkläre die Aufgabe Schritt für Schritt mit einem kleinen Beispiel.',
-        'Zeige mir jeden Rechenschritt und erkläre kurz, warum er nötig ist.',
-        'Führe mich langsam durch die Lösung und prüfe nach jedem Schritt mein Verständnis.',
+        'Erkläre in nummerierten Schritten und prüfe das Verständnis zwischendurch.',
+        'Zerlege Aufgaben in kleine Schritte und gib kurze Beispiele.',
+        'Zeige jeden Rechenschritt mit einer kurzen Begründung.',
       ],
       'concise': [
-        'Gib mir eine kurze, direkte Erklärung in 3 Sätzen.',
-        'Fasse die wichtigste Regel knapp zusammen.',
+        'Antworte sehr knapp und nenne die Kernaussage zuerst.',
+        'Beschränke dich auf wenige Sätze und vermeide Ausschweifungen.',
         'Nenne nur die entscheidenden Schritte ohne Zusatzdetails.',
       ],
     };
@@ -370,7 +370,7 @@ const TutorEditorPage: React.FC = () => {
           </Button>
           <div>
             <h1 className="font-semibold">
-              {isNew ? 'Neuer Tutor erstellen' : `${existingTutor?.name} bearbeiten`}
+              {isNew ? 'Neuen Tutor erstellen' : `${existingTutor?.name ?? 'Tutor'} bearbeiten`}
             </h1>
             <p className="text-xs text-muted-foreground">
               {formData.status === 'published' ? 'Veröffentlicht' : 'Entwurf'}
