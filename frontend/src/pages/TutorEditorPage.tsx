@@ -10,7 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -35,13 +34,57 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { TutorConfig } from '@/types';
 import { modelOptions, subjectOptions, tutorIcons, didacticModes, mockAIProviders } from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, Eye, Upload, FileText, X, Info, Send, Bot, User, ChevronDown, HelpCircle, Calendar as CalendarIcon, Lightbulb } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Upload,
+  FileText,
+  X,
+  Info,
+  Send,
+  Bot,
+  User,
+  ChevronDown,
+  HelpCircle,
+  Calendar as CalendarIcon,
+  Lightbulb,
+  Check,
+  ChevronsUpDown,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+
+const comparisonPromptExamples = [
+  { id: 'example-1', label: 'Beispiel 1', defaultPrompt: 'Erkläre mir das Thema einfach' },
+  { id: 'example-2', label: 'Beispiel 2', defaultPrompt: 'Kannst du mir ein Beispiel geben?' },
+  { id: 'example-3', label: 'Beispiel 3', defaultPrompt: 'Ich verstehe das nicht' },
+] as const;
+
+type ComparisonPromptExampleId = (typeof comparisonPromptExamples)[number]['id'];
+
+const createComparisonPromptStore = () => ({
+  activeExampleId: comparisonPromptExamples[0].id as ComparisonPromptExampleId,
+  prompts: comparisonPromptExamples.reduce(
+    (acc, example) => {
+      acc[example.id] = example.defaultPrompt;
+      return acc;
+    },
+    {} as Record<ComparisonPromptExampleId, string>,
+  ),
+});
 
 const TutorEditorPage: React.FC = () => {
   const { id } = useParams();
@@ -72,14 +115,9 @@ const TutorEditorPage: React.FC = () => {
     maxTokens: 2048,
     icon: '📚',
     didacticMode: 'step-by-step' as string,
-    safetyRules: {
-      noPersonalData: true,
-      noFullSolutions: true,
-    },
     showSources: true,
     assignedClasses: [] as string[],
     assignedStudents: [] as string[],
-    isEnabled: true,
     status: 'draft' as 'draft' | 'published',
     expiresAt: null as Date | null,
     assignment: '',
@@ -88,8 +126,9 @@ const TutorEditorPage: React.FC = () => {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [testMessages, setTestMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [testInput, setTestInput] = useState('');
+  const [subjectPickerOpen, setSubjectPickerOpen] = useState(false);
   const [comparisonOpen, setComparisonOpen] = useState(false);
-  const [comparisonPromptInput, setComparisonPromptInput] = useState('');
+  const [comparisonPromptStore, setComparisonPromptStore] = useState(createComparisonPromptStore);
   const [comparisonModelIds, setComparisonModelIds] = useState<string[]>([]);
   const [comparisonExecutedPrompt, setComparisonExecutedPrompt] = useState<string | null>(null);
   const [comparisonExecutedModels, setComparisonExecutedModels] = useState<typeof availableModels>([]);
@@ -107,11 +146,9 @@ const TutorEditorPage: React.FC = () => {
         maxTokens: existingTutor.maxTokens,
         icon: existingTutor.icon,
         didacticMode: existingTutor.didacticMode || 'step-by-step',
-        safetyRules: existingTutor.safetyRules || { noPersonalData: true, noFullSolutions: true },
         showSources: existingTutor.showSources ?? true,
         assignedClasses: existingTutor.assignedClasses,
         assignedStudents: existingTutor.assignedStudents,
-        isEnabled: existingTutor.isEnabled,
         status: existingTutor.status,
         expiresAt: existingTutor.expiresAt ? new Date(existingTutor.expiresAt) : null,
         assignment: existingTutor.assignment || '',
@@ -137,11 +174,19 @@ const TutorEditorPage: React.FC = () => {
   };
 
   const tokenUsageBadgeClass = (costPer1kTokens: number) => {
-    if (costPer1kTokens <= 0.001) return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
-    if (costPer1kTokens <= 0.002) return 'bg-green-500/15 text-green-300 border border-green-500/30';
-    if (costPer1kTokens <= 0.004) return 'bg-amber-500/15 text-amber-300 border border-amber-500/30';
-    if (costPer1kTokens <= 0.006) return 'bg-orange-500/15 text-orange-300 border border-orange-500/30';
-    return 'bg-red-500/15 text-red-300 border border-red-500/30';
+    if (costPer1kTokens <= 0.001) {
+      return 'border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300';
+    }
+    if (costPer1kTokens <= 0.002) {
+      return 'border border-green-200 bg-green-50 text-green-800 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-300';
+    }
+    if (costPer1kTokens <= 0.004) {
+      return 'border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300';
+    }
+    if (costPer1kTokens <= 0.006) {
+      return 'border border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-300';
+    }
+    return 'border border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300';
   };
 
   const didacticModeExplanation = useMemo(() => {
@@ -208,8 +253,6 @@ const TutorEditorPage: React.FC = () => {
       `Arbeite nach der Lernmethode "${didacticModeExplanation.title}".`,
       didacticModeExplanation.system,
       formData.showSources ? 'Nenne verwendete Quellen, wenn sie hilfreich sind.' : 'Nenne keine Quellen, außer sie werden explizit verlangt.',
-      formData.safetyRules.noPersonalData ? 'Fordere keine personenbezogenen Daten an.' : '',
-      formData.safetyRules.noFullSolutions ? 'Gib keine kompletten Lösungen bei Hausaufgaben.' : '',
     ].filter(Boolean).join(' ');
 
     const teacherPrompt = formData.systemPrompt.trim() || `Erkläre Inhalte verständlich und geduldig. Fokus: ${formData.description || 'kein zusätzlicher Fokus angegeben'}.`;
@@ -217,13 +260,37 @@ const TutorEditorPage: React.FC = () => {
     const finalPrompt = [globalSettings.systemPrompt, generatedSystem, teacherPrompt].join('\n\n');
 
     return { generatedSystem, teacherPrompt, finalPrompt };
-  }, [didacticModeExplanation.system, didacticModeExplanation.title, formData.description, formData.safetyRules.noFullSolutions, formData.safetyRules.noPersonalData, formData.showSources, formData.subject, formData.systemPrompt, globalSettings.systemPrompt]);
+  }, [didacticModeExplanation.system, didacticModeExplanation.title, formData.description, formData.showSources, formData.subject, formData.systemPrompt, globalSettings.systemPrompt]);
 
   const comparisonSelectedModels = useMemo(() => {
     return comparisonModelIds
       .map((modelId) => availableModels.find((model) => model.id === modelId))
       .filter((model): model is (typeof availableModels)[number] => Boolean(model));
   }, [availableModels, comparisonModelIds]);
+
+  const activeComparisonPrompt = comparisonPromptStore.prompts[comparisonPromptStore.activeExampleId] || '';
+
+  const updateComparisonPrompt = (nextPrompt: string) => {
+    setComparisonPromptStore((prev) => ({
+      ...prev,
+      prompts: {
+        ...prev.prompts,
+        [prev.activeExampleId]: nextPrompt,
+      },
+    }));
+  };
+
+  const selectComparisonPromptExample = (exampleId: ComparisonPromptExampleId) => {
+    setComparisonPromptStore((prev) => ({
+      ...prev,
+      activeExampleId: exampleId,
+    }));
+  };
+
+  const getComparisonPromptFallback = (exampleId: ComparisonPromptExampleId) =>
+    comparisonPromptExamples.find((example) => example.id === exampleId)?.defaultPrompt || comparisonPromptExamples[0].defaultPrompt;
+
+  const examplePrompts = comparisonPromptExamples.map((example) => example.defaultPrompt);
 
   const pickComparisonDefaults = () => {
     if (availableModels.length <= 3) return availableModels.map((model) => model.id);
@@ -384,14 +451,14 @@ const TutorEditorPage: React.FC = () => {
       createdBy: existingTutor?.createdBy || user!.id,
       createdAt: existingTutor?.createdAt || new Date(),
       updatedAt: new Date(),
-      isEnabled: formData.isEnabled,
+      isEnabled: publish,
       status: publish ? 'published' : formData.status,
       assignedClasses: formData.assignedClasses,
       assignedStudents: formData.assignedStudents,
       icon: formData.icon,
       color: 'blue',
       didacticMode: formData.didacticMode as any,
-      safetyRules: formData.safetyRules,
+      safetyRules: undefined,
       showSources: formData.showSources,
       expiresAt: formData.expiresAt || undefined,
       assignment: formData.assignment || undefined,
@@ -435,12 +502,6 @@ const TutorEditorPage: React.FC = () => {
     }, 500);
   };
 
-  const examplePrompts = [
-    'Erkläre mir das Thema einfach',
-    'Kannst du mir ein Beispiel geben?',
-    'Ich verstehe das nicht',
-  ];
-
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -473,7 +534,7 @@ const TutorEditorPage: React.FC = () => {
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="basic" className="h-full flex flex-col">
-          <div className="px-6 pt-4 border-b bg-card">
+          <div className="flex items-center justify-center border-b bg-card px-6 py-4">
             <TabsList className="w-full max-w-3xl grid grid-cols-4">
               <TabsTrigger value="basic">Basis</TabsTrigger>
               <TabsTrigger value="behavior">Verhalten</TabsTrigger>
@@ -516,19 +577,52 @@ const TutorEditorPage: React.FC = () => {
                       Fach *
                       <span className="text-xs text-muted-foreground ml-2">Für welches Fach?</span>
                     </Label>
-                    <Select 
-                      value={formData.subject} 
-                      onValueChange={v => setFormData(prev => ({ ...prev, subject: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Fach wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subjectOptions.map(subject => (
-                          <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={subjectPickerOpen} onOpenChange={setSubjectPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="subject"
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={subjectPickerOpen}
+                          className={cn(
+                            'w-full justify-between font-normal',
+                            !formData.subject && 'text-muted-foreground',
+                          )}
+                        >
+                          {formData.subject || 'Fach wählen'}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <Command>
+                          <CommandInput className="h-9" placeholder="Fach suchen..." />
+                          <CommandList className="max-h-52">
+                            <CommandEmpty>Kein Fach gefunden.</CommandEmpty>
+                            <CommandGroup>
+                              {subjectOptions.map((subject) => (
+                                <CommandItem
+                                  key={subject}
+                                  value={subject}
+                                  className="py-2"
+                                  onSelect={() => {
+                                    setFormData((prev) => ({ ...prev, subject }));
+                                    setSubjectPickerOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      formData.subject === subject ? 'opacity-100' : 'opacity-0',
+                                    )}
+                                  />
+                                  {subject}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
 
@@ -606,20 +700,6 @@ const TutorEditorPage: React.FC = () => {
                   </Popover>
                 </div>
 
-                <Card>
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div>
-                      <p className="font-medium text-sm">Tutor aktiviert</p>
-                      <p className="text-xs text-muted-foreground">
-                        Wenn aktiviert, können zugewiesene Schüler diesen Tutor nutzen
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.isEnabled}
-                      onCheckedChange={v => setFormData(prev => ({ ...prev, isEnabled: v }))}
-                    />
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               {/* Tab 2: Behavior */}
@@ -634,16 +714,16 @@ const TutorEditorPage: React.FC = () => {
                     value={formData.model} 
                     onValueChange={v => setFormData(prev => ({ ...prev, model: v }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-50 [&>span]:text-slate-950 dark:[&>span]:text-slate-50">
                       <SelectValue placeholder="Modell wählen" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-50">
                       {availableModels.map(model => (
-                        <SelectItem key={model.id} value={model.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{model.name}</span>
-                            <span className="text-xs text-muted-foreground">({model.providerName})</span>
-                            <Badge variant="secondary" className={cn('text-[10px]', tokenUsageBadgeClass(model.costPer1kTokens))}>
+                        <SelectItem key={model.id} value={model.id} className="py-2 focus:bg-slate-100 dark:focus:bg-slate-800">
+                          <div className="flex w-full items-center gap-2 pr-2">
+                            <span className="font-medium text-slate-950 dark:text-slate-50">{model.name}</span>
+                            <span className="text-xs text-slate-600 dark:text-slate-400">({model.providerName})</span>
+                            <Badge variant="secondary" className={cn('ml-auto text-[10px] font-semibold', tokenUsageBadgeClass(model.costPer1kTokens))}>
                               {tokenUsageLabel(model.costPer1kTokens)}
                             </Badge>
                           </div>
@@ -652,7 +732,7 @@ const TutorEditorPage: React.FC = () => {
                     </SelectContent>
                   </Select>
                   {availableModels.find(m => m.id === formData.model)?.description && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-700 dark:text-slate-300">
                       {availableModels.find(m => m.id === formData.model)?.description}
                     </p>
                   )}
@@ -732,42 +812,6 @@ const TutorEditorPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Safety Rules */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Sicherheitsregeln</CardTitle>
-                    <CardDescription>Schütze deine Schüler vor unerwünschten Inhalten</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="noPersonalData"
-                        checked={formData.safetyRules.noPersonalData}
-                        onCheckedChange={v => setFormData(prev => ({
-                          ...prev,
-                          safetyRules: { ...prev.safetyRules, noPersonalData: v as boolean }
-                        }))}
-                      />
-                      <Label htmlFor="noPersonalData" className="text-sm font-normal">
-                        Keine personenbezogenen Daten anfordern
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="noFullSolutions"
-                        checked={formData.safetyRules.noFullSolutions}
-                        onCheckedChange={v => setFormData(prev => ({
-                          ...prev,
-                          safetyRules: { ...prev.safetyRules, noFullSolutions: v as boolean }
-                        }))}
-                      />
-                      <Label htmlFor="noFullSolutions" className="text-sm font-normal">
-                        Keine kompletten Lösungen bei Hausaufgaben (nur Hilfestellung)
-                      </Label>
-                    </div>
-                  </CardContent>
-                </Card>
-
                 {/* Advanced Settings */}
                 <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
                   <CollapsibleTrigger asChild>
@@ -828,7 +872,7 @@ const TutorEditorPage: React.FC = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm">Prompt-Struktur</CardTitle>
                     <CardDescription>
-                      So setzt sich der Prompt aus System, Lernmethode und deinem Text zusammen
+                      So setzt sich der finale Prompt aus System, Lernmethode und deinem Text zusammen.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -840,14 +884,19 @@ const TutorEditorPage: React.FC = () => {
                       </div>
                       <div className="rounded-lg border bg-muted/30 p-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Von der Lehrkraft</p>
-                        <p className="mt-2 text-sm font-medium">Freitext, Aufgabe und Spezialregeln</p>
+                        <p className="mt-2 text-sm font-medium">Freitext, Aufgabe und Zusatzhinweise</p>
                         <p className="mt-1 text-xs text-muted-foreground">{didacticModeExplanation.teacher}</p>
                       </div>
                       <div className="rounded-lg border bg-muted/30 p-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Auswirkung auf den Prompt</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Aktuelles Modell</p>
                         <p className="mt-2 text-sm font-medium">{currentModel?.name || 'Modell wählen'}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Die Lernmethode bestimmt Ton, Tiefe und wie direkt das Modell antwortet.
+                          {currentModel
+                            ? `${currentModel.providerName} · ${tokenUsageLabel(currentModel.costPer1kTokens)}`
+                            : 'Das ausgewählte Modell verarbeitet den fertigen Prompt.'}
+                        </p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Die Lernmethode oben ändert den Inhalt des Prompts. Das Modell hier ist nur die Engine, die darauf antwortet.
                         </p>
                       </div>
                     </div>
@@ -1065,7 +1114,6 @@ const TutorEditorPage: React.FC = () => {
                         <Button size="sm" onClick={() => {
                           setComparisonOpen(true);
                           setComparisonModelIds((prev) => (prev.length > 0 ? prev : pickComparisonDefaults()));
-                          setComparisonPromptInput((prev) => prev || 'Erkläre mir das Thema einfach');
                         }} disabled={availableModels.length < 2}>
                           Vergleich öffnen
                         </Button>
@@ -1113,36 +1161,42 @@ const TutorEditorPage: React.FC = () => {
                           <Label htmlFor="comparisonPrompt">Test-Prompt</Label>
                           <Textarea
                             id="comparisonPrompt"
-                            value={comparisonPromptInput}
-                            onChange={(event) => setComparisonPromptInput(event.target.value)}
+                            value={activeComparisonPrompt}
+                            onChange={(event) => updateComparisonPrompt(event.target.value)}
                             rows={3}
                             placeholder="Was soll das Modell beantworten?"
                           />
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          {examplePrompts.map((prompt, index) => (
+                          {comparisonPromptExamples.map((example) => (
                             <Button
-                              key={prompt}
-                              variant="outline"
+                              key={example.id}
+                              variant={comparisonPromptStore.activeExampleId === example.id ? 'default' : 'outline'}
                               size="sm"
                               className="text-xs"
-                              onClick={() => setComparisonPromptInput(prompt)}
+                              onClick={() => selectComparisonPromptExample(example.id)}
                             >
-                              Beispiel {index + 1}
+                              {example.label}
                             </Button>
                           ))}
                           <Button
                             size="sm"
                             onClick={() => {
                               setComparisonExecutedModels(comparisonSelectedModels);
-                              setComparisonExecutedPrompt(comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach');
+                              setComparisonExecutedPrompt(
+                                activeComparisonPrompt.trim() || getComparisonPromptFallback(comparisonPromptStore.activeExampleId),
+                              );
                             }}
                             disabled={comparisonModelIds.length < 2}
                           >
                             Vergleich starten
                           </Button>
                         </div>
+
+                        <p className="text-xs text-muted-foreground">
+                          Jedes Beispiel speichert jetzt seinen eigenen Text. Du kannst also zwischen Beispiel 1 bis 3 wechseln, ohne Eingaben zu verlieren.
+                        </p>
 
                         {comparisonExecutedPrompt ? (
                           <div className="space-y-3">

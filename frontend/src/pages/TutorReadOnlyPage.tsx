@@ -173,22 +173,12 @@ const TutorReadOnlyPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BookOpen className="h-4 w-4" />
-                  Lern- und Sicherheitseinstellungen
+                  Lerneinstellungen
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 <InfoTile label="Lernmethode" value={didacticMode?.label || 'Nicht gesetzt'} icon={BookOpen} />
                 <InfoTile label="Quellen anzeigen" value={booleanLabel(tutor.showSources)} icon={FileText} />
-                <InfoTile
-                  label="Keine personenbezogenen Daten"
-                  value={booleanLabel(tutor.safetyRules?.noPersonalData)}
-                  icon={ShieldCheck}
-                />
-                <InfoTile
-                  label="Keine Voll-Lösungen"
-                  value={booleanLabel(tutor.safetyRules?.noFullSolutions)}
-                  icon={ShieldCheck}
-                />
               </CardContent>
             </Card>
           </div>
