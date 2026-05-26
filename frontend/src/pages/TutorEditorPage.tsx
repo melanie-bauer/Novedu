@@ -128,6 +128,22 @@ const TutorEditorPage: React.FC = () => {
     [availableModels, formData.model],
   );
 
+  const tokenUsageLabel = (costPer1kTokens: number) => {
+    if (costPer1kTokens <= 0.001) return 'wenig Tokenverbrauch';
+    if (costPer1kTokens <= 0.002) return 'geringere Tokenverbrauch';
+    if (costPer1kTokens <= 0.004) return 'mittlerer Tokenverbrauch';
+    if (costPer1kTokens <= 0.006) return 'hoher Tokenverbrauch';
+    return 'sehr hoher Tokenverbrauch';
+  };
+
+  const tokenUsageBadgeClass = (costPer1kTokens: number) => {
+    if (costPer1kTokens <= 0.001) return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+    if (costPer1kTokens <= 0.002) return 'bg-green-500/15 text-green-300 border border-green-500/30';
+    if (costPer1kTokens <= 0.004) return 'bg-amber-500/15 text-amber-300 border border-amber-500/30';
+    if (costPer1kTokens <= 0.006) return 'bg-orange-500/15 text-orange-300 border border-orange-500/30';
+    return 'bg-red-500/15 text-red-300 border border-red-500/30';
+  };
+
   const didacticModeExplanation = useMemo(() => {
     const explanations: Record<string, { title: string; effect: string; system: string; teacher: string }> = {
       'socratic': {
@@ -627,6 +643,9 @@ const TutorEditorPage: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <span>{model.name}</span>
                             <span className="text-xs text-muted-foreground">({model.providerName})</span>
+                            <Badge variant="secondary" className={cn('text-[10px]', tokenUsageBadgeClass(model.costPer1kTokens))}>
+                              {tokenUsageLabel(model.costPer1kTokens)}
+                            </Badge>
                           </div>
                         </SelectItem>
                       ))}
