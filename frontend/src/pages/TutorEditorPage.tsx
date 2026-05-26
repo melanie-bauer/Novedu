@@ -92,6 +92,7 @@ const TutorEditorPage: React.FC = () => {
   const [comparisonPromptInput, setComparisonPromptInput] = useState('');
   const [comparisonModelIds, setComparisonModelIds] = useState<string[]>([]);
   const [comparisonExecutedPrompt, setComparisonExecutedPrompt] = useState<string | null>(null);
+  const [comparisonExecutedModels, setComparisonExecutedModels] = useState<typeof availableModels>([]);
 
   useEffect(() => {
     if (existingTutor) {
@@ -233,7 +234,9 @@ const TutorEditorPage: React.FC = () => {
     setComparisonModelIds((prev) => (
       prev.includes(modelId)
         ? prev.filter((id) => id !== modelId)
-        : [...prev, modelId]
+        : prev.length >= 3
+          ? prev
+          : [...prev, modelId]
     ));
   };
 
@@ -247,15 +250,28 @@ const TutorEditorPage: React.FC = () => {
           : 'erklärt sehr schrittweise';
 
     const depth = modelCost >= 0.01 ? 'detailreich' : 'kostenbewusst';
-    return `${modelName} (${providerName}) würde ${depth} und ${style} antworten auf: "${prompt}"`;
+    return `${modelName} (${providerName}) antwortet voraussichtlich ${depth} und ${style} auf: "${prompt}"`;
   };
 
   const modelScore = (modelCost: number, maxTokens: number) => {
-    const efficiency = Math.max(12, Math.round(42 / Math.max(0.00025, modelCost)));
-    const capacity = Math.min(28, Math.round(maxTokens / 6000));
-    const clarity = formData.didacticMode === 'step-by-step' ? 22 : formData.didacticMode === 'concise' ? 16 : 18;
-    return Math.min(100, Math.max(35, efficiency + capacity + clarity));
+    const costScore = Math.max(8, Math.min(35, Math.round(40 - Math.log10(modelCost * 100000) * 10)));
+    const capacityScore = maxTokens >= 1000000 ? 30 : maxTokens >= 400000 ? 26 : maxTokens >= 200000 ? 22 : 18;
+    const clarityScore = formData.didacticMode === 'step-by-step' ? 24 : formData.didacticMode === 'concise' ? 20 : 22;
+    const total = costScore + capacityScore + clarityScore;
+    return Math.min(95, Math.max(45, total));
   };
+
+  const comparisonScores = useMemo(() => {
+    const scoreModels = comparisonExecutedPrompt ? comparisonExecutedModels : comparisonSelectedModels;
+    const entries = scoreModels.map((model) => [model.id, modelScore(model.costPer1kTokens, model.maxTokens)] as const);
+    const maxScore = entries.length > 0 ? Math.max(...entries.map(([, score]) => score)) : 0;
+    const winnerIds = entries.filter(([, score]) => score === maxScore).map(([id]) => id);
+    return {
+      scores: Object.fromEntries(entries) as Record<string, number>,
+      maxScore,
+      winnerIds,
+    };
+  }, [comparisonExecutedModels, comparisonExecutedPrompt, comparisonSelectedModels, formData.didacticMode]);
 
   const modelTokenStats = (prompt: string, modelCost: number, maxTokens: number) => {
     const promptTokens = Math.max(18, Math.round(prompt.length / 3.5));
@@ -974,7 +990,7 @@ const TutorEditorPage: React.FC = () => {
                       <div>
                         <CardTitle className="text-sm">Modellvergleich</CardTitle>
                         <CardDescription>
-                          Starte hier einen Vergleich mit mehreren Modellen, gib einen Prompt ein und sieh Antworten, Tokens und Kosten nebeneinander.
+                          Vergleiche bis zu drei Modelle, teste einen Prompt und sieh Antworten, Token-Volumen und Kosten auf einen Blick.
                         </CardDescription>
                       </div>
                       {!comparisonOpen ? (
@@ -982,8 +998,8 @@ const TutorEditorPage: React.FC = () => {
                           setComparisonOpen(true);
                           setComparisonModelIds((prev) => prev.length > 0 ? prev : comparisonModels.map((model) => model.id));
                           setComparisonPromptInput((prev) => prev || 'Erkläre mir das Thema einfach');
-                        }}>
-                          Vergleich starten
+                        }} disabled={availableModels.length < 2}>
+                          Vergleich öffnen
                         </Button>
                       ) : (
                         <Button variant="outline" size="sm" onClick={() => setComparisonOpen(false)}>
@@ -997,13 +1013,15 @@ const TutorEditorPage: React.FC = () => {
                       <Alert>
                         <Bot className="h-4 w-4" />
                         <AlertDescription className="text-xs">
-                          Öffne den Vergleich, wähle 1 bis 3 Modelle aus und starte dann einen Testprompt.
+                          {availableModels.length < 2
+                            ? 'Für den Vergleich werden mindestens zwei Modelle benötigt.'
+                            : 'Öffne den Vergleich, wähle 1 bis 3 Modelle aus und starte dann einen Testprompt.'}
                         </AlertDescription>
                       </Alert>
                     ) : (
                       <>
                         <div className="space-y-2">
-                          <Label>Modelle auswählen</Label>
+                          <Label>Modelle auswählen (max. 3)</Label>
                           <div className="flex flex-wrap gap-2">
                             {availableModels.map((model) => {
                               const selected = comparisonModelIds.includes(model.id);
@@ -1024,13 +1042,13 @@ const TutorEditorPage: React.FC = () => {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="comparisonPrompt">Vergleichs-Prompt</Label>
+                          <Label htmlFor="comparisonPrompt">Test-Prompt</Label>
                           <Textarea
                             id="comparisonPrompt"
                             value={comparisonPromptInput}
                             onChange={(event) => setComparisonPromptInput(event.target.value)}
                             rows={3}
-                            placeholder="Schreibe hier deinen Testprompt..."
+                            placeholder="Was soll das Modell beantworten?"
                           />
                         </div>
 
@@ -1048,10 +1066,13 @@ const TutorEditorPage: React.FC = () => {
                           ))}
                           <Button
                             size="sm"
-                            onClick={() => setComparisonExecutedPrompt(comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach')}
-                            disabled={comparisonModelIds.length === 0}
+                            onClick={() => {
+                              setComparisonExecutedModels(comparisonSelectedModels);
+                              setComparisonExecutedPrompt(comparisonPromptInput.trim() || 'Erkläre mir das Thema einfach');
+                            }}
+                            disabled={comparisonModelIds.length < 2}
                           >
-                            Vergleich ausführen
+                            Vergleich starten
                           </Button>
                         </div>
 
@@ -1061,14 +1082,16 @@ const TutorEditorPage: React.FC = () => {
                               <p className="font-medium">Prompt</p>
                               <p className="mt-1 text-muted-foreground">{comparisonExecutedPrompt}</p>
                               <p className="mt-2 text-xs text-muted-foreground">
-                                Auswahl: {comparisonSelectedModels.length} Modell{comparisonSelectedModels.length === 1 ? '' : 'e'}
+                                Auswahl: {comparisonExecutedModels.length} Modell{comparisonExecutedModels.length === 1 ? '' : 'e'}
                               </p>
                             </div>
 
                             <div className="grid gap-3">
-                              {comparisonSelectedModels.map((model) => {
+                              {comparisonExecutedModels.map((model) => {
                                 const stats = modelTokenStats(comparisonExecutedPrompt, model.costPer1kTokens, model.maxTokens);
                                 const response = buildComparisonResponse(model.name, model.providerName, model.costPer1kTokens, comparisonExecutedPrompt);
+                                const score = comparisonScores.scores[model.id] ?? 0;
+                                const isWinner = comparisonScores.winnerIds.includes(model.id) && comparisonExecutedModels.length > 1;
 
                                 return (
                                   <div key={model.id} className="rounded-lg border p-4">
@@ -1077,26 +1100,29 @@ const TutorEditorPage: React.FC = () => {
                                         <p className="font-semibold text-sm">{model.name}</p>
                                         <p className="text-xs text-muted-foreground">{model.providerName}</p>
                                       </div>
-                                      <Badge variant="secondary">{modelScore(model.costPer1kTokens, model.maxTokens)}/100</Badge>
+                                      <div className="flex items-center gap-2">
+                                        {isWinner && <Badge>Sieger</Badge>}
+                                        <Badge variant="secondary">{score}/100</Badge>
+                                      </div>
                                     </div>
 
                                     <div className="mt-3 space-y-3 text-sm">
                                       <p className="rounded-md bg-muted/40 p-3">{response}</p>
                                       <div className="grid gap-2 sm:grid-cols-4 text-xs text-muted-foreground">
                                         <div className="rounded-md border bg-muted/20 p-2">
-                                          <span className="block font-medium text-foreground">Prompt Tokens</span>
+                                          <span className="block font-medium text-foreground">Prompt-Tokens</span>
                                           {stats.promptTokens}
                                         </div>
                                         <div className="rounded-md border bg-muted/20 p-2">
-                                          <span className="block font-medium text-foreground">Antwort Tokens</span>
+                                          <span className="block font-medium text-foreground">Antwort-Tokens</span>
                                           {stats.responseTokens}
                                         </div>
                                         <div className="rounded-md border bg-muted/20 p-2">
-                                          <span className="block font-medium text-foreground">Gesamt Tokens</span>
+                                          <span className="block font-medium text-foreground">Gesamt-Tokens</span>
                                           {stats.totalTokens}
                                         </div>
                                         <div className="rounded-md border bg-muted/20 p-2">
-                                          <span className="block font-medium text-foreground">Kosten</span>
+                                          <span className="block font-medium text-foreground">Kosten (ca.)</span>
                                           {stats.estimatedCost} €
                                         </div>
                                       </div>
@@ -1110,7 +1136,7 @@ const TutorEditorPage: React.FC = () => {
                           <Alert>
                             <Bot className="h-4 w-4" />
                             <AlertDescription className="text-xs">
-                              Wähle Modelle aus, schreibe einen Prompt und starte den Vergleich.
+                              Wähle mindestens zwei Modelle, schreibe einen Test-Prompt und starte den Vergleich.
                             </AlertDescription>
                           </Alert>
                         )}
