@@ -25,9 +25,10 @@ table(EntraConfig) {
 table(User) {
   primary_key(id) : int
   --
-  column(entra_oid) : varchar(36)
+  column(entra_oid) : varchar(36) {unique}
   column(name) : varchar(255)
-  column(email) : citext
+  column(email) : citext {unique}
+  column(is_sso_enabled) : boolean
   column(role) : ENUM('student','teacher','admin')
   column(is_active) : boolean
   column(created_at) : timestamptz
@@ -45,15 +46,19 @@ table(Group) {
 table(TutorConfig) {
   primary_key(id) : int
   --
-  foreign_key(created_by?) : int
+  foreign_key(created_by) : int
+  foreign_key(model_id?) : int
   --
   column(name) : varchar(255)
   column(system_prompt) : text
   column(source_repo) : varchar(1024) ' e.g. GitHub repo URL
   column(source_path) : varchar(1024) ' e.g. path to YAML
-  column(repo_private) : boolean
-  column(visibility) : ENUM('private','internal','public')
+  column(source_repo_private) : boolean
+  column(visibility) : ENUM('private','protected','internal','public')
+  column(source_path_hash) : varchar(64)
+  column(synced_at?) : timestamptz
   column(created_at) : timestamptz
+  column(updated_at?) : timestamptz
 }
 
 ' ======= Models =======
@@ -62,7 +67,6 @@ table(AIModel) {
   --
   column(name) : varchar(255)
   column(description) : text
-  column(scch_available) : boolean
 }
 
 ' ======= Assignments =======
@@ -75,22 +79,36 @@ table(TutorAssignment) {
   --
   column(enabled_from?) : timestamptz
   column(enabled_until?) : timestamptz
+  column(created_at) : timestamptz
+  column(updated_at?) : timestamptz
+}
+
+' ======= User–Group Membership (many-to-many) =======
+table(UserGroupMembership) {
+  primary_key(id) : int
+  --
+  foreign_key(user_id) : int
+  foreign_key(group_id) : int
+  --
+  column(joined_at) : timestamptz
 }
 
 ' ======= Relationships =======
 EntraConfig ||--o{ User : "used for login"
-User ||--o{ Group : "member of"
+User ||--o{ UserGroupMembership : "member via"
+Group ||--o{ UserGroupMembership : "has members via"
 Group ||--o{ TutorAssignment : "receives tutor"
 TutorConfig ||--o{ TutorAssignment : "assigned to"
-TutorConfig ||--o{ User : "created by"
-TutorConfig ||--o{ AIModel : "powered by" 
+TutorConfig }o--|| User : "created by"
+TutorConfig }o--|| AIModel : "powered by" 
 
 ' Notes from meeting (MVP scope):
 note bottom
  - Tutor configs are stored in a private GitHub repo as YAML + system prompt (no UI yet).
  - Ignore cost & budget control for MVP.
- - Use only models available in SCCH (flagged via `scch_available`).
+ - Single-school MVP: all models are considered available.
  - Assume single school; no School abstraction in MVP. Entra OIDs stored on `User`.
+ - TutorAssignment requires `group_id` OR `user_id` (XOR). Enforce via application logic / DB CHECK.
 end note
 
 @enduml
