@@ -1,0 +1,20 @@
+prefix_rule(
+    pattern = ["npm.cmd", ["audit", "view", "run", "--version"]],
+    decision = "allow",
+    justification = "Allow uncritical npm commands in this project",
+    match = [
+      "npm.cmd view next version",
+      "npm.cmd --prefix mvp-harness run typecheck",
+      "npm.cmd --prefix mvp-harness run verify",
+    ],
+  )
+
+prefix_rule(
+    pattern = ["node", ["--version", "-v"]],
+    decision = "allow",
+    justification = "Allow uncritical node version checks",
+    match = [
+      "node -v",
+      "node --version",
+    ],
+  )

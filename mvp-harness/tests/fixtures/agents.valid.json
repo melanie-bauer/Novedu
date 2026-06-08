@@ -1,0 +1,22 @@
+[
+  {
+    "id": "math-demo",
+    "displayName": "Mathematics Demo Tutor",
+    "subject": "Mathematics",
+    "description": "A fixture tutor for the harness.",
+    "systemPrompt": "You are a concise mathematics tutor for students.",
+    "model": {
+      "provider": "demo",
+      "modelId": "demo-local"
+    },
+    "assignments": {
+      "classes": ["4AHIF"],
+      "users": []
+    },
+    "features": {
+      "fileUpload": true,
+      "latex": true,
+      "syntaxHighlighting": true
+    }
+  }
+]
