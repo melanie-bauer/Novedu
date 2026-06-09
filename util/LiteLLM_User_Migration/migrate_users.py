@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  
 
-SQLITE_DB_PATH = os.path.join("data", "webui.db")
+SQLITE_DB_PATH = os.path.join("..", "data", "openwebui", "webui.db")
 
 PG_CONFIG = {
     "host": os.getenv("PG_HOST"),
@@ -15,7 +15,8 @@ PG_CONFIG = {
     "user": os.getenv("PG_USER"),
     "password": os.getenv("PG_PASSWORD"),
     "port": int(os.getenv("PG_PORT", 5432)),
-    "sslmode": "require"
+    # Azure: require; lokales Docker-Postgres meist ohne TLS → PG_SSLMODE=disable
+    "sslmode": os.getenv("PG_SSLMODE", "require"),
 }
 
 PG_TABLE_NAME = "LiteLLM_UserTable"
@@ -39,7 +40,7 @@ def migrate_users_to_postgres(users):
         if cursor.fetchone():
             continue 
 
-        cursor.execute(f'SELECT user_id FROM "{PG_TABLE_NAME}" WHERE user_email = %s', (email))
+        cursor.execute(f'SELECT user_id FROM "{PG_TABLE_NAME}" WHERE user_email = %s', (email,))
         result = cursor.fetchone()
         if result:
             existing_id = result[0]
@@ -53,7 +54,7 @@ def migrate_users_to_postgres(users):
                 inserted += 1
                 continue
 
-        cursor.execute(f'SELECT user_email FROM "{PG_TABLE_NAME}" WHERE user_id = %s', (user_id))
+        cursor.execute(f'SELECT user_email FROM "{PG_TABLE_NAME}" WHERE user_id = %s', (user_id,))
         result = cursor.fetchone()
         if result:
             existing_email = result[0]
