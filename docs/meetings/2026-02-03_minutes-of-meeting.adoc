@@ -1,0 +1,66 @@
+= Besprechungsprotokoll 03.02.2026
+firstname lastname
+1.0, {docdate}: Some notes
+ifndef::imagesdir[:imagesdir: images]
+:icons: font
+
+.Teilnehmer
+|===
+|anwesend (Vorname Nachname)
+
+|Melanie Bauer
+
+|Lukas Larndorfer
+
+|Konstantin Wetscher
+
+|André Wildberger
+|===
+
+.Ort und Zeit
+[cols=2*]
+|===
+|Ort
+|Schule
+
+|von-bis
+|Di, 03.02.2026, 1. EH
+|Dauer
+|45 min
+|===
+
+== Besprochene Themen
+
+* Datenmodell von Eigenbau
+* Anforderungsanalyse fertigstellen
+* Prototyp Frontend -> möglischt intuitiv & einfach.
+
+== Vereinbarungen und Entscheidungen
+
+.Was wurde vereinbart?
+[%autowidth]
+|===
+|wer |macht was |bis wann
+* 
+| André Wildberger
+a| Anforderungsanalyse fertigstellen 
+| 16.02.2026
+
+| Melanie Bauer
+a| Datenmodell von Eigenbau erstellen
+| 19.03.2026
+| Melanie Bauer
+a| Prototyp Frontend
+| 16.02.2026
+
+| Lukas Larndorfer
+a| Datenmodell von Eigenbau erstellen
+| 19.02.2026
+
+| Konstantin Wetscher
+a| Anforderungsanalyse fertigstellen, 
+| 16.02.2026
+| Konstantin Wetscher
+a| Prototyp Frontend
+| 24.02.2026
+|===
