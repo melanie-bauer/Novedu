@@ -1,9 +1,13 @@
 # Novedu MVP GitHub Issue Backlog
 
 This backlog is ordered for implementation. UI and chat experience come first so
-the team can validate the real product shape early. Auth, GitHub persistence,
-and provider integrations are added once the chat harness is useful and covered
-by tests.
+the team can validate the real product shape early. Auth, simple config
+persistence, and provider integrations are added once the chat harness is useful
+and covered by tests.
+
+The MVP does not implement class-specific tutor releases, tutor preview/testing,
+or version history UI. Teachers create and edit tutors as `.yaml` files in a
+GitHub repository; the app loads those tutor configs.
 
 ## Issue 1: Stabilize MVP harness baseline
 
@@ -169,23 +173,26 @@ tutor metadata, Markdown, LaTeX, code, and attachment-aware responses.
 - Unit test mock runtime output.
 - E2E test happy path and error path.
 
-## Issue 8: Finalize agent/tutor config schema
+## Issue 8: Finalize global YAML agent/tutor config schema
 
 **Goal**
-Define the MVP shape for teacher-configurable tutors.
+Define the MVP YAML shape for globally available tutors.
 
 **Description**
-The schema should represent the tutor fields needed for the MVP: identity,
-subject, prompt, model, feature flags, assignment targets, and metadata for
-future migration.
+The schema should represent the tutor fields needed for the MVP in `.yaml`
+files: identity, subject, prompt, model, feature flags, and metadata for future
+migration. The MVP does not support class-specific assignments.
 
 **Acceptance Criteria**
 - Schema validates tutor id, display name, subject, description, prompt, model,
-  assignments, and feature flags.
+  and feature flags.
 - Schema supports file upload, LaTeX, syntax highlighting, and future tool flags.
 - Invalid configs produce useful validation messages.
-- Schema uses stable field names intended for GitHub-stored JSON/YAML files.
+- Schema uses stable field names intended for GitHub-stored YAML files.
+- YAML examples are documented for teacher-authored tutor configs.
 - Fixtures cover at least math and programming tutors.
+- Schema does not expose class-specific visibility or role-specific ownership in
+  the MVP.
 
 **Verification**
 - Unit test valid fixtures.
@@ -211,18 +218,20 @@ through the same interface that the GitHub adapter will later implement.
 - Unit test fixture loading.
 - Browser or E2E test tutor selection from fixture data.
 
-## Issue 10: Add tutor selection and chat session model
+## Issue 10: Add global tutor selection and chat session model
 
 **Goal**
-Let users start a visible temporary chat with a selected tutor.
+Let users start a visible temporary chat with any globally available tutor.
 
 **Description**
-The MVP needs a simple in-memory chat session model. A user selects a tutor,
-starts a chat, sees messages, and can reset the current chat. The chat exists
-only while visible in the browser session.
+The MVP needs a simple in-memory chat session model. A user selects a globally
+available tutor, starts a chat, sees messages, and can reset the current chat.
+The chat exists only while visible in the browser session.
 
 **Acceptance Criteria**
 - User can select a tutor before or inside `/chat`.
+- All configured tutors are visible to all authenticated users.
+- There is no class filter and no role-specific tutor list.
 - Current chat stores messages in memory only.
 - Resetting or leaving the visible chat clears messages and attachments.
 - Tutor metadata is visible in the chat header.
@@ -255,48 +264,58 @@ adapters.
 - Unit test runtime-to-AG-UI conversion.
 - E2E test still passes with mock runtime.
 
-## Issue 12: Add provider abstraction with Azure OpenAI first
+## Issue 12: Add model adapter abstraction for locally hosted models
 
 **Goal**
-Prepare real LLM calls while keeping provider independence.
+Connect the MVP to locally hosted models while keeping the model runtime
+replaceable.
 
 **Description**
-Add a provider abstraction and implement Azure OpenAI first. Other providers
-should be planned through the same interface, not hard-coded into the UI.
+Add a model adapter abstraction and implement the first adapter for the locally
+hosted model endpoint used by Novedu. The UI must not know where the model runs.
+Future hosted or cloud providers can still be added behind the same interface if
+needed, but they are not the MVP default.
 
 **Acceptance Criteria**
-- Provider interface supports streaming text responses.
-- Azure OpenAI adapter reads credentials only from environment variables.
-- Missing credentials produce a clear non-secret error.
-- Provider selection comes from tutor config.
-- OpenAI, Anthropic, Gemini, and Mistral can be added without changing UI code.
+- Model adapter interface supports streaming text responses.
+- Local model endpoint URL and credentials, if any, are read only from
+  environment variables.
+- Missing endpoint configuration produces a clear non-secret error.
+- Model selection comes from tutor YAML config.
+- Frontend code does not change when the backend model adapter changes.
+- CI keeps using the deterministic mock runtime, not a real local model.
 
 **Verification**
-- Unit test provider selection.
-- Unit test missing credential behavior.
-- Keep CI using mock provider only.
+- Unit test model adapter selection.
+- Unit test missing local endpoint configuration.
+- Keep CI using mock runtime only.
 
-## Issue 13: Add GitHub config adapter
+## Issue 13: Load tutor YAML configs from GitHub
 
 **Goal**
-Store agent/tutor configuration in GitHub instead of a database.
+Load agent/tutor configuration from GitHub without introducing a database.
 
 **Description**
-Implement authenticated GitHub read/write flows behind the config store
-interface. Config changes should be reviewable as commits or pull requests.
+Implement config loading behind the config store interface. Teachers create and
+edit tutor configs as `.yaml` files in a GitHub repository. The MVP app reads
+those YAML files, validates them, and exposes valid tutors globally to all
+authenticated users. The MVP does not expose version history, rollback, commit
+review, pull-request workflows, or YAML editing in the UI.
 
 **Acceptance Criteria**
-- GitHub adapter can list tutor config files from a configured repository path.
-- GitHub adapter validates configs before returning them.
-- Write flow creates a reviewable commit or branch/PR, according to final repo
-  policy.
-- Tokens are read from environment variables and never logged.
+- Config adapter can list tutor `.yaml` files from the configured GitHub repo path.
+- Config adapter parses and validates YAML before returning tutors.
+- Invalid YAML files produce clear non-secret errors.
+- Valid tutors are globally available in the app.
+- The MVP UI does not show version history, commits, pull requests, rollback, or
+  diff/compare/YAML editing views.
+- Credentials are read from environment variables and never logged.
 - Fixture store remains the default for CI.
 
 **Verification**
 - Unit test with mocked GitHub responses.
 - Integration test can be skipped unless credentials are present.
-- Security review confirms no token leakage.
+- Security review confirms no credential leakage.
 
 ## Issue 14: Add Auth.js Microsoft Entra ID login
 
@@ -306,7 +325,8 @@ Replace mock access with production-ready Microsoft Entra ID login.
 **Description**
 Auth is important for production but should not block early UI iteration. Once
 the chat shell is useful, wire Auth.js with Microsoft Entra ID and keep explicit
-test auth paths for CI.
+test auth paths for CI. The MVP uses authentication only for access, not for
+role-specific product behavior.
 
 **Acceptance Criteria**
 - Auth.js is configured for Microsoft Entra ID.
@@ -314,33 +334,33 @@ test auth paths for CI.
 - Login and logout routes work in production mode.
 - No local password login is introduced.
 - Tests can still use mock auth without real Entra credentials.
+- Authenticated users can access the globally available tutor list. Tutor YAML
+  authoring happens outside the app in GitHub.
 
 **Verification**
 - Unit test auth option construction.
 - E2E test unauthenticated redirect.
 - Manual smoke test with real Entra credentials when available.
 
-## Issue 15: Add protected routing and role-aware session model
+## Issue 15: Add protected routing without MVP role differences
 
 **Goal**
-Apply authorization rules for students, teachers, and admins.
+Require login for the app while keeping MVP functionality role-neutral.
 
 **Description**
-Use Entra claims/groups to derive Novedu roles. Protect chat and future admin
-routes server-side.
+Protect chat routes server-side. The MVP may read identity claims, but tutor
+authoring happens outside the app in GitHub YAML files.
 
 **Acceptance Criteria**
-- Student, teacher, and admin roles are derived through tested helpers.
 - `/chat` requires a valid session.
-- Future admin routes reject non-admin users.
+- All authenticated users see the same globally loaded tutor list.
+- There is no tutor creation/editing surface inside the MVP app.
 - Authorization failures show clear UI.
-- Role mapping does not depend on email string guessing unless explicitly
-  configured as a fallback.
 
 **Verification**
-- Unit test claim/group role mapping.
-- E2E test student/teacher chat access.
-- E2E test unauthorized admin access once admin route exists.
+- Unit test session/access helpers.
+- E2E test unauthenticated redirect.
+- E2E test authenticated access to chat and global tutor list.
 
 ## Issue 16: Add security and privacy review gate
 
@@ -375,12 +395,13 @@ works from the user's perspective.
 
 **Acceptance Criteria**
 - E2E covers login or mock-authenticated access.
-- E2E covers tutor selection.
+- E2E covers global tutor selection.
 - E2E covers temporary chat lifecycle.
 - E2E covers AG-UI streaming response.
 - E2E covers upload validation and temporary attachment clearing.
 - E2E covers Markdown, LaTeX, and code rendering.
 - E2E covers config loading from fixture store.
+- E2E does not assume class-specific tutor visibility or in-app tutor editing.
 
 **Verification**
 - `npm.cmd run test:e2e` passes.
