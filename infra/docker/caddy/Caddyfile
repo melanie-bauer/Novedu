@@ -4,6 +4,7 @@
 # localhost / 127.0.0.1: Open WebUI ohne hosts-Datei (z. B. SSH: -L 8443:127.0.0.1:443 → https://127.0.0.1:8443)
 # :8444: LiteLLM gleicher Zugriff (z. B. SSH: -L 8444:127.0.0.1:8444 → https://127.0.0.1:8444)
 
+# intern / lokal
 localhost, 127.0.0.1 {
 	tls internal
 	reverse_proxy openwebui:8080
@@ -14,12 +15,11 @@ localhost, 127.0.0.1 {
 	reverse_proxy litellm:4000
 }
 
-htl-leonding.novedu {
-	tls internal
+# öffentlich
+ki-tutor.htl-leonding.ac.at {
 	reverse_proxy openwebui:8080
 }
 
-htl-leonding.litellm {
-	tls internal
+litellm.ki-tutor.htl-leonding.ac.at {
 	reverse_proxy litellm:4000
 }

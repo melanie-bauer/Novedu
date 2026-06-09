@@ -74,43 +74,44 @@
       restart: unless-stopped
       depends_on:
         - litellm
-        environment:
-          WEBUI_URL: ${WEBUI_URL:?set in .env}
-          WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?set in .env}
-          CORS_ALLOW_ORIGIN: ${WEBUI_URL}
+      environment:
+        WEBUI_URL: ${WEBUI_URL:?set in .env}
+        WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?set in .env}
+        CORS_ALLOW_ORIGIN: ${WEBUI_URL}
 
-          OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://litellm:4000/v1}
-          ENABLE_FORWARD_USER_INFO_HEADERS: "True"
+        OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://litellm:4000/v1}
+        ENABLE_FORWARD_USER_INFO_HEADERS: "True"
 
-          OPENID_PROVIDER_URL: ${OPENID_PROVIDER_URL:?set in .env}
-          MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:?set in .env}
-          MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:?set in .env}
-          MICROSOFT_CLIENT_TENANT_ID: ${MICROSOFT_CLIENT_TENANT_ID:?set in .env}
-          MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:?set in .env}
-          MICROSOFT_OAUTH_SCOPE: ${MICROSOFT_OAUTH_SCOPE:-openid email profile offline_access}
+        OPENID_PROVIDER_URL: ${OPENID_PROVIDER_URL:?set in .env}
+        MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:?set in .env}
+        MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:?set in .env}
+        MICROSOFT_CLIENT_TENANT_ID: ${MICROSOFT_CLIENT_TENANT_ID:?set in .env}
+        MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:?set in .env}
+        MICROSOFT_OAUTH_SCOPE: ${MICROSOFT_OAUTH_SCOPE:-openid email profile offline_access}
 
-          ENABLE_OAUTH_SIGNUP: "True"
-          ENABLE_SIGNUP: "False"
-          ENABLE_LOGIN_FORM: "False"
+        ENABLE_OAUTH_SIGNUP: "True"
+        ENABLE_SIGNUP: "False"
+        ENABLE_LOGIN_FORM: "False"
+        ENABLE_WEBSOCKET_SUPPORT: "True"
 
-          OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "True"
+        OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "True"
 
-          ENABLE_OAUTH_GROUP_MANAGEMENT: "True"
-          ENABLE_OAUTH_GROUP_CREATION: "True"
-          OAUTH_GROUP_CLAIM: "groups"
-          OAUTH_USERNAME_CLAIM: "name"
-          MICROSOFT_EMAIL_CLAIM: "email"
+        ENABLE_OAUTH_GROUP_MANAGEMENT: "True"
+        ENABLE_OAUTH_GROUP_CREATION: "True"
+        OAUTH_GROUP_CLAIM: "groups"
+        OAUTH_USERNAME_CLAIM: "name"
+        MICROSOFT_EMAIL_CLAIM: "email"
 
-          OAUTH_GROUP_DEFAULT_SHARE: "members"
+        OAUTH_GROUP_DEFAULT_SHARE: "members"
 
-          ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
+        ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
 
-          WEBUI_SESSION_COOKIE_SAME_SITE: "lax"
-          WEBUI_AUTH_COOKIE_SAME_SITE: "lax"
-          WEBUI_SESSION_COOKIE_SECURE: "True"
-          WEBUI_AUTH_COOKIE_SECURE: "True"
+        WEBUI_SESSION_COOKIE_SAME_SITE: "lax"
+        WEBUI_AUTH_COOKIE_SAME_SITE: "lax"
+        WEBUI_SESSION_COOKIE_SECURE: "True"
+        WEBUI_AUTH_COOKIE_SECURE: "True"
 
-          GLOBAL_LOG_LEVEL: "DEBUG"
+        GLOBAL_LOG_LEVEL: "DEBUG"
       volumes:
         - openwebui_data:/app/backend/data
       networks:
@@ -133,6 +134,7 @@
         - postgres
       networks:
         - backend
+        - frontend
       volumes:
         - pgadmin_data:/var/lib/pgadmin
 
