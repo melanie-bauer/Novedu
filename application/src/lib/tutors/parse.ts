@@ -13,7 +13,10 @@ export function parseYaml(
     return { ok: true, value: parseYamlText(text) };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return { ok: false, error: error("YAML_PARSE_ERROR", `Invalid YAML: ${message}`, { url }) };
+    return {
+      ok: false,
+      error: error("YAML_PARSE_ERROR", `Invalid YAML: ${message}`, { url }),
+    };
   }
 }
 

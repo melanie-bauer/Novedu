@@ -36,9 +36,28 @@ export function CodeBlock({
   const multiline = text.includes("\n");
 
   return (
-    <div style={{ background: "#f6f8fa", border: "1px solid #d0d7de", borderRadius: "6px", marginBottom: "1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0.75rem", borderBottom: "1px solid #d0d7de" }}>
-        <span style={{ fontSize: "0.85rem", color: "#57606a", fontWeight: 500 }}>{language}</span>
+    <div
+      style={{
+        background: "#f6f8fa",
+        border: "1px solid #d0d7de",
+        borderRadius: "6px",
+        marginBottom: "1rem",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0.5rem 0.75rem",
+          borderBottom: "1px solid #d0d7de",
+        }}
+      >
+        <span
+          style={{ fontSize: "0.85rem", color: "#57606a", fontWeight: 500 }}
+        >
+          {language}
+        </span>
         <CopyButton text={text} />
       </div>
       <SyntaxHighlighter
