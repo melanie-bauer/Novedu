@@ -2,7 +2,12 @@
 
 import { CopilotChat, CopilotKitProvider } from "@copilotkit/react-core/v2";
 import "@copilotkit/react-core/v2/styles.css";
-import { type ComponentProps, type HTMLAttributes, useMemo, useState } from "react";
+import {
+  type ComponentProps,
+  type HTMLAttributes,
+  useMemo,
+  useState,
+} from "react";
 import type { ExampleQuestion, ValidationWarning } from "@/lib/tutors";
 import { CodeBlock } from "./CodeBlock";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -59,10 +64,16 @@ export function TutorChat({
   const ChatView = useMemo(() => {
     type ChatViewProps = ComponentProps<typeof CopilotChat.View>;
     function TutorChatView({ onInputChange, ...viewProps }: ChatViewProps) {
-      const WelcomeWithDescription = (props: HTMLAttributes<HTMLDivElement>) => (
+      const WelcomeWithDescription = (
+        props: HTMLAttributes<HTMLDivElement>,
+      ) => (
         <div {...props}>
           <CopilotChat.View.WelcomeMessage />
-          {description ? <p style={{ marginTop: "0.5rem", color: "#57606a" }}>{description}</p> : null}
+          {description ? (
+            <p style={{ marginTop: "0.5rem", color: "#57606a" }}>
+              {description}
+            </p>
+          ) : null}
           {exampleQuestions.length > 0 ? (
             <ul style={{ listStyle: "none", padding: 0, marginTop: "1rem" }}>
               {exampleQuestions.map((q) => (
@@ -115,19 +126,45 @@ export function TutorChat({
 
   return (
     <>
-      <div style={{ padding: "0.75rem", background: "#f6f8fa", borderBottom: "1px solid #d0d7de", fontSize: "0.85rem" }}>
+      <div
+        style={{
+          padding: "0.75rem",
+          background: "#f6f8fa",
+          borderBottom: "1px solid #d0d7de",
+          fontSize: "0.85rem",
+        }}
+      >
         <span style={{ color: "#57606a" }} title={tutorUrl}>
           {tutorUrl}
         </span>
       </div>
 
       <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", padding: "0.5rem", fontWeight: 500 }}>System prompt &amp; warnings</summary>
-        <div style={{ padding: "0.5rem", background: "#f6f8fa", borderTop: "1px solid #d0d7de" }}>
+        <summary
+          style={{ cursor: "pointer", padding: "0.5rem", fontWeight: 500 }}
+        >
+          System prompt &amp; warnings
+        </summary>
+        <div
+          style={{
+            padding: "0.5rem",
+            background: "#f6f8fa",
+            borderTop: "1px solid #d0d7de",
+          }}
+        >
           {warnings.length > 0 ? (
             <div style={{ marginBottom: "1rem" }}>
-              {warnings.map((w, i) => (
-                <div key={i} style={{ padding: "0.5rem", background: "#fff8c5", border: "1px solid #e3b341", borderRadius: "4px", marginBottom: "0.5rem" }}>
+              {warnings.map((w) => (
+                <div
+                  key={`${w.code}-${w.message}`}
+                  style={{
+                    padding: "0.5rem",
+                    background: "#fff8c5",
+                    border: "1px solid #e3b341",
+                    borderRadius: "4px",
+                    marginBottom: "0.5rem",
+                  }}
+                >
                   <strong>{w.code}:</strong> {w.message}
                 </div>
               ))}
@@ -138,11 +175,29 @@ export function TutorChat({
       </details>
 
       {uploadError ? (
-        <div style={{ padding: "0.75rem", background: "#fff8c5", border: "1px solid #e3b341", borderRadius: "6px", marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }} role="alert">
+        <div
+          style={{
+            padding: "0.75rem",
+            background: "#fff8c5",
+            border: "1px solid #e3b341",
+            borderRadius: "6px",
+            marginBottom: "1rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+          role="alert"
+        >
           <span>{uploadError}</span>
           <button
             type="button"
-            style={{ padding: "0.25rem 0.5rem", background: "transparent", border: "1px solid #d0d7de", borderRadius: "4px", cursor: "pointer" }}
+            style={{
+              padding: "0.25rem 0.5rem",
+              background: "transparent",
+              border: "1px solid #d0d7de",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
             onClick={() => setUploadError(null)}
           >
             Dismiss
@@ -158,12 +213,18 @@ export function TutorChat({
           the share-link signature material — as headers instead, sent on every
           runtime request and verified server-side.
         */}
-        <CopilotKitProvider key={tutorUrl} runtimeUrl="/api/copilotkit" headers={runtimeHeaders}>
+        <CopilotKitProvider
+          key={tutorUrl}
+          runtimeUrl="/api/copilotkit"
+          headers={runtimeHeaders}
+        >
           <CopilotChat
             agentId="tutor"
             labels={title ? { welcomeMessageText: title } : undefined}
             chatView={ChatView}
-            messageView={{ assistantMessage: { markdownRenderer: MarkdownRenderer } }}
+            messageView={{
+              assistantMessage: { markdownRenderer: MarkdownRenderer },
+            }}
             attachments={
               imageInput
                 ? {
