@@ -30,7 +30,10 @@ const FragmentUrlRef = z
  */
 const PropertySchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("string"), default: z.string().optional() }),
-  z.strictObject({ type: z.literal("boolean"), default: z.boolean().optional() }),
+  z.strictObject({
+    type: z.literal("boolean"),
+    default: z.boolean().optional(),
+  }),
   z.strictObject({
     type: z.literal("array"),
     items: z.strictObject({ type: z.literal("string") }),
@@ -71,7 +74,11 @@ export type FragmentFile = z.infer<typeof FragmentFileSchema>;
 // --- tutor definition (the thing the user supplies a URL to) ---
 
 /** A supplied variable value mirrors what `input_schema` can declare. */
-export const VariableValueSchema = z.union([z.string(), z.boolean(), z.array(z.string())]);
+export const VariableValueSchema = z.union([
+  z.string(),
+  z.boolean(),
+  z.array(z.string()),
+]);
 export type VariableValue = z.infer<typeof VariableValueSchema>;
 
 const FragmentFileRefSchema = z.strictObject({
@@ -89,6 +96,17 @@ const FragmentRefSchema = z.strictObject({
   required: z.boolean().optional(),
 });
 
+/**
+ * An example question offered to students on the welcome screen: the `title` is
+ * the clickable label, the `question` is the full text placed into the chat
+ * input on click. Tutors may define any number; the UI samples at most 5.
+ */
+export const ExampleQuestionSchema = z.strictObject({
+  title: z.string().min(1),
+  question: z.string().min(1),
+});
+export type ExampleQuestion = z.infer<typeof ExampleQuestionSchema>;
+
 export const TutorSchema = z.strictObject({
   id: z.string(),
   name: z.string(),
@@ -99,7 +117,10 @@ export const TutorSchema = z.strictObject({
   // Students may attach images in the chat by default; a tutor opts OUT with
   // `imageInput: false` (e.g. for models without vision support — the flag is
   // what gates the upload UI, nothing checks the model's actual modalities).
-  llm: z.strictObject({ model: z.string(), imageInput: z.boolean().optional() }),
+  llm: z.strictObject({
+    model: z.string(),
+    imageInput: z.boolean().optional(),
+  }),
   prompt: z.strictObject({
     fragment_files: z.array(FragmentFileRefSchema).default([]),
     fragments: z.array(FragmentRefSchema).default([]),
