@@ -1,29 +1,21 @@
 import { Mastra } from "@mastra/core/mastra";
+import { FilesystemStore, MastraCompositeStore } from "@mastra/core/storage";
 import { PinoLogger } from "@mastra/loggers";
 import { tutorAgent } from "./tutor-agent";
 
 const logger = new PinoLogger({ name: "Mastra", level: "info" });
 
-// Simple in-memory storage for MVP testing. Not suitable for production.
-class InMemoryStorage {
-  private store = new Map<string, unknown>();
+// MVP: Use FilesystemStore for local development. Stores data as JSON files
+// in .mastra-storage/ directory. Not suitable for production.
+const filesystemStore = new FilesystemStore({
+  dir: ".mastra-storage",
+});
 
-  async get(key: string): Promise<unknown> {
-    return this.store.get(key);
-  }
-
-  async set(key: string, value: unknown): Promise<void> {
-    this.store.set(key, value);
-  }
-
-  async delete(key: string): Promise<void> {
-    this.store.delete(key);
-  }
-}
-
-// MVP: Use in-memory storage for testing. In production, use MSSQLStore
-// (see sample/app/mastra/index.ts for Azure SQL configuration).
-const storage = new InMemoryStorage();
+// Composite store routes all domains to the filesystem backend.
+const storage = new MastraCompositeStore({
+  id: "mvp-storage",
+  default: filesystemStore,
+});
 
 export const mastra = new Mastra({
   // The `tutor` agent is configured per request from a tutor-definition YAML

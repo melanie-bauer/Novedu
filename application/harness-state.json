@@ -1,8 +1,8 @@
 {
-  "stage": "intake",
+  "stage": "close",
   "evidence": {
-    "before": [],
+    "before": ["evidence/before/home.png", "evidence/before/chat.png"],
     "checks": [],
-    "after": []
+    "after": ["evidence/after/tutor-chat.png"]
   }
 }
