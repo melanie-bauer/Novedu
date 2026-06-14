@@ -9,6 +9,9 @@ test("unauthenticated chat access redirects to login", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Sign in with Microsoft Entra ID" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Continue with Microsoft" }),
+  ).toHaveAttribute("href", /\/api\/auth\/signin\/azure-ad/);
 });
 
 test("mock authenticated user reaches chat", async ({ context, page }) => {

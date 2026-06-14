@@ -1,13 +1,9 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getMockSessionFromCookie } from "@/features/auth/session";
+import { getCurrentNoveduSession } from "@/features/auth/server-session";
 import { ChatShell } from "@/features/chat/ChatShell";
 
 export default async function ChatPage() {
-  const cookieStore = await cookies();
-  const session = getMockSessionFromCookie(
-    cookieStore.get("novedu-mock-session")?.value,
-  );
+  const session = await getCurrentNoveduSession();
 
   if (!session) {
     redirect("/login?callbackUrl=/chat");

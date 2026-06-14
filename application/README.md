@@ -26,6 +26,25 @@ http://127.0.0.1:3000/chat
 In tests, `/chat` is accessed with the explicit `novedu-mock-session` cookie.
 Production auth is intended to use Auth.js with Microsoft Entra ID.
 
+## Microsoft Entra ID Auth
+
+Production login uses Auth.js with the Azure AD / Microsoft Entra ID provider.
+Configure these runtime environment variables:
+
+```text
+AUTH_SECRET=
+AUTH_MICROSOFT_ENTRA_ID_ID=
+AUTH_MICROSOFT_ENTRA_ID_SECRET=
+AUTH_MICROSOFT_ENTRA_ID_TENANT_ID=
+NEXTAUTH_URL=
+```
+
+The redirect URI in Entra ID must point to:
+
+```text
+https://<your-app-host>/api/auth/callback/azure-ad
+```
+
 ## Verify
 
 ```sh

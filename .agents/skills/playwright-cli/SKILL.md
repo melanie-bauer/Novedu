@@ -6,7 +6,8 @@ description: Use when browser evidence, screenshots, videos, snapshots, or manua
 # Playwright CLI Evidence
 
 Use this skill for visible before/after evidence. Automated tests use
-`@playwright/test`; this skill is for browser work that should be easy to review.
+`@playwright/test`; this skill is for browser work that should be easy to
+review. UI-facing before/after evidence should be recorded as `.webm` video.
 
 Run commands from `application/`.
 
@@ -37,5 +38,8 @@ npm.cmd run harness evidence after evidence/after/after.webm
 
 - Capture current behavior before editing UI flows.
 - Capture changed behavior after implementation.
+- Register before/after UI evidence as `.webm` videos in the matching evidence
+  folder.
 - Keep bulky artifacts ignored; only `.gitkeep` files stay committed.
-- If video is unavailable, use screenshots or Playwright traces and explain why.
+- If video is unavailable, use screenshots or Playwright traces as `checks`
+  evidence and explain why.

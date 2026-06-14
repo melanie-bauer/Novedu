@@ -91,3 +91,36 @@ npm.cmd run test -- tests/unit/harness-state-machine.test.ts
 npm.cmd run verify
 ```
 
+## 2026-06-14: Microsoft Entra ID Login
+
+### Implemented Changes
+- Added the Auth.js route at `/api/auth/[...nextauth]`.
+- Configured Microsoft Entra ID through the Auth.js Azure AD provider using
+  `AUTH_MICROSOFT_ENTRA_ID_ID`, `AUTH_MICROSOFT_ENTRA_ID_SECRET`,
+  `AUTH_MICROSOFT_ENTRA_ID_TENANT_ID`, and `AUTH_SECRET`.
+- Added session normalization so Entra/Auth.js sessions and explicit test mock
+  cookies both produce a `NoveduSession`.
+- Updated `/chat` to use the shared server-side session helper.
+- Updated `/login` with a real Auth.js Microsoft sign-in link and safe callback
+  handling.
+- Documented the required Entra/Auth environment variables in `README.md`.
+
+### Verification Commands
+```bash
+npm.cmd run test -- tests/unit/auth-session.test.ts
+npm.cmd run test:e2e
+npm.cmd run verify
+```
+
+### After Evidence
+- `evidence/after/login-entra.webm` - Login page with Microsoft sign-in action.
+
+### Evidence Workflow Fix
+- Updated the harness state machine to reject `before` evidence outside
+  `reproduce` and `after` evidence outside `verify`.
+- Enforced matching `evidence/before/` and `evidence/after/` folders.
+- Required `.webm` videos for UI before/after evidence; screenshots now belong
+  in `checks` evidence when video capture is unavailable.
+- Updated local harness/playwright skills to prefer videos for UI-facing
+  before/after evidence.
+

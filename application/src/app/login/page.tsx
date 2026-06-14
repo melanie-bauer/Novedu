@@ -1,11 +1,23 @@
 import Link from "next/link";
 
-export default function LoginPage({
+function safeCallbackUrl(value: string | undefined): string {
+  if (!value?.startsWith("/") || value.startsWith("//")) {
+    return "/chat";
+  }
+
+  return value;
+}
+
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams?: Promise<{ callbackUrl?: string }>;
 }) {
-  void searchParams;
+  const params = searchParams ? await searchParams : {};
+  const callbackUrl = safeCallbackUrl(params.callbackUrl);
+  const signInHref = `/api/auth/signin/azure-ad?callbackUrl=${encodeURIComponent(
+    callbackUrl,
+  )}`;
 
   return (
     <main className="page-shell">
@@ -23,7 +35,10 @@ export default function LoginPage({
             path is Auth.js with Microsoft Entra ID; tests use an explicit mock
             session cookie.
           </p>
-          <Link className="button" href="/">
+          <Link className="button" href={signInHref}>
+            Continue with Microsoft
+          </Link>
+          <Link className="button secondary" href="/">
             Back to overview
           </Link>
         </div>
