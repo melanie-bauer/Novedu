@@ -55,3 +55,23 @@ npm run test:e2e   # ⚠️ 1 failed (pre-existing /chat test, unrelated to chan
 - Share link generation script added: `scripts/generate-test-link.ts`
 - Environment variable: `SHARE_LINK_SECRET=dev-secret-local` in `.env.local`
 
+## 2026-06-14: Harness Verification Repair
+
+### Implemented Changes
+- Replaced the undeclared `@mastra/loggers` import with Mastra core logging so
+  the runtime boots from declared dependencies.
+- Added regression coverage for Mastra tutor-agent registration.
+- Made the custom E2E runner importable and deterministic on Windows by
+  normalizing duplicate `Path`/`PATH` env keys.
+- Added an E2E-only `SHARE_LINK_SECRET` fallback so the runner can poll the app
+  without relying on a local `.env` file.
+- Set Biome line endings to `auto` so lint passes on Windows and CI.
+
+### Verification Commands
+```bash
+npm.cmd run test -- tests/unit/mastra-runtime.test.ts
+npm.cmd run test -- tests/unit/run-e2e.test.ts
+npm.cmd run test:e2e
+npm.cmd run verify
+```
+
