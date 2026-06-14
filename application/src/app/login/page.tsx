@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SignInButton } from "./SignInButton";
 
 function safeCallbackUrl(value: string | undefined): string {
   if (!value?.startsWith("/") || value.startsWith("//")) {
@@ -16,9 +17,6 @@ export default async function LoginPage({
   const params = searchParams ? await searchParams : {};
   const callbackUrl = safeCallbackUrl(params.callbackUrl);
   const authError = params.error;
-  const signInHref = `/api/auth/signin/azure-ad?callbackUrl=${encodeURIComponent(
-    callbackUrl,
-  )}`;
 
   return (
     <main className="login-page">
@@ -49,15 +47,7 @@ export default async function LoginPage({
           </div>
         ) : null}
 
-        <Link className="button microsoft-button" href={signInHref}>
-          <span className="microsoft-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          Mit Microsoft Entra ID anmelden
-        </Link>
+        <SignInButton callbackUrl={callbackUrl} />
 
         <div className="login-note" role="note">
           <strong>Geschutzter Zugriff</strong>
