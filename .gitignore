@@ -13,8 +13,6 @@ playwright-report
 
 # Local leftovers from other Novedu branches; not part of this harness branch.
 .idea
-infra
-util
 
 # Keep evidence folder shapes, not bulky artifacts.
 **/evidence/**/*.webm
