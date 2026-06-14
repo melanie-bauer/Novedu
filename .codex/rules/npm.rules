@@ -4,8 +4,8 @@ prefix_rule(
     justification = "Allow uncritical npm commands in this project",
     match = [
       "npm.cmd view next version",
-      "npm.cmd --prefix mvp-harness run typecheck",
-      "npm.cmd --prefix mvp-harness run verify",
+      "npm.cmd --prefix application run typecheck",
+      "npm.cmd --prefix application run verify",
     ],
   )
 

@@ -7,7 +7,7 @@ description: Use for issue workflow, reproduce-before-change discipline, evidenc
 
 Use this skill whenever an issue or feature is implemented.
 
-Run commands from `mvp-harness/`.
+Run commands from `application/`.
 
 ## Flow
 

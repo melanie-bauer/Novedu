@@ -16,19 +16,19 @@ Keep the harness branch green and make the project easy for agents and humans to
 work in.
 
 **Description**
-The current `mvp-harness` folder should remain the executable workspace for the
+The current `application` folder should remain the executable workspace for the
 MVP. This issue is complete when the baseline project structure, scripts,
 instructions, and CI are stable.
 
 **Acceptance Criteria**
-- `mvp-harness` contains the runnable NextJS app and all app-level tool config.
-- Root `AGENTS.md` points agents to `mvp-harness` and the relevant skills.
-- `npm.cmd run verify` passes from `mvp-harness`.
+- `application` contains the runnable NextJS app and all app-level tool config.
+- Root `AGENTS.md` points agents to `application` and the relevant skills.
+- `npm.cmd run verify` passes from `application`.
 - GitHub Actions runs the same verification chain on pull requests.
 - No legacy `frontend` or `backend` artifacts are part of the branch.
 
 **Verification**
-- Run `npm.cmd run verify` from `mvp-harness`.
+- Run `npm.cmd run verify` from `application`.
 - Confirm `git status` only shows intentional harness files.
 
 ## Issue 2: Redesign the MVP chat UI shell

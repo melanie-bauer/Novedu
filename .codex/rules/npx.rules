@@ -4,7 +4,7 @@ prefix_rule(
     justification = "Allow the project-local Playwright CLI",
     match = [
       "npx.cmd --no-install playwright-cli --version",
-      "npx.cmd --prefix mvp-harness --no-install playwright-cli open http://127.0.0.1:3000",
+      "npx.cmd --prefix application --no-install playwright-cli open http://127.0.0.1:3000",
     ],
   )
 

@@ -1,14 +1,14 @@
 # Novedu MVP Harness
 
 This branch is the agent harness for the real Novedu MVP. It is a green,
-minimal NextJS baseline in `mvp-harness/` that future agents can extend in
+minimal NextJS baseline in `application/` that future agents can extend in
 small, verifiable pieces.
 
 ## Start Here
 
 1. Read this file.
 2. Read `docs/harness/operating-model.md`.
-3. Run `npm run harness:status` from `mvp-harness/`.
+3. Run `npm run harness:status` from `application/`.
 4. Read the issue or task.
 5. Reproduce current behavior before editing.
 6. Add or update focused tests.
@@ -42,7 +42,7 @@ Use repo-local skills from `.agents/skills` when a task touches that area:
 
 ## Commands
 
-Run these from `mvp-harness/`:
+Run these from `application/`:
 
 - `npm run dev` starts the app.
 - `npm run typecheck` checks TypeScript.

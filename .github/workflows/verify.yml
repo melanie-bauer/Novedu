@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: mvp-harness
+        working-directory: application
 
     steps:
       - name: Checkout repository
@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: mvp-harness/package-lock.json
+          cache-dependency-path: application/package-lock.json
 
       - name: Install dependencies
         run: npm ci

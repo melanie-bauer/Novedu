@@ -7,7 +7,7 @@ This folder contains the runnable NextJS harness for the Novedu MVP.
 From the repository root:
 
 ```sh
-cd mvp-harness
+cd application
 npm.cmd run dev
 ```
 
@@ -29,7 +29,7 @@ Production auth is intended to use Auth.js with Microsoft Entra ID.
 ## Verify
 
 ```sh
-cd mvp-harness
+cd application
 npm.cmd run verify
 ```
 
@@ -39,7 +39,7 @@ Playwright E2E tests.
 ## Harness Workflow
 
 ```sh
-cd mvp-harness
+cd application
 npm.cmd run harness:status
 ```
 
