@@ -51,44 +51,105 @@ export function ChatShell({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="panel chat-layout" data-testid="chat-shell">
-      <header className="chat-header">
-        <div>
-          <h1>Novedu Tutor Chat</h1>
-          <p>AG-UI stream boundary with CoPilotKit-ready chat surface.</p>
+    <div className="chat-workspace" data-testid="chat-shell">
+      <aside className="chat-sidebar" aria-label="Chat navigation">
+        <div className="sidebar-brand">
+          <span className="brand-mark">N</span>
+          <div>
+            <strong>Novedu</strong>
+            <span>Tutor Workspace</span>
+          </div>
         </div>
-        <div className="upload-row">
-          <label htmlFor="document-upload">Document upload</label>
-          <input
-            aria-label="Upload document"
-            data-testid="document-upload"
-            id="document-upload"
-            type="file"
-          />
-        </div>
-      </header>
-      <div className="message-list" aria-live="polite">
-        {messages.map((message) => (
-          <article className={`message ${message.role}`} key={message.id}>
-            <MessageRenderer content={message.content} />
-          </article>
-        ))}
-      </div>
-      <footer className="composer">
-        <input
-          aria-label="Message"
-          readOnly
-          value="Explain the demo contract."
-        />
-        <button
-          className="button"
-          disabled={isStreaming}
-          onClick={sendMessage}
-          type="button"
-        >
-          {isStreaming ? "Streaming" : "Send"}
+
+        <button className="button sidebar-action" type="button">
+          <span aria-hidden="true">+</span>
+          Neuer Chat
         </button>
-      </footer>
+
+        <label className="sidebar-search">
+          <span className="visually-hidden">Chats durchsuchen</span>
+          <input placeholder="Chats durchsuchen..." type="search" />
+        </label>
+
+        <section className="sidebar-section" aria-labelledby="current-tutor">
+          <h2 id="current-tutor">Aktueller Tutor</h2>
+          <button className="sidebar-list-item active" type="button">
+            <span className="subject-dot" aria-hidden="true" />
+            <span>
+              <strong>Mathematics demo tutor</strong>
+              <small>GitHub adapter fixture</small>
+            </span>
+          </button>
+        </section>
+
+        <section className="sidebar-section" aria-labelledby="history">
+          <h2 id="history">Verlauf</h2>
+          <button className="sidebar-list-item" type="button">
+            <span aria-hidden="true">#</span>
+            <span>
+              <strong>AG-UI contract demo</strong>
+              <small>Heute aktualisiert</small>
+            </span>
+          </button>
+        </section>
+
+        <section className="sidebar-section sidebar-section-bottom">
+          <h2>Dokumente</h2>
+          <div className="upload-card">
+            <label htmlFor="document-upload">Document upload</label>
+            <input
+              aria-label="Upload document"
+              data-testid="document-upload"
+              id="document-upload"
+              type="file"
+            />
+            <p>Temporar im Browser, nicht persistiert.</p>
+          </div>
+        </section>
+      </aside>
+
+      <main className="chat-main">
+        <header className="chat-header">
+          <div>
+            <span className="eyebrow">Live Tutor</span>
+            <h1>Novedu Tutor Chat</h1>
+            <p>AG-UI stream boundary with CoPilotKit-ready chat surface.</p>
+          </div>
+          <div className="chat-status">
+            <span className={isStreaming ? "status-dot busy" : "status-dot"} />
+            {isStreaming ? "Streaming" : "Bereit"}
+          </div>
+        </header>
+
+        <div className="message-list" aria-live="polite">
+          {messages.map((message) => (
+            <article className={`message ${message.role}`} key={message.id}>
+              <div className="message-avatar" aria-hidden="true">
+                {message.role === "user" ? "U" : "N"}
+              </div>
+              <div className="message-bubble">
+                <MessageRenderer content={message.content} />
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <footer className="composer">
+          <input
+            aria-label="Message"
+            readOnly
+            value="Explain the demo contract."
+          />
+          <button
+            className="button"
+            disabled={isStreaming}
+            onClick={sendMessage}
+            type="button"
+          >
+            {isStreaming ? "Streaming" : "Send"}
+          </button>
+        </footer>
+      </main>
     </div>
   );
 }

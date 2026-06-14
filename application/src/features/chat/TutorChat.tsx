@@ -12,18 +12,9 @@ import type { ExampleQuestion, ValidationWarning } from "@/lib/tutors";
 import { CodeBlock } from "./CodeBlock";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
-// The chat surface. There is no tutor input here anymore: the server component
-// (app/page.tsx) verifies the signed share link and the tutor YAML and passes
-// the result down — including the ready-made runtime headers carrying the
-// signed parameters, which travel along on every runtime request so the
-// backend can re-verify them. The client is never trusted.
-//
-// The prompt preview is intentionally visible to everyone with a valid link:
-// the app is in early preview and the preview is a debugging aid.
-// Attachments are capped client-side at 5 MB per image: photos are inlined as
-// base64 into the chat request AND replayed from Mastra memory on every
-// following turn, so big files would bloat both the request body and the
-// model's context.
+// The server component verifies the signed share link and tutor YAML before
+// this client surface receives runtime headers. The client never gets to decide
+// which tutor or availability window is valid.
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 export function TutorChat({
@@ -40,27 +31,15 @@ export function TutorChat({
   runtimeHeaders: Record<string, string>;
   prompt: string;
   warnings: ValidationWarning[];
-  /** Tutor `llm.imageInput`: students may attach images (vision-capable model). */
+  /** Tutor `llm.imageInput`: students may attach images. */
   imageInput: boolean;
-  /** Tutor `title`: replaces the default "How can I help you today?" greeting. */
+  /** Tutor `title`: replaces the default greeting. */
   title?: string;
-  /** Tutor `description`: rendered below the greeting on the welcome screen. */
+  /** Tutor `description`: rendered below the greeting. */
   description: string;
-  /** ≤5 questions, sampled server-side; clicking one fills the chat input. */
+  /** Up to five sampled questions; clicking one fills the chat input. */
   exampleQuestions?: ExampleQuestion[];
 }) {
-  // The welcome screen needs to write into the chat input (clicking an example
-  // question fills it in), but CopilotChat keeps the input value in internal
-  // state and overrides any `inputValue`/`onInputChange` passed to it directly.
-  // The one public hook into that state is the `chatView` slot: CopilotChat
-  // hands its view all props including `onInputChange` (the internal setter),
-  // so we wrap CopilotChat.View and compose the welcome screen here — the
-  // built-in greeting (renders `labels.welcomeMessageText`), the description,
-  // and the clickable example questions.
-  //
-  // Memoized: the chat view contains the live input, so a fresh component
-  // identity on every TutorChat render (e.g. when uploadError flips) could
-  // remount it and lose the student's draft text.
   const ChatView = useMemo(() => {
     type ChatViewProps = ComponentProps<typeof CopilotChat.View>;
     function TutorChatView({ onInputChange, ...viewProps }: ChatViewProps) {
@@ -70,28 +49,14 @@ export function TutorChat({
         <div {...props}>
           <CopilotChat.View.WelcomeMessage />
           {description ? (
-            <p style={{ marginTop: "0.5rem", color: "#57606a" }}>
-              {description}
-            </p>
+            <p className="copilot-welcome-copy">{description}</p>
           ) : null}
           {exampleQuestions.length > 0 ? (
-            <ul style={{ listStyle: "none", padding: 0, marginTop: "1rem" }}>
+            <ul className="copilot-example-list">
               {exampleQuestions.map((q) => (
-                // Titles alone are not guaranteed unique; the question text is
-                // part of the key. The list is static, so content keys are safe.
                 <li key={`${q.title}\n${q.question}`}>
                   <button
                     type="button"
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      marginBottom: "0.5rem",
-                      background: "#f6f8fa",
-                      border: "1px solid #d0d7de",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      width: "100%",
-                      textAlign: "left",
-                    }}
                     title={q.question}
                     onClick={() => onInputChange?.(q.question)}
                   >
@@ -115,130 +80,134 @@ export function TutorChat({
         />
       );
     }
-    // The chatView slot's type is `typeof CopilotChat.View`, which carries the
-    // namespace statics (WelcomeMessage, ScrollView, …) — copy them onto the
-    // wrapper so it satisfies the slot without a type assertion.
+
     return Object.assign(TutorChatView, CopilotChat.View);
   }, [description, exampleQuestions]);
-  // Rejected uploads (too large, wrong type) call onUploadFailed and silently
-  // drop the file — without this notice the student would never learn why.
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   return (
-    <>
-      <div
-        style={{
-          padding: "0.75rem",
-          background: "#f6f8fa",
-          borderBottom: "1px solid #d0d7de",
-          fontSize: "0.85rem",
-        }}
-      >
-        <span style={{ color: "#57606a" }} title={tutorUrl}>
-          {tutorUrl}
-        </span>
-      </div>
+    <div className="chat-workspace chat-workspace-real">
+      <aside className="chat-sidebar" aria-label="Tutor details">
+        <div className="sidebar-brand">
+          <span className="brand-mark">N</span>
+          <div>
+            <strong>Novedu</strong>
+            <span>Share-Link Sitzung</span>
+          </div>
+        </div>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary
-          style={{ cursor: "pointer", padding: "0.5rem", fontWeight: 500 }}
-        >
-          System prompt &amp; warnings
-        </summary>
-        <div
-          style={{
-            padding: "0.5rem",
-            background: "#f6f8fa",
-            borderTop: "1px solid #d0d7de",
-          }}
-        >
+        <section className="sidebar-section">
+          <h2>Aktueller Tutor</h2>
+          <div className="sidebar-info">
+            <strong>{title ?? "Tutor Chat"}</strong>
+            <span title={tutorUrl}>{tutorUrl}</span>
+          </div>
+        </section>
+
+        <section className="sidebar-section">
+          <h2>Funktionen</h2>
+          <ul className="feature-list">
+            <li>
+              <span className="status-dot" aria-hidden="true" />
+              Signierter Share-Link
+            </li>
+            <li>
+              <span className="status-dot" aria-hidden="true" />
+              CopilotKit Runtime
+            </li>
+            <li>
+              <span
+                className={imageInput ? "status-dot" : "status-dot muted"}
+                aria-hidden="true"
+              />
+              {imageInput ? "Bild-Upload aktiv" : "Bild-Upload deaktiviert"}
+            </li>
+          </ul>
+        </section>
+
+        {exampleQuestions.length > 0 ? (
+          <section className="sidebar-section">
+            <h2>Beispiele</h2>
+            <div className="example-stack">
+              {exampleQuestions.map((q) => (
+                <span key={`${q.title}\n${q.question}`}>{q.title}</span>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <details className="sidebar-section prompt-details">
+          <summary>System prompt &amp; warnings</summary>
           {warnings.length > 0 ? (
-            <div style={{ marginBottom: "1rem" }}>
+            <div className="warning-stack">
               {warnings.map((w) => (
-                <div
-                  key={`${w.code}-${w.message}`}
-                  style={{
-                    padding: "0.5rem",
-                    background: "#fff8c5",
-                    border: "1px solid #e3b341",
-                    borderRadius: "4px",
-                    marginBottom: "0.5rem",
-                  }}
-                >
+                <div className="warning-box" key={`${w.code}-${w.message}`}>
                   <strong>{w.code}:</strong> {w.message}
                 </div>
               ))}
             </div>
-          ) : null}
+          ) : (
+            <p className="sidebar-muted">Keine Warnungen.</p>
+          )}
           <CodeBlock className="language-markdown">{prompt}</CodeBlock>
-        </div>
-      </details>
+        </details>
+      </aside>
 
-      {uploadError ? (
-        <div
-          style={{
-            padding: "0.75rem",
-            background: "#fff8c5",
-            border: "1px solid #e3b341",
-            borderRadius: "6px",
-            marginBottom: "1rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-          role="alert"
-        >
-          <span>{uploadError}</span>
-          <button
-            type="button"
-            style={{
-              padding: "0.25rem 0.5rem",
-              background: "transparent",
-              border: "1px solid #d0d7de",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-            onClick={() => setUploadError(null)}
+      <main className="chat-main">
+        <header className="chat-header">
+          <div>
+            <span className="eyebrow">Tutor Session</span>
+            <h1>{title ?? "Novedu Tutor Chat"}</h1>
+            <p>{description}</p>
+          </div>
+          <div className="chat-status">
+            <span className="status-dot" />
+            Bereit
+          </div>
+        </header>
+
+        {uploadError ? (
+          <div className="upload-error" role="alert">
+            <span>{uploadError}</span>
+            <button type="button" onClick={() => setUploadError(null)}>
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+
+        <div className="copilot-chat-frame">
+          {/*
+            The tutor URL must not go in runtimeUrl's query string. CopilotKit
+            appends sub-routes such as /info to runtimeUrl, so the verified
+            share-link material travels as headers on every runtime request.
+          */}
+          <CopilotKitProvider
+            key={tutorUrl}
+            runtimeUrl="/api/copilotkit"
+            headers={runtimeHeaders}
           >
-            Dismiss
-          </button>
+            <CopilotChat
+              agentId="tutor"
+              labels={title ? { welcomeMessageText: title } : undefined}
+              chatView={ChatView}
+              messageView={{
+                assistantMessage: { markdownRenderer: MarkdownRenderer },
+              }}
+              attachments={
+                imageInput
+                  ? {
+                      enabled: true,
+                      accept: "image/*",
+                      maxSize: MAX_IMAGE_BYTES,
+                      onUploadFailed: ({ file, message }) =>
+                        setUploadError(`${file.name}: ${message}`),
+                    }
+                  : undefined
+              }
+            />
+          </CopilotKitProvider>
         </div>
-      ) : null}
-
-      <div style={{ minHeight: "400px" }}>
-        {/*
-          The tutor URL must NOT go in runtimeUrl's query string: CopilotKit
-          builds sub-route URLs (e.g. /info) by appending to runtimeUrl, which
-          would yield `/api/copilotkit?tutor=...yaml/info` (404). Pass it — and
-          the share-link signature material — as headers instead, sent on every
-          runtime request and verified server-side.
-        */}
-        <CopilotKitProvider
-          key={tutorUrl}
-          runtimeUrl="/api/copilotkit"
-          headers={runtimeHeaders}
-        >
-          <CopilotChat
-            agentId="tutor"
-            labels={title ? { welcomeMessageText: title } : undefined}
-            chatView={ChatView}
-            messageView={{
-              assistantMessage: { markdownRenderer: MarkdownRenderer },
-            }}
-            attachments={
-              imageInput
-                ? {
-                    enabled: true,
-                    accept: "image/*",
-                    maxSize: MAX_IMAGE_BYTES,
-                    onUploadFailed: ({ file, message }) =>
-                      setUploadError(`${file.name}: ${message}`),
-                  }
-                : undefined
-            }
-          />
-        </CopilotKitProvider>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

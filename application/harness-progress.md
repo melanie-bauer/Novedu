@@ -124,3 +124,27 @@ npm.cmd run verify
 - Updated local harness/playwright skills to prefer videos for UI-facing
   before/after evidence.
 
+## 2026-06-14: Prototype-Inspired Chat And Login UI
+
+### Implemented Changes
+- Reworked `/chat` into a prototype-inspired chat workspace with sidebar,
+  current tutor context, search affordance, visible document upload, message
+  bubbles, and composer while keeping the existing AG-UI mock stream.
+- Reworked the real share-link `TutorChat` around the same workspace shell while
+  preserving CopilotKit runtime headers, attachment gating, markdown rendering,
+  and prompt/warning visibility.
+- Replaced the plain login page with a focused Novedu Microsoft Entra ID card
+  and kept local password auth out of scope.
+- Added browser and E2E assertions for the new workflow and login card.
+
+### Verification Commands
+```bash
+npm.cmd run test:browser -- --run tests/browser/chat-shell.test.tsx
+npm.cmd run test:e2e
+npm.cmd run verify
+```
+
+### Evidence
+- `evidence/before/ui-prototype-before.webm` - Previous login/chat shell state.
+- `evidence/after/ui-prototype-after.webm` - Updated login/chat workspace UI.
+

@@ -14,12 +14,11 @@ test("unauthenticated chat access redirects to login", async ({ page }) => {
   await expect(page).toHaveURL(
     /\/login\?callbackUrl=%2Fchat|\/login\?callbackUrl=\/chat/,
   );
+  await expect(page.getByRole("heading", { name: "Novedu" })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Sign in with Microsoft Entra ID" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "Continue with Microsoft" }),
+    page.getByRole("link", { name: "Mit Microsoft Entra ID anmelden" }),
   ).toHaveAttribute("href", /\/api\/auth\/signin\/azure-ad/);
+  await expect(page.getByText("Anmeldung mit Schulaccount")).toBeVisible();
 });
 
 test("mock authenticated user reaches chat", async ({ context, page }) => {
@@ -37,6 +36,8 @@ test("mock authenticated user reaches chat", async ({ context, page }) => {
   await expect(
     page.getByRole("heading", { name: "Novedu Tutor Chat" }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Neuer Chat" })).toBeVisible();
+  await expect(page.getByText("Aktueller Tutor")).toBeVisible();
   await expect(page.getByTestId("document-upload")).toBeVisible();
 });
 

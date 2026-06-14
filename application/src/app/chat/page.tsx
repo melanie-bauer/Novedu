@@ -10,23 +10,12 @@ export default async function ChatPage() {
   }
 
   return (
-    <main className="page-shell">
-      <nav className="topbar" aria-label="Main navigation">
-        <div className="brand">
-          <span className="brand-mark">N</span>
-          <span>Novedu Chat</span>
-        </div>
-        <span>{session.user.email}</span>
-      </nav>
-      <div className="main-grid">
-        <aside className="sidebar">
-          <h2>Available tutor</h2>
-          <p>Mathematics demo tutor</p>
-          <p>Config source: GitHub adapter fixture</p>
-        </aside>
-        <section className="content">
-          <ChatShell userId={session.user.id} />
-        </section>
+    <main className="page-shell page-shell--flush">
+      <div className="session-pill" title="Signed in user">
+        {session.user.email}
+      </div>
+      <div className="content-full">
+        <ChatShell userId={session.user.id} />
       </div>
     </main>
   );

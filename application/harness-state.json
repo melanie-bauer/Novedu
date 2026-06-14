@@ -1,7 +1,7 @@
 {
   "evidence": {
-    "after": ["evidence/after/login-entra.webm"],
-    "before": [],
+    "after": ["evidence/after/ui-prototype-after.webm"],
+    "before": ["evidence/before/ui-prototype-before.webm"],
     "checks": []
   },
   "stage": "close"

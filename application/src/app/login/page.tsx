@@ -20,27 +20,46 @@ export default async function LoginPage({
   )}`;
 
   return (
-    <main className="page-shell">
-      <nav className="topbar" aria-label="Main navigation">
-        <div className="brand">
-          <span className="brand-mark">N</span>
-          <span>Novedu</span>
+    <main className="login-page">
+      <section className="login-card" aria-labelledby="login-title">
+        <div className="login-brand">
+          <span className="brand-mark brand-mark-large">N</span>
+          <div>
+            <h1 id="login-title">Novedu</h1>
+            <p>Anmeldung mit Schulaccount</p>
+          </div>
         </div>
-      </nav>
-      <section className="hero">
-        <div className="hero-inner">
-          <h1>Sign in with Microsoft Entra ID</h1>
+
+        <div className="login-copy">
+          <h2>Willkommen zuruck</h2>
           <p>
-            The MVP harness keeps local passwords out of scope. The production
-            path is Auth.js with Microsoft Entra ID; tests use an explicit mock
-            session cookie.
+            Melde dich mit deinem Microsoft Entra ID Konto an. Lokale
+            Passwoerter bleiben im MVP bewusst ausserhalb der Anwendung.
           </p>
-          <Link className="button" href={signInHref}>
-            Continue with Microsoft
-          </Link>
-          <Link className="button secondary" href="/">
-            Back to overview
-          </Link>
+        </div>
+
+        <Link className="button microsoft-button" href={signInHref}>
+          <span className="microsoft-mark" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </span>
+          Mit Microsoft Entra ID anmelden
+        </Link>
+
+        <div className="login-note" role="note">
+          <strong>Geschutzter Zugriff</strong>
+          <span>
+            Nach der Anmeldung prueft die App serverseitig deine Session und
+            bringt dich zur angefragten Seite zuruck.
+          </span>
+        </div>
+
+        <div className="login-links">
+          <Link href="/">Zur Share-Link-Seite</Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/chat">Chat-Demo</Link>
         </div>
       </section>
     </main>
