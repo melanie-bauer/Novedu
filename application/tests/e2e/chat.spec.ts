@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+const videoHoldMs = Number(process.env.E2E_VIDEO_HOLD_MS ?? 2000);
+
+test.afterEach(async ({ page }) => {
+  if (videoHoldMs > 0) {
+    await page.waitForTimeout(videoHoldMs);
+  }
+});
+
 test("unauthenticated chat access redirects to login", async ({ page }) => {
   await page.goto("/chat");
 
