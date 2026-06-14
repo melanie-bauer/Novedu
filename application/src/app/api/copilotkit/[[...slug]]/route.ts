@@ -1,7 +1,9 @@
 import { MastraAgent } from "@ag-ui/mastra";
 import { CopilotRuntime, createCopilotEndpoint } from "@copilotkit/runtime/v2";
 import { RequestContext } from "@mastra/core/request-context";
+import { buildDemoTutors, findDemoTutor } from "@/lib/chat-options";
 import { mastra } from "@/lib/mastra";
+import { scchModels } from "@/lib/mastra/scch";
 import {
   getShareLinkSecret,
   type ShareLinkRejection,
@@ -48,25 +50,47 @@ async function handler(req: Request): Promise<Response> {
   // For MVP, we'll use a mock user ID. In production, this would come from the session.
   const resourceId = sessionValue ? `mock-${sessionValue}` : "mock-student";
 
-  const verification = verifyShareLink(
-    {
-      tutor: req.headers.get("x-tutor-url") ?? undefined,
-      start: req.headers.get("x-share-start") ?? undefined,
-      end: req.headers.get("x-share-end") ?? undefined,
-      sig: req.headers.get("x-share-sig") ?? undefined,
-    },
-    getShareLinkSecret(),
-    Math.floor(Date.now() / 1000),
-  );
-  if (!verification.ok) {
+  const requestContext = new RequestContext();
+  const tutorUrl = req.headers.get("x-tutor-url");
+  const shareSig = req.headers.get("x-share-sig");
+  const demoTutorId = req.headers.get("x-demo-tutor-id");
+  const scchModel = req.headers.get("x-scch-model");
+
+  if (tutorUrl || shareSig) {
+    const verification = verifyShareLink(
+      {
+        tutor: tutorUrl ?? undefined,
+        start: req.headers.get("x-share-start") ?? undefined,
+        end: req.headers.get("x-share-end") ?? undefined,
+        sig: shareSig ?? undefined,
+      },
+      getShareLinkSecret(),
+      Math.floor(Date.now() / 1000),
+    );
+    if (!verification.ok) {
+      return Response.json(
+        { error: REJECTION_MESSAGES[verification.reason] },
+        { status: 403 },
+      );
+    }
+    requestContext.set("tutor-url", verification.tutor);
+  } else if (demoTutorId) {
+    const tutor = findDemoTutor(buildDemoTutors(scchModels), demoTutorId);
+    if (!tutor) {
+      return Response.json({ error: "Unknown demo tutor." }, { status: 404 });
+    }
+    requestContext.set("tutor-config", {
+      model: tutor.model,
+      prompt: tutor.prompt,
+    });
+  } else if (scchModel) {
+    requestContext.set("scch-model", scchModel);
+  } else {
     return Response.json(
-      { error: REJECTION_MESSAGES[verification.reason] },
-      { status: 403 },
+      { error: "Choose an SCCH model or tutor configuration first." },
+      { status: 400 },
     );
   }
-
-  const requestContext = new RequestContext();
-  requestContext.set("tutor-url", verification.tutor);
 
   const runtime = new CopilotRuntime({
     // @ts-expect-error - @ag-ui/mastra's AbstractAgent type does not line up with

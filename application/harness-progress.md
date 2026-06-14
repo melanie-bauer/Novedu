@@ -148,3 +148,37 @@ npm.cmd run verify
 - `evidence/before/ui-prototype-before.webm` - Previous login/chat shell state.
 - `evidence/after/ui-prototype-after.webm` - Updated login/chat workspace UI.
 
+## 2026-06-14: Open Chat Entry And Entra Error Handling
+
+### Implemented Changes
+- Changed `/` into an authentication gateway: signed-in users go to `/chat`,
+  unauthenticated users go to `/login`.
+- Kept the signed share-link flow available under `/share-link-chat` instead of
+  deleting it, so it can be promoted again later.
+- Reworked `/chat` so it no longer needs a share link for the current MVP path.
+  Users can choose between fetched SCCH models and demo tutor configurations.
+- Added demo tutor configurations that use the first fetched SCCH model, with a
+  deterministic fallback when SCCH is unavailable locally.
+- Extended the CopilotKit runtime to accept `x-demo-tutor-id` and
+  `x-scch-model` headers while preserving the old signed share-link headers.
+- Accepted both `AUTH_MICROSOFT_ENTRA_ID_*` and `AZURE_*` Entra env variable
+  names, and surfaced `error=azure-ad` as a visible login-card error.
+
+### Verification Commands
+```bash
+npm.cmd run test -- tests/unit/auth-session.test.ts tests/unit/chat-options.test.ts
+npm.cmd run test:browser -- --run tests/browser/chat-shell.test.tsx
+npm.cmd run test:e2e
+npm.cmd run verify
+```
+
+### Evidence
+- `evidence/after/open-chat-login-after.webm` - New root/login/chat flow.
+
+### Notes
+- Before evidence capture via Playwright CLI failed to produce a file in this
+  cycle; after evidence is registered from the passing Playwright E2E video.
+- I did not automate a real Microsoft login. Interactive Entra login may involve
+  MFA and credentials; it should be completed by the account owner in the
+  browser.
+

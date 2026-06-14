@@ -35,6 +35,18 @@ describe("auth session helpers", () => {
     expect(options.providers[0].id).toBe("azure-ad");
   });
 
+  it("accepts the Azure env names used by the chat prototype", () => {
+    const options = buildAuthOptions({
+      AZURE_CLIENT_ID: "client-id",
+      AZURE_CLIENT_SECRET: "client-secret",
+      AZURE_TENANT_ID: "tenant-id",
+      AUTH_SECRET: "auth-secret",
+    });
+
+    expect(options.providers).toHaveLength(1);
+    expect(options.providers[0].id).toBe("azure-ad");
+  });
+
   it("keeps Auth.js provider disabled until all Entra env vars exist", () => {
     const options = buildAuthOptions({
       AUTH_MICROSOFT_ENTRA_ID_ID: "client-id",

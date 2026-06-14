@@ -22,9 +22,10 @@ type NoveduTokenUser = {
 type AuthEnv = Record<string, string | undefined>;
 
 export function buildAuthOptions(env: AuthEnv = process.env): NextAuthOptions {
-  const clientId = env.AUTH_MICROSOFT_ENTRA_ID_ID;
-  const clientSecret = env.AUTH_MICROSOFT_ENTRA_ID_SECRET;
-  const tenantId = env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID;
+  const clientId = env.AUTH_MICROSOFT_ENTRA_ID_ID ?? env.AZURE_CLIENT_ID;
+  const clientSecret =
+    env.AUTH_MICROSOFT_ENTRA_ID_SECRET ?? env.AZURE_CLIENT_SECRET;
+  const tenantId = env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID ?? env.AZURE_TENANT_ID;
 
   return {
     callbacks: {

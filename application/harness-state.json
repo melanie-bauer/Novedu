@@ -1,7 +1,7 @@
 {
   "evidence": {
-    "after": ["evidence/after/ui-prototype-after.webm"],
-    "before": ["evidence/before/ui-prototype-before.webm"],
+    "after": ["evidence/after/open-chat-login-after.webm"],
+    "before": [],
     "checks": []
   },
   "stage": "close"

@@ -232,6 +232,22 @@ textarea {
   font-size: 0.875rem;
 }
 
+.login-error {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0 0 1rem;
+  border: 1px solid #efb3a6;
+  border-radius: 0.5rem;
+  background: #fff3f0;
+  color: #5f1d12;
+  padding: 0.875rem;
+  font-size: 0.875rem;
+}
+
+.login-error span {
+  color: #7a382d;
+}
+
 .login-links {
   display: flex;
   align-items: center;
@@ -314,6 +330,33 @@ textarea {
 .sidebar-action {
   width: 100%;
   gap: 0.5rem;
+}
+
+.option-picker {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.option-picker span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.option-picker small {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.option-picker select {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: white;
+  color: var(--foreground);
+  padding: 0 0.75rem;
 }
 
 .sidebar-search input {

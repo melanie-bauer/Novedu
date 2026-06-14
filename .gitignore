@@ -25,3 +25,5 @@ util
 **/evidence/**/*.trace
 !**/evidence/**/.gitkeep
 sample
+
+.playwright-cli

@@ -11,10 +11,11 @@ function safeCallbackUrl(value: string | undefined): string {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ callbackUrl?: string }>;
+  searchParams?: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const callbackUrl = safeCallbackUrl(params.callbackUrl);
+  const authError = params.error;
   const signInHref = `/api/auth/signin/azure-ad?callbackUrl=${encodeURIComponent(
     callbackUrl,
   )}`;
@@ -38,6 +39,16 @@ export default async function LoginPage({
           </p>
         </div>
 
+        {authError ? (
+          <div className="login-error" role="alert">
+            <strong>Microsoft Anmeldung fehlgeschlagen</strong>
+            <span>
+              Bitte pruefe Tenant-ID, Client-ID, Client-Secret und Redirect URI
+              in der Entra App Registration.
+            </span>
+          </div>
+        ) : null}
+
         <Link className="button microsoft-button" href={signInHref}>
           <span className="microsoft-mark" aria-hidden="true">
             <span />
@@ -57,7 +68,7 @@ export default async function LoginPage({
         </div>
 
         <div className="login-links">
-          <Link href="/">Zur Share-Link-Seite</Link>
+          <Link href="/share-link-chat">Share-Link-Chat</Link>
           <span aria-hidden="true">/</span>
           <Link href="/chat">Chat-Demo</Link>
         </div>
