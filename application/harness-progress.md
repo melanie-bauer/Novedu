@@ -75,3 +75,19 @@ npm.cmd run test:e2e
 npm.cmd run verify
 ```
 
+## 2026-06-14: AG-UI Chunked SSE Contract
+
+### Implemented Changes
+- Added chunked SSE parsing for AG-UI streams while preserving the existing
+  whole-string parser behavior.
+- Added regression tests for split AG-UI frames and incomplete trailing frames.
+- Fixed the harness state writer so `harness advance/reset` keeps
+  `harness-state.json` formatted on Windows.
+
+### Verification Commands
+```bash
+npm.cmd run test -- tests/unit/agui.test.ts
+npm.cmd run test -- tests/unit/harness-state-machine.test.ts
+npm.cmd run verify
+```
+

@@ -32,7 +32,15 @@ function loadHarnessState(): HarnessState {
 
 function saveHarnessState(state: HarnessState) {
   const filePath = join(process.cwd(), "harness-state.json");
-  writeFileSync(filePath, `${JSON.stringify(state, null, 2)}\n`);
+  writeFileSync(filePath, serializeHarnessState(state));
+}
+
+export function serializeHarnessState(
+  state: HarnessState,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const lineEnding = platform === "win32" ? "\r\n" : "\n";
+  return `${JSON.stringify(state, null, 2)}\n`.replaceAll("\n", lineEnding);
 }
 
 function getNextStage(stage: HarnessStage): HarnessStage {
@@ -136,17 +144,23 @@ function isEvidenceKind(kind: string | undefined): kind is EvidenceKind {
   return kind === "before" || kind === "checks" || kind === "after";
 }
 
-const command = process.argv[2] ?? "status";
+function main() {
+  const command = process.argv[2] ?? "status";
 
-if (command === "status") {
-  printStatus();
-} else if (command === "advance") {
-  advance();
-} else if (command === "reset") {
-  reset();
-} else if (command === "evidence") {
-  addEvidence(process.argv[3], process.argv[4]);
-} else {
-  console.error(`Unknown harness command: ${command}`);
-  process.exitCode = 1;
+  if (command === "status") {
+    printStatus();
+  } else if (command === "advance") {
+    advance();
+  } else if (command === "reset") {
+    reset();
+  } else if (command === "evidence") {
+    addEvidence(process.argv[3], process.argv[4]);
+  } else {
+    console.error(`Unknown harness command: ${command}`);
+    process.exitCode = 1;
+  }
+}
+
+if (!process.env.VITEST) {
+  main();
 }
