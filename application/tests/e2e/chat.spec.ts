@@ -65,8 +65,13 @@ test("mock authenticated user reaches chat", async ({ context, page }) => {
   await page.goto("/chat");
 
   await expect(page.getByTestId("chat-shell")).toBeVisible();
+
+  const picker = page.locator(".model-picker-label");
+  await expect(picker).toBeVisible();
+  const selectedTutor = (await picker.textContent())?.trim();
+  expect(selectedTutor).toBeTruthy();
   await expect(
-    page.getByRole("heading", { name: "Mathematik Tutor" }),
+    page.getByRole("heading", { name: selectedTutor }),
   ).toBeVisible();
   await expect(page.getByPlaceholder("Nachricht an Novedu...")).toBeVisible();
 });
