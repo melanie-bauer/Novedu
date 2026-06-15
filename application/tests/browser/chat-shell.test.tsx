@@ -35,7 +35,9 @@ test("renders the chatgpt-like shell", async () => {
     .element(screen.getByRole("heading", { name: "Mathematik Tutor" }))
     .toBeVisible();
   await expect.element(screen.getByText("student@example.org")).toBeVisible();
-  await expect.element(screen.getByTestId("copilot-welcome-screen")).toBeVisible();
+  await expect
+    .element(screen.getByTestId("copilot-welcome-screen"))
+    .toBeVisible();
 });
 
 test("opens the model and tutor picker", async () => {
