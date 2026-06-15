@@ -4,10 +4,20 @@
 
 import { assembleSystemPrompt } from "./assemble";
 import { checkConsistency } from "./consistency";
-import { type BuildResult, error, type ValidationError, type ValidationWarning } from "./errors";
+import {
+  type BuildResult,
+  error,
+  type ValidationError,
+  type ValidationWarning,
+} from "./errors";
 import type { Fetcher } from "./fetcher";
 import { parseYaml, validate } from "./parse";
-import { type FragmentFile, FragmentFileSchema, type Tutor, TutorSchema } from "./schemas";
+import {
+  type FragmentFile,
+  FragmentFileSchema,
+  type Tutor,
+  TutorSchema,
+} from "./schemas";
 
 /**
  * Resolve a fragment-file reference to an absolute URL. An absolute http(s) ref is used
@@ -31,10 +41,14 @@ async function fetchText(
     if (!res.ok) {
       return {
         ok: false,
-        error: error("FETCH_FAILED", `Failed to fetch ${url} (HTTP ${res.status})`, {
-          url,
-          status: res.status,
-        }),
+        error: error(
+          "FETCH_FAILED",
+          `Failed to fetch ${url} (HTTP ${res.status})`,
+          {
+            url,
+            status: res.status,
+          },
+        ),
       };
     }
     return { ok: true, text: await res.text() };
@@ -42,7 +56,9 @@ async function fetchText(
     const message = e instanceof Error ? e.message : String(e);
     return {
       ok: false,
-      error: error("FETCH_FAILED", `Failed to fetch ${url}: ${message}`, { url }),
+      error: error("FETCH_FAILED", `Failed to fetch ${url}: ${message}`, {
+        url,
+      }),
     };
   }
 }
@@ -63,13 +79,20 @@ export async function loadAndBuildTutorPrompt(
 
   // --- tutor definition ---
   const tutorFetch = await fetchText(url, fetchImpl);
-  if (!tutorFetch.ok) return { ok: false, errors: [tutorFetch.error], warnings };
+  if (!tutorFetch.ok)
+    return { ok: false, errors: [tutorFetch.error], warnings };
 
   const tutorYaml = parseYaml(tutorFetch.text, url);
   if (!tutorYaml.ok) return { ok: false, errors: [tutorYaml.error], warnings };
 
-  const tutorValid = validate<Tutor>(tutorYaml.value, TutorSchema, "TUTOR_SCHEMA_ERROR", url);
-  if (!tutorValid.ok) return { ok: false, errors: [tutorValid.error], warnings };
+  const tutorValid = validate<Tutor>(
+    tutorYaml.value,
+    TutorSchema,
+    "TUTOR_SCHEMA_ERROR",
+    url,
+  );
+  if (!tutorValid.ok)
+    return { ok: false, errors: [tutorValid.error], warnings };
   const tutor = tutorValid.data;
 
   // --- fragment files (fetched in parallel; surface every failing file at once) ---
@@ -78,7 +101,8 @@ export async function loadAndBuildTutorPrompt(
       async (
         ref,
       ): Promise<
-        { alias: string; file: FragmentFile } | { alias: string; error: ValidationError }
+        | { alias: string; file: FragmentFile }
+        | { alias: string; error: ValidationError }
       > => {
         // Relative refs are resolved against the tutor URL; absolute http(s) refs pass
         // through. Report errors against the resolved URL (the thing actually fetched).
@@ -104,7 +128,11 @@ export async function loadAndBuildTutorPrompt(
           "FRAGMENT_FILE_SCHEMA_ERROR",
           fragmentUrl,
         );
-        if (!valid.ok) return { alias: ref.id, error: { ...valid.error, fileAlias: ref.id } };
+        if (!valid.ok)
+          return {
+            alias: ref.id,
+            error: { ...valid.error, fileAlias: ref.id },
+          };
         return { alias: ref.id, file: valid.data };
       },
     ),
@@ -121,7 +149,8 @@ export async function loadAndBuildTutorPrompt(
   // --- consistency ---
   const consistency = checkConsistency(tutor, fragmentFilesByAlias);
   warnings.push(...consistency.warnings);
-  if (consistency.errors.length > 0) return { ok: false, errors: consistency.errors, warnings };
+  if (consistency.errors.length > 0)
+    return { ok: false, errors: consistency.errors, warnings };
 
   // --- assemble (strict Handlebars backstop) ---
   try {
@@ -141,7 +170,9 @@ export async function loadAndBuildTutorPrompt(
     const message = e instanceof Error ? e.message : String(e);
     return {
       ok: false,
-      errors: [error("ASSEMBLY_ERROR", `Failed to render system prompt: ${message}`)],
+      errors: [
+        error("ASSEMBLY_ERROR", `Failed to render system prompt: ${message}`),
+      ],
       warnings,
     };
   }

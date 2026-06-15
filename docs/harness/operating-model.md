@@ -4,7 +4,7 @@ This harness keeps Novedu changes visible and reviewable. It is deliberately
 small: agents must understand the task, reproduce current behavior, implement a
 focused change, verify it, and leave evidence.
 
-The runnable harness app lives in `mvp-harness/`. Run npm commands from that
+The runnable harness app lives in `application/`. Run npm commands from that
 folder unless a task explicitly says otherwise.
 
 ## State Machine
@@ -20,7 +20,7 @@ The local state machine has five stages:
 Run:
 
 ```sh
-cd mvp-harness
+cd application
 npm run harness:status
 npm run harness advance
 npm run harness reset
@@ -30,15 +30,15 @@ npm run harness reset
 
 Use these paths:
 
-- `mvp-harness/evidence/before` for current behavior
-- `mvp-harness/evidence/checks` for test output notes, traces, or screenshots
-- `mvp-harness/evidence/after` for changed behavior
-- `mvp-harness/evidence/traces` for Playwright traces
+- `application/evidence/before` for current behavior
+- `application/evidence/checks` for test output notes, traces, or screenshots
+- `application/evidence/after` for changed behavior
+- `application/evidence/traces` for Playwright traces
 
 Register every real evidence file:
 
 ```sh
-cd mvp-harness
+cd application
 npm run harness evidence before evidence/before/<file>
 npm run harness evidence checks evidence/checks/<file>
 npm run harness evidence after evidence/after/<file>
@@ -47,7 +47,7 @@ npm run harness evidence after evidence/after/<file>
 For browser evidence, prefer the local Playwright CLI:
 
 ```sh
-cd mvp-harness
+cd application
 npx.cmd --no-install playwright-cli open http://127.0.0.1:3000
 npx.cmd --no-install playwright-cli video-start evidence/before/before.webm
 npx.cmd --no-install playwright-cli video-stop
@@ -61,7 +61,7 @@ Before claiming completion, run the narrowest relevant checks and normally end
 with:
 
 ```sh
-cd mvp-harness
+cd application
 npm run verify
 ```
 

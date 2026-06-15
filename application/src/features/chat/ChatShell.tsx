@@ -1,94 +1,118 @@
 "use client";
 
-import { useState } from "react";
-import { MessageRenderer } from "@/features/chat/MessageRenderer";
-import { parseSseFrames } from "@/lib/agui/events";
+import { CopilotKitProvider } from "@copilotkit/react-core/v2";
+import { useMemo, useState } from "react";
+import {
+  buildPickerOptions,
+  type ChatPickerOption,
+  ModelTutorPicker,
+} from "@/features/chat/ModelTutorPicker";
+import {
+  type ChatModelOption,
+  modelSupportsVision,
+  type TutorOption,
+} from "@/lib/chat-options";
+import { ChatTopBar } from "./ChatTopBar";
+import { NoveduChatSurface } from "./NoveduChatSurface";
 
-type ChatMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
+function optionKey(option: ChatPickerOption): string {
+  return `${option.kind}:${option.id}`;
+}
 
-const starterMessage = `Welcome to the Novedu chat harness.
+export function ChatShell({
+  models,
+  tutors,
+  userLabel,
+  userId,
+}: {
+  models: ChatModelOption[];
+  tutors: TutorOption[];
+  userLabel: string;
+  userId: string;
+}) {
+  const pickerOptions = useMemo(
+    () =>
+      buildPickerOptions(
+        tutors.map((tutor) => ({ id: tutor.id, title: tutor.title })),
+        models.map((model) => ({ id: model.id, label: model.label })),
+      ),
+    [models, tutors],
+  );
 
-Math renders as $$x^2 + y^2 = z^2$$.
+  const initialSelection =
+    pickerOptions[0] ??
+    ({
+      kind: "model",
+      id: models[0]?.id ?? "demo-scch-model",
+      label: models[0]?.label ?? "Modell",
+      group: "Modelle",
+    } satisfies ChatPickerOption);
 
-\`\`\`ts
-const answer = 42;
-\`\`\``;
+  const [selection, setSelection] =
+    useState<ChatPickerOption>(initialSelection);
 
-export function ChatShell({ userId }: { userId: string }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: "welcome", role: "assistant", content: starterMessage },
-  ]);
-  const [isStreaming, setIsStreaming] = useState(false);
+  const selectedTutor =
+    selection.kind === "tutor"
+      ? tutors.find((tutor) => tutor.id === selection.id)
+      : undefined;
+  const selectedModel =
+    selection.kind === "model"
+      ? models.find((model) => model.id === selection.id)
+      : undefined;
 
-  async function sendMessage() {
-    setIsStreaming(true);
-    setMessages((current) => [
-      ...current,
-      { id: "user-1", role: "user", content: "Explain the demo contract." },
-    ]);
+  const selectedModelName = selectedTutor?.model ?? selectedModel?.model ?? "";
+  const selectedTitle =
+    selectedTutor?.title ?? selectedModel?.label ?? "Novedu Chat";
+  const selectedDescription =
+    selectedTutor?.description ??
+    "Direkter Modellchat ohne Tutor-Konfiguration.";
+  const imageUploadsEnabled = selectedTutor
+    ? selectedTutor.imageInput
+    : modelSupportsVision(selectedModelName);
 
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    });
-    const text = await response.text();
-    const events = parseSseFrames(text);
-    const content = events
-      .filter((event) => event.type === "TEXT_MESSAGE_CONTENT")
-      .map((event) => event.delta)
-      .join("");
+  const runtimeHeaders = useMemo<Record<string, string>>(() => {
+    const headers: Record<string, string> = {
+      "x-chat-user": userId,
+    };
 
-    setMessages((current) => [
-      ...current,
-      { id: "assistant-1", role: "assistant", content },
-    ]);
-    setIsStreaming(false);
-  }
+    if (selectedTutor) {
+      headers["x-tutor-id"] = selectedTutor.id;
+      return headers;
+    }
+
+    headers["x-scch-model"] = selectedModelName;
+    return headers;
+  }, [selectedModelName, selectedTutor, userId]);
 
   return (
-    <div className="panel chat-layout" data-testid="chat-shell">
-      <header className="chat-header">
-        <div>
-          <h1>Novedu Tutor Chat</h1>
-          <p>AG-UI stream boundary with CoPilotKit-ready chat surface.</p>
-        </div>
-        <div className="upload-row">
-          <label htmlFor="document-upload">Document upload</label>
-          <input
-            aria-label="Upload document"
-            data-testid="document-upload"
-            id="document-upload"
-            type="file"
+    <div className="gpt-app" data-testid="chat-shell">
+      <ChatTopBar
+        left={
+          <ModelTutorPicker
+            options={pickerOptions}
+            value={selection}
+            onChange={setSelection}
           />
-        </div>
-      </header>
-      <div className="message-list" aria-live="polite">
-        {messages.map((message) => (
-          <article className={`message ${message.role}`} key={message.id}>
-            <MessageRenderer content={message.content} />
-          </article>
-        ))}
-      </div>
-      <footer className="composer">
-        <input
-          aria-label="Message"
-          readOnly
-          value="Explain the demo contract."
-        />
-        <button
-          className="button"
-          disabled={isStreaming}
-          onClick={sendMessage}
-          type="button"
+        }
+        userLabel={userLabel}
+      />
+
+      <div className="gpt-main">
+        <CopilotKitProvider
+          key={optionKey(selection)}
+          runtimeUrl="/api/copilotkit"
+          headers={runtimeHeaders}
         >
-          {isStreaming ? "Streaming" : "Send"}
-        </button>
-      </footer>
+          <NoveduChatSurface
+            agentId="tutor"
+            imageUploadsEnabled={imageUploadsEnabled}
+            welcome={{
+              title: selectedTitle,
+              description: selectedDescription,
+            }}
+          />
+        </CopilotKitProvider>
+      </div>
     </div>
   );
 }

@@ -17,7 +17,10 @@ const COMPILE_OPTIONS = { strict: true, noEscape: true } as const;
  * instructions last (they carry no priority, so "after everything" is the only
  * deterministic position). May throw if a template references a missing variable.
  */
-export function assembleSystemPrompt(plan: ResolvedFragment[], tutor: Tutor): string {
+export function assembleSystemPrompt(
+  plan: ResolvedFragment[],
+  tutor: Tutor,
+): string {
   const parts = plan.map((fragment) => {
     const template = Handlebars.compile(fragment.content, COMPILE_OPTIONS);
     return template(fragment.variables).trimEnd();

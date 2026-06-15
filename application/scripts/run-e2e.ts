@@ -1,17 +1,63 @@
-import { spawn } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const baseUrl = "http://127.0.0.1:3000";
 const isWindows = process.platform === "win32";
 
+type ChildEnv = Record<string, string | undefined>;
+
+export function createChildProcessEnv(
+  env: ChildEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): ChildEnv {
+  if (platform !== "win32") {
+    return { ...env };
+  }
+
+  const normalized: ChildEnv = {};
+  let pathKey: string | undefined;
+
+  for (const [key, value] of Object.entries(env)) {
+    if (key.toLowerCase() !== "path") {
+      normalized[key] = value;
+      continue;
+    }
+
+    pathKey ??= key;
+    if (key === "Path") {
+      pathKey = key;
+    }
+  }
+
+  if (pathKey) {
+    normalized[pathKey] = env[pathKey];
+  }
+
+  return normalized;
+}
+
+export function createE2eServerEnv(
+  env: ChildEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): ChildEnv {
+  return createChildProcessEnv(
+    {
+      ...env,
+      SHARE_LINK_SECRET: env.SHARE_LINK_SECRET ?? "dev-secret-local",
+    },
+    platform,
+  );
+}
+
 function spawnCommand(
   command: string,
   args: string[],
-  env = process.env,
+  env: ChildEnv = process.env,
   stdio: "ignore" | "inherit" = "inherit",
-) {
+): ChildProcess {
   return spawn(command, args, {
     cwd: process.cwd(),
-    env,
+    env: env as NodeJS.ProcessEnv,
     shell: false,
     stdio,
   });
@@ -76,7 +122,7 @@ async function main() {
       "--port",
       "3000",
     ],
-    process.env,
+    createE2eServerEnv(),
     "ignore",
   );
 
@@ -86,10 +132,10 @@ async function main() {
     const testProcess = spawnCommand(
       "node",
       ["node_modules/@playwright/test/cli.js", "test", "--reporter=list"],
-      {
+      createChildProcessEnv({
         ...process.env,
         PLAYWRIGHT_SKIP_WEB_SERVER: "1",
-      },
+      }),
     );
 
     const exitCode = await new Promise<number>((resolve) => {
@@ -104,7 +150,9 @@ async function main() {
   process.exit(process.exitCode ?? 0);
 }
 
-main().catch((error: unknown) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error: unknown) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

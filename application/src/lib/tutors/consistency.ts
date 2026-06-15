@@ -3,8 +3,19 @@
 // (variables-only — `bind` is intentionally ignored), then produce an ordered
 // render plan. Pure: no network, no YAML, no Handlebars.
 
-import { error, type ValidationError, type ValidationWarning, warning } from "./errors";
-import type { Fragment, FragmentFile, InputSchema, Tutor, VariableValue } from "./schemas";
+import {
+  error,
+  type ValidationError,
+  type ValidationWarning,
+  warning,
+} from "./errors";
+import type {
+  Fragment,
+  FragmentFile,
+  InputSchema,
+  Tutor,
+  VariableValue,
+} from "./schemas";
 
 export interface ResolvedFragment {
   fileAlias: string;
@@ -33,7 +44,9 @@ function typeMismatch(
     case "string":
       return typeof value === "string" ? null : { expected: "string", actual };
     case "boolean":
-      return typeof value === "boolean" ? null : { expected: "boolean", actual };
+      return typeof value === "boolean"
+        ? null
+        : { expected: "boolean", actual };
     case "array":
       return Array.isArray(value) && value.every((v) => typeof v === "string")
         ? null
@@ -120,10 +133,14 @@ export function checkConsistency(
     const fragment = byId.get(ref.id);
     if (!fragment) {
       errors.push(
-        error("FRAGMENT_NOT_FOUND", `Fragment "${ref.id}" not found in file "${ref.file}"`, {
-          fileAlias: ref.file,
-          fragmentId: ref.id,
-        }),
+        error(
+          "FRAGMENT_NOT_FOUND",
+          `Fragment "${ref.id}" not found in file "${ref.file}"`,
+          {
+            fileAlias: ref.file,
+            fragmentId: ref.id,
+          },
+        ),
       );
       continue;
     }

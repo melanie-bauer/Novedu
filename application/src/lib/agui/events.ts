@@ -66,21 +66,43 @@ export function encodeSseEvent(event: AgUiEvent): string {
 }
 
 export function parseSseFrames(streamText: string): AgUiEvent[] {
-  return streamText
-    .split("\n\n")
-    .map((frame) => frame.trim())
-    .filter(Boolean)
-    .map((frame) => {
-      const dataLine = frame
-        .split("\n")
-        .find((line) => line.startsWith("data: "));
+  return parseSseEventChunks([streamText]).events;
+}
 
-      if (!dataLine) {
-        throw new Error(`Invalid AG-UI frame: ${frame}`);
+export function parseSseEventChunks(
+  chunks: Iterable<string>,
+  initialRemainder = "",
+): { events: AgUiEvent[]; remainder: string } {
+  let buffer = initialRemainder;
+  const events: AgUiEvent[] = [];
+
+  for (const chunk of chunks) {
+    buffer += chunk;
+
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary !== -1) {
+      const frame = buffer.slice(0, boundary).trim();
+      buffer = buffer.slice(boundary + 2);
+
+      if (frame) {
+        events.push(parseSseFrame(frame));
       }
 
-      return agUiEventSchema.parse(JSON.parse(dataLine.slice(6)));
-    });
+      boundary = buffer.indexOf("\n\n");
+    }
+  }
+
+  return { events, remainder: buffer };
+}
+
+function parseSseFrame(frame: string): AgUiEvent {
+  const dataLine = frame.split("\n").find((line) => line.startsWith("data: "));
+
+  if (!dataLine) {
+    throw new Error(`Invalid AG-UI frame: ${frame}`);
+  }
+
+  return agUiEventSchema.parse(JSON.parse(dataLine.slice(6)));
 }
 
 export function collectAssistantText(events: AgUiEvent[]): string {

@@ -1,8 +1,8 @@
 {
-  "stage": "intake",
   "evidence": {
+    "after": ["evidence/after/open-chat-login-after.webm"],
     "before": [],
-    "checks": [],
-    "after": []
-  }
+    "checks": []
+  },
+  "stage": "close"
 }

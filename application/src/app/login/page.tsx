@@ -1,32 +1,40 @@
-import Link from "next/link";
+import { SignInButton } from "./SignInButton";
 
-export default function LoginPage({
+function safeCallbackUrl(value: string | undefined): string {
+  if (!value?.startsWith("/") || value.startsWith("//")) {
+    return "/chat";
+  }
+
+  return value;
+}
+
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ callbackUrl?: string }>;
+  searchParams?: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
-  void searchParams;
+  const params = searchParams ? await searchParams : {};
+  const callbackUrl = safeCallbackUrl(params.callbackUrl);
+  const authError = params.error;
 
   return (
-    <main className="page-shell">
-      <nav className="topbar" aria-label="Main navigation">
-        <div className="brand">
-          <span className="brand-mark">N</span>
-          <span>Novedu</span>
-        </div>
-      </nav>
-      <section className="hero">
-        <div className="hero-inner">
-          <h1>Sign in with Microsoft Entra ID</h1>
-          <p>
-            The MVP harness keeps local passwords out of scope. The production
-            path is Auth.js with Microsoft Entra ID; tests use an explicit mock
-            session cookie.
-          </p>
-          <Link className="button" href="/">
-            Back to overview
-          </Link>
-        </div>
+    <main className="login-page login-page-minimal">
+      <section
+        className="login-card login-card-minimal"
+        aria-labelledby="login-title"
+      >
+        <h1 id="login-title" className="login-title-minimal">
+          Login
+        </h1>
+
+        {authError ? (
+          <div className="login-error" role="alert">
+            <strong>Anmeldung fehlgeschlagen</strong>
+            <span>Bitte versuche es erneut.</span>
+          </div>
+        ) : null}
+
+        <SignInButton callbackUrl={callbackUrl} />
       </section>
     </main>
   );

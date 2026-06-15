@@ -10,6 +10,16 @@ export type NoveduSession = {
   };
 };
 
+type AuthSessionLike = {
+  user?: {
+    classIds?: string[] | null;
+    email?: string | null;
+    id?: string | null;
+    name?: string | null;
+    role?: NoveduRole | null;
+  } | null;
+} | null;
+
 export function deriveRoleFromClaims(claims: {
   roles?: string[];
   groups?: string[];
@@ -26,6 +36,26 @@ export function deriveRoleFromClaims(claims: {
   }
 
   return "student";
+}
+
+export function getNoveduSessionFromAuthSession(
+  session: AuthSessionLike,
+): NoveduSession | null {
+  const user = session?.user;
+
+  if (!user?.email) {
+    return null;
+  }
+
+  return {
+    user: {
+      id: user.id || user.email,
+      email: user.email,
+      name: user.name || user.email,
+      role: user.role ?? "student",
+      classIds: user.classIds ?? [],
+    },
+  };
 }
 
 export function getMockSessionFromCookie(
