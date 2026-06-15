@@ -1,0 +1,111 @@
+= Anforderungsbeschreibung Novedu
+:toc: left
+:sectnums:
+:icons: font
+:docdate: 2026-01-27
+:imagesdir: images
+
+== Grundfunktionen
+
+=== Login und Benutzerverwaltung
+==== Authentifizierung
+* Login mit Entra ID
+* Keine lokalen Passwörter (alles über Entra ID, optional für Dev/Test)
+* Persistente Login-Session bis Logout
+* Fehlerfälle in UI klar darstellen
+** Kein Entra Konto vorhanden -> nicht berechtigt
+
+==== Rollen & Rechte
+* Automatische zuweisung der Rolle (Lehrer, Schüler) basierend auf Email (gibt es eine bessere Lösung?)
+* Rollenmodell:
+** Schüler/in: Chat nutzen, eigene Chats verwalten, exportieren
+** Lehrer/in: Tutoren konfigurieren, Tutoren für Klassen freigeben, Klassen-Usage einsehen
+** Admin: Benutzer, Gruppen, Modelle, Budget verwalten.
+
+==== Gruppen / Klassen
+* Automatische zuweisung zu Gruppen/Klassen basierend auf Entra ID Gruppen
+* Gruppen werden als Klassen geführt (z.B: 4AHIF, 4BHIF, 5AHIF, usw...)
+* Klassenzuordnung muss in UI ersichtbar sein.
+
+==== Admin Benutzerverwaltung
+* Admins können manuell Benutzer anlegen, bearbeiten und löschen
+** Bearbeiten: Rollen, Deaktivieren (auf "Pending" setzen), Klassenzuordnung
+** Löschen nach Datenschutzvorgaben
+* Audit-Log für Admins (?)
+** Rollenänderung, Gruppen/Klassenoverrides, Deaktivierungen, Löschungen
+
+==== Synchronisation & Migration
+* Automatische Synchronisation der Benutzer und Gruppen mit Entra ID (z.B. täglich für mögliche Namensänderungen oder neue Benutzer)
+* Einfache Migration am Jahresanfang, wenn neue Klassen/Gruppen angelegt werden ohne das bestehende Chats verloren gehen
+** Eine "SchoolYear-Dimension" z.B 2025/26 für Gruppen oder Tutoren Statistik
+** Chats der User sollten als Historie erhalten bleiben
+** Klassenwechsel soll diese Historie nicht zerstören
+* evtl. Admin-Workflow: 
+** Am Jahrenanfang checken ob importiert / gesynct wurde
+** Archivierung alter Klassen
+
+=== Chatoberfläche
+==== Grundfunktion
+* Benutzerfreundliches Chatfenster mit Eingabefeld für Fragen
+* Anzeige von Chatverlauf und Antworten
+** Antworten klar voneinander trennten (User vs Tutor), Timestamps
+** "Re-generate" / "Retry" der letzten Antwort falls was schief geht
+* Unterstützung für Textformatierung (Fett, Kursiv, Listen)
+** Renderung Dateitypen mit stabiler Darstellung
+
+==== Datei, Kontext & Multimodalität
+* Hochladen und verarbeiten von Dateien (z.B. PDFs, Bilder) zur Kontextualisierung der Fragen
+** Darstellung der Datein die im Kontext sind.
+** Limits: Dateitypen, Größen, Anzahl Datein pro Chat
+
+==== Modelle & Tutor-Logik
+* Auswahl verschiedener Sprachmodelle (z.B. GPT-3.5, GPT-4)
+** In UI nur Modelle anzeigen die freigegeben / zur Gruppe gehören
+* Tutor Konzept für Einheit
+** Jeder Chat läuft mit einem Tutor (System Propmt, Features, Modell)
+** Tutor-Info im sichtbar im Chat (Fach/Modell, Name)
+** Lehrer:innen stellen Tutor für Gruppen bereit
+
+==== Feedback, Status, Qualität
+* Anzeige von Antwortzeiten und Ladeinidaktoren (Thinking, Generating, usw...)
+* Klare Fehlermeldungen 
+** Ratelimit -> warten & erneut probieren
+** Budget erreicht -> eindeutige Meldung
+* Mathematische Formeln korrekt darstellen (LaTeX Unterstützung)
+* Code-Snippets korrekt formatieren und hervorheben
+** Syntax-Highlighting, Copy-Button
+* Code-Ausführung für unterstützte Programmiersprachen (Python, JavaScript, etc.)
+* Temporäre Speicherung des Chatverlaufs für die Dauer der Sitzung möglich
+
+==== Exporte
+* Möglichkeit Chatverlauf zu exportieren (z.B PDF)
+
+=== Navbar
+==== Navbar & Struktur
+* Klare, konsistente Navigation (Sidebar)
+** Neuer Chat (prominent)
+** Chats / Verlauf
+** Tutoren (Liste/Details)
+** Suche
+** Ordner/Fächer/Schuljahr
+** Usage / Budget
+** Adminpanel (nur für Admin natürlich)
+
+=== Chatverlauf und Verwaltung
+==== Übersicht & Organisation
+* Übersicht der letzten Chats
+* Neuen Chat starten immer sichtbar
+* Gruppierung der Chats in "Folder" nach Schuljahr, Fach, Modell
+
+==== Suche
+* Suchfunkion um bestimmte Themen oder Chats zu finden
+** Mindestens: über Titel
+** Optional wenn gespeichert: über Volltextsuche von Nachrichten
+
+==== Aktionen
+* Möglichkeit Chats zu löschen oder zu archivieren
+** Archivieren: aus Liste ausblenden ist aber noch wiederherstellbar
+** Löschen: mit Bestätigung, evtl. mit "Soft Delete" (also einer Retention)
+* Batch-Aktionen (optional)
+** mehrere Chats markieren -> löschen/archivieren/exportieren
+
