@@ -3,7 +3,7 @@ import { getCurrentNoveduSession } from "@/features/auth/server-session";
 import { ChatShell } from "@/features/chat/ChatShell";
 import { buildModelOptions, buildTutorOptions } from "@/lib/chat-options";
 import { scchModels } from "@/lib/mastra/scch";
-import { listLocalTutorSummaries } from "@/lib/tutors/local-catalog";
+import { listTutorSummaries } from "@/lib/tutors/catalog";
 
 export default async function ChatPage() {
   const session = await getCurrentNoveduSession();
@@ -13,7 +13,7 @@ export default async function ChatPage() {
   }
 
   const models = buildModelOptions(scchModels);
-  const tutors = buildTutorOptions(await listLocalTutorSummaries());
+  const tutors = buildTutorOptions(await listTutorSummaries());
 
   return (
     <ChatShell

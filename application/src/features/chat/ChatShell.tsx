@@ -76,7 +76,7 @@ export function ChatShell({
     };
 
     if (selectedTutor) {
-      headers["x-local-tutor-id"] = selectedTutor.id;
+      headers["x-tutor-id"] = selectedTutor.id;
       return headers;
     }
 

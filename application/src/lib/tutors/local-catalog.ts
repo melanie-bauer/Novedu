@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { assembleSystemPrompt } from "./assemble";
+import type { TutorSummary } from "./catalog-types";
 import { checkConsistency } from "./consistency";
 import type { BuildResult, ValidationWarning } from "./errors";
 import { error } from "./errors";
@@ -9,13 +10,7 @@ import { type Tutor, TutorSchema } from "./schemas";
 
 const TUTORS_DIR = path.join(process.cwd(), "tutors");
 
-export type LocalTutorSummary = {
-  id: string;
-  title: string;
-  description: string;
-  model: string;
-  imageInput: boolean;
-};
+export type LocalTutorSummary = TutorSummary;
 
 async function readTutorYaml(filePath: string): Promise<BuildResult> {
   const warnings: ValidationWarning[] = [];

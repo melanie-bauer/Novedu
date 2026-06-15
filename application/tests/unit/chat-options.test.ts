@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildModelOptions, buildTutorOptions } from "@/lib/chat-options";
-import type { LocalTutorSummary } from "@/lib/tutors/local-catalog";
+import type { TutorSummary } from "@/lib/tutors/catalog";
 
 describe("chat options", () => {
   it("keeps a fallback model visible when SCCH is unavailable", () => {
@@ -21,7 +21,7 @@ describe("chat options", () => {
         model: "Qwen/Qwen3",
         imageInput: false,
       },
-    ] satisfies LocalTutorSummary[]);
+    ] satisfies TutorSummary[]);
 
     expect(tutors[0]).toMatchObject({
       id: "math-tutor",
