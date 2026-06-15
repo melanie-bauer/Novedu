@@ -13,48 +13,43 @@ const models = [
 const tutors = [
   {
     description: "Hilft beim Zerlegen von Rechenwegen.",
-    id: "math-demo",
+    id: "math-tutor",
     imageInput: false,
     model: "Qwen/Qwen-Demo",
-    prompt: "Erklaere Mathematik schrittweise.",
-    title: "Mathematik Demo Tutor",
+    title: "Mathematik Tutor",
   },
 ];
 
-test("renders the minimal chat shell", async () => {
+test("renders the chatgpt-like shell", async () => {
   const screen = await render(
-    <ChatShell models={models} tutors={tutors} userId="browser-user" />,
+    <ChatShell
+      models={models}
+      tutors={tutors}
+      userId="browser-user"
+      userLabel="student@example.org"
+    />,
   );
 
   await expect.element(screen.getByTestId("chat-shell")).toBeVisible();
-  await expect.element(screen.getByText("Novedu Tutor Chat")).toBeVisible();
-  await expect.element(screen.getByLabelText("Chat-Ziel")).toBeVisible();
-  await expect.element(screen.getByText("Qwen/Qwen-Demo")).toBeVisible();
-  await expect.element(screen.getByText("Aktueller Tutor")).toBeVisible();
+  await expect
+    .element(screen.getByRole("heading", { name: "Mathematik Tutor" }))
+    .toBeVisible();
+  await expect.element(screen.getByText("student@example.org")).toBeVisible();
+  await expect.element(screen.getByTestId("copilot-welcome-screen")).toBeVisible();
 });
 
-test("renders latex, code blocks, and upload controls", async () => {
+test("opens the model and tutor picker", async () => {
   const screen = await render(
-    <ChatShell models={models} tutors={tutors} userId="browser-user" />,
+    <ChatShell
+      models={models}
+      tutors={tutors}
+      userId="browser-user"
+      userLabel="student@example.org"
+    />,
   );
 
-  await expect
-    .element(screen.getByRole("heading", { name: "Modell" }))
-    .toBeVisible();
-  await expect
-    .element(screen.getByText("Tutor-Konfiguration oder SCCH Modell"))
-    .toBeVisible();
-  await expect.element(screen.getByTestId("document-upload")).toBeVisible();
-});
-
-test("keeps the prototype-inspired workflow visible around the composer", async () => {
-  const screen = await render(
-    <ChatShell models={models} tutors={tutors} userId="browser-user" />,
-  );
-
-  await expect
-    .element(screen.getByText("Tutor-Konfiguration oder SCCH Modell"))
-    .toBeVisible();
-  await expect.element(screen.getByText("Dokumente")).toBeVisible();
-  await expect.element(screen.getByText("CopilotKit Runtime")).toBeVisible();
+  await screen.getByRole("button", { name: "Mathematik Tutor" }).click();
+  await expect.element(screen.getByText("Tutoren")).toBeVisible();
+  await expect.element(screen.getByText("Modelle")).toBeVisible();
+  await expect.element(screen.getByText("Qwen Demo")).toBeVisible();
 });
