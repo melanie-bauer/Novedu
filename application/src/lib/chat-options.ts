@@ -1,5 +1,5 @@
 import type { ScchModel } from "@/lib/mastra/scch";
-import type { LocalTutorSummary } from "@/lib/tutors/local-catalog";
+import type { TutorSummary } from "./tutors/catalog";
 
 export type ChatModelOption = ScchModel;
 
@@ -27,7 +27,7 @@ export function buildModelOptions(models: ScchModel[]): ChatModelOption[] {
   ];
 }
 
-export function buildTutorOptions(tutors: LocalTutorSummary[]): TutorOption[] {
+export function buildTutorOptions(tutors: TutorSummary[]): TutorOption[] {
   return tutors.map((tutor) => ({
     id: tutor.id,
     title: tutor.title,

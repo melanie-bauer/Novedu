@@ -27,3 +27,4 @@ export {
   TutorSchema,
   type VariableValue,
 } from "./schemas";
+export type { TutorSummary } from "./catalog";

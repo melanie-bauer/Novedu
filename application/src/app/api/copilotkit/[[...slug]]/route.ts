@@ -7,7 +7,7 @@ import {
   type ShareLinkRejection,
   verifyShareLink,
 } from "@/lib/share-links";
-import { loadLocalTutorById } from "@/lib/tutors/local-catalog";
+import { loadTutorById } from "@/lib/tutors/catalog";
 
 // Human-readable rejection texts: a 403 can surface mid-session in the chat's
 // error UI (e.g. when the window closes while the student is typing), so the
@@ -53,7 +53,7 @@ async function handler(req: Request): Promise<Response> {
   const tutorUrl = req.headers.get("x-tutor-url");
   const shareSig = req.headers.get("x-share-sig");
   const demoTutorId = req.headers.get("x-demo-tutor-id");
-  const localTutorId = req.headers.get("x-local-tutor-id");
+  const tutorId = req.headers.get("x-tutor-id") ?? req.headers.get("x-local-tutor-id")
   const scchModel = req.headers.get("x-scch-model");
 
   if (tutorUrl || shareSig) {
@@ -74,9 +74,9 @@ async function handler(req: Request): Promise<Response> {
       );
     }
     requestContext.set("tutor-url", verification.tutor);
-  } else if (localTutorId || demoTutorId) {
-    const tutorId = localTutorId ?? demoTutorId;
-    const result = await loadLocalTutorById(tutorId ?? "");
+  } else if (tutorId || demoTutorId) {
+    const selectedTutorId = tutorId ?? demoTutorId;
+    const result = await loadTutorById(selectedTutorId ?? "");
     if (!result.ok) {
       return Response.json({ error: "Unknown tutor." }, { status: 404 });
     }

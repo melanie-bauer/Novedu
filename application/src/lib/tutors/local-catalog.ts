@@ -6,16 +6,11 @@ import type { BuildResult, ValidationWarning } from "./errors";
 import { error } from "./errors";
 import { parseYaml, validate } from "./parse";
 import { type Tutor, TutorSchema } from "./schemas";
+import { TutorSummary } from "./catalog-types";
 
 const TUTORS_DIR = path.join(process.cwd(), "tutors");
 
-export type LocalTutorSummary = {
-  id: string;
-  title: string;
-  description: string;
-  model: string;
-  imageInput: boolean;
-};
+export type LocalTutorSummary = TutorSummary;
 
 async function readTutorYaml(filePath: string): Promise<BuildResult> {
   const warnings: ValidationWarning[] = [];
