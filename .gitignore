@@ -1,3 +1,27 @@
-.idea/
-.vscode/
+node_modules
+.next
+dist
+build
+coverage
+test-results
+playwright-report
+*.tsbuildinfo
+*.log
 .env
+.env.*
+!.env.example
+
+# Local leftovers from other Novedu branches; not part of this harness branch.
+.idea
+
+# Keep evidence folder shapes, not bulky artifacts.
+**/evidence/**/*.webm
+**/evidence/**/*.zip
+**/evidence/**/*.png
+**/evidence/**/*.jpg
+**/evidence/**/*.jpeg
+**/evidence/**/*.trace
+!**/evidence/**/.gitkeep
+sample
+
+.playwright-cli

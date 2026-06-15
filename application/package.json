@@ -1,0 +1,67 @@
+{
+  "name": "novedu-application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
+    "test:e2e": "tsx scripts/run-e2e.ts",
+    "test:e2e:raw": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "harness": "tsx scripts/harness/state-machine.ts",
+    "harness:status": "tsx scripts/harness/state-machine.ts status",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run test:browser && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "@ag-ui/client": "^0.0.55",
+    "@ag-ui/core": "^0.0.55",
+    "@ag-ui/mastra": "^1.0.3",
+    "@copilotkit/react-core": "^1.59.5",
+    "@copilotkit/runtime": "^1.59.5",
+    "@mastra/core": "^1.41.0",
+    "@mastra/memory": "^1.20.2",
+    "handlebars": "^4.7.9",
+    "katex": "^0.17.0",
+    "next": "16.2.7",
+    "next-auth": "^4.24.14",
+    "pdfjs-dist": "^4.10.38",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "@ag-ui/mastra": {
+      "@copilotkit/runtime": "$@copilotkit/runtime"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@playwright/cli": "^0.1.13",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/browser-playwright": "^4.1.8",
+    "playwright": "^1.60.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5",
+    "vitest": "^4.1.8",
+    "vitest-browser-react": "^2.2.0"
+  }
+}
