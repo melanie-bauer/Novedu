@@ -1,3 +1,4 @@
+import type { TutorSummary } from "./catalog-types";
 import type { BuildResult } from "./errors";
 import {
   isGitHubTutorCatalogConfigured,
@@ -5,7 +6,6 @@ import {
   loadGitHubTutorById,
 } from "./github-catalog";
 import { listLocalTutorSummaries, loadLocalTutorById } from "./local-catalog";
-import type { TutorSummary } from "./catalog-types";
 
 export type { TutorSummary } from "./catalog-types";
 
@@ -28,4 +28,4 @@ export async function loadTutorById(id: string): Promise<BuildResult> {
 /*
 .env has GitHub owner + repo set => use GitHub
 .env does not have them set => use local application/tutors fallback
-*/
+ */

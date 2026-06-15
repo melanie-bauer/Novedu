@@ -1,12 +1,12 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { assembleSystemPrompt } from "./assemble";
+import type { TutorSummary } from "./catalog-types";
 import { checkConsistency } from "./consistency";
 import type { BuildResult, ValidationWarning } from "./errors";
 import { error } from "./errors";
 import { parseYaml, validate } from "./parse";
 import { type Tutor, TutorSchema } from "./schemas";
-import { TutorSummary } from "./catalog-types";
 
 const TUTORS_DIR = path.join(process.cwd(), "tutors");
 

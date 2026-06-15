@@ -53,7 +53,8 @@ async function handler(req: Request): Promise<Response> {
   const tutorUrl = req.headers.get("x-tutor-url");
   const shareSig = req.headers.get("x-share-sig");
   const demoTutorId = req.headers.get("x-demo-tutor-id");
-  const tutorId = req.headers.get("x-tutor-id") ?? req.headers.get("x-local-tutor-id")
+  const tutorId =
+    req.headers.get("x-tutor-id") ?? req.headers.get("x-local-tutor-id");
   const scchModel = req.headers.get("x-scch-model");
 
   if (tutorUrl || shareSig) {

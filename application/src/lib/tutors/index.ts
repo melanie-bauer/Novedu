@@ -1,6 +1,7 @@
 // Public surface of the reusable tutor validator/builder core.
 
 export { assembleSystemPrompt } from "./assemble";
+export type { TutorSummary } from "./catalog";
 export {
   type ConsistencyResult,
   checkConsistency,
@@ -27,4 +28,3 @@ export {
   TutorSchema,
   type VariableValue,
 } from "./schemas";
-export type { TutorSummary } from "./catalog";

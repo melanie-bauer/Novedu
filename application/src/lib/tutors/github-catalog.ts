@@ -1,10 +1,10 @@
+import type { TutorSummary } from "./catalog-types";
 import type { BuildResult, ValidationError } from "./errors";
 import { error } from "./errors";
 import type { Fetcher, FetchResponse } from "./fetcher";
 import { loadAndBuildTutorPrompt } from "./load";
 import { parseYaml, validate } from "./parse";
 import { type Tutor, TutorSchema } from "./schemas";
-import type { TutorSummary } from "./catalog-types";
 
 const GITHUB_API_ROOT = "https://api.github.com";
 const GITHUB_API_VERSION = "2022-11-28";
@@ -112,7 +112,10 @@ function withDefaultGitHubRef(
   config: GitHubTutorCatalogConfig,
 ): string {
   const parsed = new URL(url);
-  if (isSameGitHubContentsUrl(parsed, config) && !parsed.searchParams.has("ref")) {
+  if (
+    isSameGitHubContentsUrl(parsed, config) &&
+    !parsed.searchParams.has("ref")
+  ) {
     parsed.searchParams.set("ref", config.ref);
   }
   return parsed.href;
@@ -274,9 +277,7 @@ export async function listGitHubTutorSummaries(): Promise<TutorSummary[]> {
   for (const file of files) {
     const metadata = await readTutorMetadata(config, file.path);
     if (!metadata.ok) {
-      console.warn(
-        `[tutors] Skipping ${file.path}: ${metadata.error.message}`,
-      );
+      console.warn(`[tutors] Skipping ${file.path}: ${metadata.error.message}`);
       continue;
     }
 
@@ -328,7 +329,10 @@ export async function loadGitHubTutorById(id: string): Promise<BuildResult> {
     if (!metadata.ok) continue;
     if (metadata.tutor.id !== id) continue;
 
-    return loadAndBuildTutorPrompt(metadata.sourceUrl, githubRawFetcher(config));
+    return loadAndBuildTutorPrompt(
+      metadata.sourceUrl,
+      githubRawFetcher(config),
+    );
   }
 
   return {
