@@ -1,8 +1,8 @@
 {
-  "stage": "close",
   "evidence": {
-    "before": ["evidence/before/home.png", "evidence/before/chat.png"],
-    "checks": [],
-    "after": ["evidence/after/tutor-chat.png"]
-  }
+    "after": ["evidence/after/open-chat-login-after.webm"],
+    "before": [],
+    "checks": []
+  },
+  "stage": "close"
 }

@@ -32,7 +32,54 @@ function loadHarnessState(): HarnessState {
 
 function saveHarnessState(state: HarnessState) {
   const filePath = join(process.cwd(), "harness-state.json");
-  writeFileSync(filePath, `${JSON.stringify(state, null, 2)}\n`);
+  writeFileSync(filePath, serializeHarnessState(state));
+}
+
+export function serializeHarnessState(
+  state: HarnessState,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const lineEnding = platform === "win32" ? "\r\n" : "\n";
+  return [
+    "{",
+    '  "evidence": {',
+    `    "after": ${JSON.stringify(state.evidence.after)},`,
+    `    "before": ${JSON.stringify(state.evidence.before)},`,
+    `    "checks": ${JSON.stringify(state.evidence.checks)}`,
+    "  },",
+    `  "stage": ${JSON.stringify(state.stage)}`,
+    "}",
+    "",
+  ].join(lineEnding);
+}
+
+export function getEvidenceRegistrationError(
+  kind: EvidenceKind,
+  normalizedPath: string,
+  stage: HarnessStage,
+): string | null {
+  const expectedPrefix = `evidence/${kind}/`;
+
+  if (!normalizedPath.startsWith(expectedPrefix)) {
+    return `${kind} evidence must live under ${expectedPrefix}`;
+  }
+
+  if (kind === "before" && stage !== "reproduce") {
+    return "before evidence can only be registered during reproduce.";
+  }
+
+  if (kind === "after" && stage !== "verify") {
+    return "after evidence can only be registered during verify.";
+  }
+
+  if (
+    (kind === "before" || kind === "after") &&
+    !normalizedPath.endsWith(".webm")
+  ) {
+    return "before/after UI evidence must be a .webm video. Use checks evidence for screenshots or traces.";
+  }
+
+  return null;
 }
 
 function getNextStage(stage: HarnessStage): HarnessStage {
@@ -109,6 +156,17 @@ function addEvidence(
   }
 
   const state = loadHarnessState();
+  const registrationError = getEvidenceRegistrationError(
+    kind,
+    normalizedPath,
+    state.stage,
+  );
+  if (registrationError) {
+    console.error(registrationError);
+    process.exitCode = 1;
+    return;
+  }
+
   const currentEntries = state.evidence[kind];
 
   saveHarnessState({
@@ -136,17 +194,23 @@ function isEvidenceKind(kind: string | undefined): kind is EvidenceKind {
   return kind === "before" || kind === "checks" || kind === "after";
 }
 
-const command = process.argv[2] ?? "status";
+function main() {
+  const command = process.argv[2] ?? "status";
 
-if (command === "status") {
-  printStatus();
-} else if (command === "advance") {
-  advance();
-} else if (command === "reset") {
-  reset();
-} else if (command === "evidence") {
-  addEvidence(process.argv[3], process.argv[4]);
-} else {
-  console.error(`Unknown harness command: ${command}`);
-  process.exitCode = 1;
+  if (command === "status") {
+    printStatus();
+  } else if (command === "advance") {
+    advance();
+  } else if (command === "reset") {
+    reset();
+  } else if (command === "evidence") {
+    addEvidence(process.argv[3], process.argv[4]);
+  } else {
+    console.error(`Unknown harness command: ${command}`);
+    process.exitCode = 1;
+  }
+}
+
+if (!process.env.VITEST) {
+  main();
 }

@@ -14,6 +14,11 @@ interface LoadedTutor {
   model: string;
 }
 
+type RuntimeTutorConfig = {
+  prompt: string;
+  model: string;
+};
+
 // Memoize by URL so the YAML is fetched + assembled once, not on every chat
 // message. A failed load is evicted so a corrected URL can succeed on retry.
 const cache = new Map<string, Promise<LoadedTutor>>();
@@ -49,15 +54,41 @@ function tutorUrl(requestContext: RequestContext): string {
   return url;
 }
 
+async function resolveRuntimeTutor(
+  requestContext: RequestContext,
+): Promise<LoadedTutor> {
+  const inlineConfig = requestContext.get("tutor-config");
+  if (
+    inlineConfig &&
+    typeof inlineConfig === "object" &&
+    "prompt" in inlineConfig &&
+    "model" in inlineConfig
+  ) {
+    const config = inlineConfig as RuntimeTutorConfig;
+    return { prompt: config.prompt, model: config.model };
+  }
+
+  const directModel = requestContext.get("scch-model");
+  if (typeof directModel === "string" && directModel !== "") {
+    return {
+      model: directModel,
+      prompt:
+        "Du bist ein hilfreicher Novedu Assistent. Antworte klar, sachlich und altersgerecht. Stelle Rueckfragen, wenn dir Kontext fehlt.",
+    };
+  }
+
+  return loadTutor(tutorUrl(requestContext));
+}
+
 export const tutorAgent = new Agent({
   id: "tutor",
   name: "Tutor",
   // Both resolvers run per request and share the same memoized load. The prompt
   // is used verbatim — no app-level formatting guidance is appended.
   instructions: async ({ requestContext }) =>
-    (await loadTutor(tutorUrl(requestContext))).prompt,
+    (await resolveRuntimeTutor(requestContext)).prompt,
   model: async ({ requestContext }) =>
-    scchProvider.chat((await loadTutor(tutorUrl(requestContext))).model),
+    scchProvider.chat((await resolveRuntimeTutor(requestContext)).model),
   // MVP: Memory disabled for testing without storage. Conversation context
   // is not persisted across requests. For production, enable Memory with
   // proper storage (see sample/app/mastra/tutor-agent.ts).

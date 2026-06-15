@@ -7,6 +7,7 @@ import {
   type ShareLinkRejection,
   verifyShareLink,
 } from "@/lib/share-links";
+import { loadLocalTutorById } from "@/lib/tutors/local-catalog";
 
 // Human-readable rejection texts: a 403 can surface mid-session in the chat's
 // error UI (e.g. when the window closes while the student is typing), so the
@@ -48,25 +49,49 @@ async function handler(req: Request): Promise<Response> {
   // For MVP, we'll use a mock user ID. In production, this would come from the session.
   const resourceId = sessionValue ? `mock-${sessionValue}` : "mock-student";
 
-  const verification = verifyShareLink(
-    {
-      tutor: req.headers.get("x-tutor-url") ?? undefined,
-      start: req.headers.get("x-share-start") ?? undefined,
-      end: req.headers.get("x-share-end") ?? undefined,
-      sig: req.headers.get("x-share-sig") ?? undefined,
-    },
-    getShareLinkSecret(),
-    Math.floor(Date.now() / 1000),
-  );
-  if (!verification.ok) {
+  const requestContext = new RequestContext();
+  const tutorUrl = req.headers.get("x-tutor-url");
+  const shareSig = req.headers.get("x-share-sig");
+  const demoTutorId = req.headers.get("x-demo-tutor-id");
+  const localTutorId = req.headers.get("x-local-tutor-id");
+  const scchModel = req.headers.get("x-scch-model");
+
+  if (tutorUrl || shareSig) {
+    const verification = verifyShareLink(
+      {
+        tutor: tutorUrl ?? undefined,
+        start: req.headers.get("x-share-start") ?? undefined,
+        end: req.headers.get("x-share-end") ?? undefined,
+        sig: shareSig ?? undefined,
+      },
+      getShareLinkSecret(),
+      Math.floor(Date.now() / 1000),
+    );
+    if (!verification.ok) {
+      return Response.json(
+        { error: REJECTION_MESSAGES[verification.reason] },
+        { status: 403 },
+      );
+    }
+    requestContext.set("tutor-url", verification.tutor);
+  } else if (localTutorId || demoTutorId) {
+    const tutorId = localTutorId ?? demoTutorId;
+    const result = await loadLocalTutorById(tutorId ?? "");
+    if (!result.ok) {
+      return Response.json({ error: "Unknown tutor." }, { status: 404 });
+    }
+    requestContext.set("tutor-config", {
+      model: result.model,
+      prompt: result.prompt,
+    });
+  } else if (scchModel) {
+    requestContext.set("scch-model", scchModel);
+  } else {
     return Response.json(
-      { error: REJECTION_MESSAGES[verification.reason] },
-      { status: 403 },
+      { error: "Choose an SCCH model or tutor configuration first." },
+      { status: 400 },
     );
   }
-
-  const requestContext = new RequestContext();
-  requestContext.set("tutor-url", verification.tutor);
 
   const runtime = new CopilotRuntime({
     // @ts-expect-error - @ag-ui/mastra's AbstractAgent type does not line up with

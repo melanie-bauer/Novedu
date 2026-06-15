@@ -1,8 +1,8 @@
+import { createLogger } from "@mastra/core/logger";
 import { Mastra } from "@mastra/core/mastra";
-import { PinoLogger } from "@mastra/loggers";
 import { tutorAgent } from "./tutor-agent";
 
-const logger = new PinoLogger({ name: "Mastra", level: "info" });
+const logger = createLogger({ name: "Mastra", level: "info" });
 
 // MVP harness: No database storage. The app still boots (non-chat flows like
 // tutor validation work without a DB), but the tutor's Memory REQUIRES a

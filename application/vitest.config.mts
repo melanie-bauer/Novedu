@@ -42,7 +42,16 @@ export default defineConfig({
           deps: {
             optimizer: {
               client: {
-                include: ["vitest-browser-react"],
+                include: [
+                  "vitest-browser-react",
+                  "@copilotkit/react-core/v2",
+                  "react-markdown",
+                  "react-syntax-highlighter",
+                  "react-syntax-highlighter/dist/esm/styles/prism",
+                  "rehype-katex",
+                  "remark-gfm",
+                  "remark-math",
+                ],
               },
             },
           },
