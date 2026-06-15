@@ -1,31 +1,33 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildDemoTutors,
-  buildModelOptions,
-  findDemoTutor,
-} from "@/lib/chat-options";
+import { buildModelOptions, buildTutorOptions } from "@/lib/chat-options";
+import type { LocalTutorSummary } from "@/lib/tutors/local-catalog";
 
 describe("chat options", () => {
-  it("keeps a fallback model and demo tutors visible when SCCH is unavailable", () => {
+  it("keeps a fallback model visible when SCCH is unavailable", () => {
     const models = buildModelOptions([]);
-    const tutors = buildDemoTutors([]);
 
     expect(models[0]).toMatchObject({
       label: "Demo SCCH Modell (nicht verbunden)",
       model: "demo-scch-model",
     });
-    expect(tutors.map((tutor) => tutor.title)).toContain(
-      "Demo Mathematik Tutor",
-    );
-    expect(tutors[0].model).toBe("demo-scch-model");
   });
 
-  it("uses fetched SCCH models for demo tutors", () => {
-    const models = buildModelOptions([
-      { id: "qwen", label: "Qwen", model: "Qwen/Qwen3" },
-    ]);
-    const tutors = buildDemoTutors(models);
+  it("maps local tutor summaries into picker options", () => {
+    const tutors = buildTutorOptions([
+      {
+        id: "math-tutor",
+        title: "Mathematik Tutor",
+        description: "Hilft bei Mathe.",
+        model: "Qwen/Qwen3",
+        imageInput: false,
+      },
+    ] satisfies LocalTutorSummary[]);
 
-    expect(findDemoTutor(tutors, "demo-math")?.model).toBe("Qwen/Qwen3");
+    expect(tutors[0]).toMatchObject({
+      id: "math-tutor",
+      title: "Mathematik Tutor",
+      model: "Qwen/Qwen3",
+      imageInput: false,
+    });
   });
 });

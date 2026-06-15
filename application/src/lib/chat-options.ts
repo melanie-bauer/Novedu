@@ -1,14 +1,14 @@
 import type { ScchModel } from "@/lib/mastra/scch";
+import type { LocalTutorSummary } from "@/lib/tutors/local-catalog";
 
 export type ChatModelOption = ScchModel;
 
-export type DemoTutorOption = {
+export type TutorOption = {
   id: string;
   title: string;
   description: string;
   model: string;
   imageInput: boolean;
-  prompt: string;
 };
 
 const FALLBACK_MODEL = "demo-scch-model";
@@ -27,40 +27,34 @@ export function buildModelOptions(models: ScchModel[]): ChatModelOption[] {
   ];
 }
 
-export function buildDemoTutors(models: ScchModel[]): DemoTutorOption[] {
-  const model = models[0]?.model ?? FALLBACK_MODEL;
-
-  return [
-    {
-      id: "demo-math",
-      title: "Demo Mathematik Tutor",
-      description:
-        "Hilft beim Zerlegen von Rechenwegen und erklaert Loesungen schrittweise.",
-      imageInput: false,
-      model,
-      prompt:
-        "Du bist ein geduldiger Mathematik-Tutor fuer Schuelerinnen und Schueler. Erklaere Aufgaben in kleinen Schritten, stelle Rueckfragen, und gib keine Endloesung ohne Herleitung.",
-    },
-    {
-      id: "demo-study-coach",
-      title: "Demo Lerncoach",
-      description:
-        "Unterstuetzt beim Strukturieren von Lernzielen, Zusammenfassungen und Uebungsplaenen.",
-      imageInput: false,
-      model,
-      prompt:
-        "Du bist ein strukturierter Lerncoach. Hilf Lernenden, Ziele zu klaeren, Stoff in kleine Einheiten zu teilen und konkrete naechste Schritte zu planen.",
-    },
-  ];
+export function buildTutorOptions(tutors: LocalTutorSummary[]): TutorOption[] {
+  return tutors.map((tutor) => ({
+    id: tutor.id,
+    title: tutor.title,
+    description: tutor.description,
+    model: tutor.model,
+    imageInput: tutor.imageInput,
+  }));
 }
 
-export function findDemoTutor(
-  tutors: DemoTutorOption[],
+export function findTutorOption(
+  tutors: TutorOption[],
   id: string | null,
-): DemoTutorOption | null {
+): TutorOption | null {
   if (!id) {
     return null;
   }
 
   return tutors.find((tutor) => tutor.id === id) ?? null;
+}
+
+/** Models confirmed to accept image_url parts on the SCCH endpoint. */
+const MULTIMODAL_MODELS = new Set([
+  "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16",
+  "RedHatAI/gemma-4-31B-it-FP8-Dynamic",
+  "Qwen/Qwen3.6-27B-FP8",
+]);
+
+export function modelSupportsVision(model: string): boolean {
+  return MULTIMODAL_MODELS.has(model);
 }

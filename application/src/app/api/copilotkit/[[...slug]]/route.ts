@@ -1,14 +1,13 @@
 import { MastraAgent } from "@ag-ui/mastra";
 import { CopilotRuntime, createCopilotEndpoint } from "@copilotkit/runtime/v2";
 import { RequestContext } from "@mastra/core/request-context";
-import { buildDemoTutors, findDemoTutor } from "@/lib/chat-options";
 import { mastra } from "@/lib/mastra";
-import { scchModels } from "@/lib/mastra/scch";
 import {
   getShareLinkSecret,
   type ShareLinkRejection,
   verifyShareLink,
 } from "@/lib/share-links";
+import { loadLocalTutorById } from "@/lib/tutors/local-catalog";
 
 // Human-readable rejection texts: a 403 can surface mid-session in the chat's
 // error UI (e.g. when the window closes while the student is typing), so the
@@ -54,6 +53,7 @@ async function handler(req: Request): Promise<Response> {
   const tutorUrl = req.headers.get("x-tutor-url");
   const shareSig = req.headers.get("x-share-sig");
   const demoTutorId = req.headers.get("x-demo-tutor-id");
+  const localTutorId = req.headers.get("x-local-tutor-id");
   const scchModel = req.headers.get("x-scch-model");
 
   if (tutorUrl || shareSig) {
@@ -74,14 +74,15 @@ async function handler(req: Request): Promise<Response> {
       );
     }
     requestContext.set("tutor-url", verification.tutor);
-  } else if (demoTutorId) {
-    const tutor = findDemoTutor(buildDemoTutors(scchModels), demoTutorId);
-    if (!tutor) {
-      return Response.json({ error: "Unknown demo tutor." }, { status: 404 });
+  } else if (localTutorId || demoTutorId) {
+    const tutorId = localTutorId ?? demoTutorId;
+    const result = await loadLocalTutorById(tutorId ?? "");
+    if (!result.ok) {
+      return Response.json({ error: "Unknown tutor." }, { status: 404 });
     }
     requestContext.set("tutor-config", {
-      model: tutor.model,
-      prompt: tutor.prompt,
+      model: result.model,
+      prompt: result.prompt,
     });
   } else if (scchModel) {
     requestContext.set("scch-model", scchModel);
