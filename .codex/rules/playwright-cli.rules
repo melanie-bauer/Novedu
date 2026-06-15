@@ -1,0 +1,12 @@
+prefix_rule(
+    pattern = ["npx.cmd", "--no-install", "playwright-cli"],
+    decision = "allow",
+    justification = "Allow browser evidence capture through the local playwright-cli package",
+    match = [
+      "npx.cmd --no-install playwright-cli open http://127.0.0.1:3000",
+      "npx.cmd --no-install playwright-cli video-start evidence/before/before.webm",
+      "npx.cmd --no-install playwright-cli video-stop",
+      "npx.cmd --no-install playwright-cli video-start evidence/after/after.webm",
+      "npx.cmd --no-install playwright-cli snapshot",
+    ],
+  )

@@ -86,11 +86,11 @@ resource openWebUIApp 'Microsoft.App/containerApps@2025-07-01' = {
             { name: 'MICROSOFT_CLIENT_SECRET', secretRef: 'openid-client-secret' }
             { name: 'MICROSOFT_CLIENT_TENANT_ID', value: '91fc072c-edef-4f97-bdc5-cfb67718ae3a'}
             { name: 'MICROSOFT_OAUTH_SCOPES', value: 'openid email profile User.Read GroupMember.Read.All'}
-            { name: 'MICROSOFT_REDIRECT_URI', value: 'https://openwebui-app.proudgrass-50c81754.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
-            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.proudgrass-50c81754.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
+            { name: 'MICROSOFT_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
+            { name: 'OPENID_REDIRECT_URI', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io/oauth/microsoft/callback'}
             { name: 'WEBUI_SECRET_KEY', secretRef:'webui-secret-key'}
             { name: 'ENABLE_OAUTH_PERSISTENT_CONFIG', value: 'false' }
-            { name: 'WEBUI_URL', value: 'https://openwebui-app.proudgrass-50c81754.swedencentral.azurecontainerapps.io' }
+            { name: 'WEBUI_URL', value: 'https://openwebui-app.gentleisland-b1776130.swedencentral.azurecontainerapps.io' }
             { name: 'ENABLE_LOGIN_FORM', value: 'false'}
             { name: 'OAUTH_MERGE_ACCOUNTS_BY_EMAIL', value: 'true'}
             { name: 'WEBUI_SESSION_COOKIE_SAME_SITE', value: 'lax'}

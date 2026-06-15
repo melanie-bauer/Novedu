@@ -1,0 +1,19 @@
+prefix_rule(
+    pattern = ["npx.cmd", "--no-install", "playwright-cli"],
+    decision = "allow",
+    justification = "Allow the project-local Playwright CLI",
+    match = [
+      "npx.cmd --no-install playwright-cli --version",
+      "npx.cmd --prefix application --no-install playwright-cli open http://127.0.0.1:3000",
+    ],
+  )
+
+prefix_rule(
+    pattern = ["npx.cmd", "playwright"],
+    decision = "allow",
+    justification = "Allow the project Playwright test and browser tooling",
+    match = [
+      "npx.cmd playwright --version",
+      "npx.cmd playwright test",
+    ],
+  )
