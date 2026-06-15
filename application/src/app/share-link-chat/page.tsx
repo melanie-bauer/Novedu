@@ -110,8 +110,6 @@ export default async function ShareLinkChatPage({
           "x-share-end": String(verification.end),
           "x-share-sig": verification.sig,
         }}
-        prompt={result.prompt}
-        warnings={result.warnings}
         imageInput={result.imageInput}
         title={result.title}
         description={result.description}
