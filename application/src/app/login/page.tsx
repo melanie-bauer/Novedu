@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SignInButton } from "./SignInButton";
 
 function safeCallbackUrl(value: string | undefined): string {
@@ -19,49 +18,23 @@ export default async function LoginPage({
   const authError = params.error;
 
   return (
-    <main className="login-page">
-      <section className="login-card" aria-labelledby="login-title">
-        <div className="login-brand">
-          <span className="brand-mark brand-mark-large">N</span>
-          <div>
-            <h1 id="login-title">Novedu</h1>
-            <p>Anmeldung mit Schulaccount</p>
-          </div>
-        </div>
-
-        <div className="login-copy">
-          <h2>Willkommen zuruck</h2>
-          <p>
-            Melde dich mit deinem Microsoft Entra ID Konto an. Lokale
-            Passwoerter bleiben im MVP bewusst ausserhalb der Anwendung.
-          </p>
-        </div>
+    <main className="login-page login-page-minimal">
+      <section
+        className="login-card login-card-minimal"
+        aria-labelledby="login-title"
+      >
+        <h1 id="login-title" className="login-title-minimal">
+          Login
+        </h1>
 
         {authError ? (
           <div className="login-error" role="alert">
-            <strong>Microsoft Anmeldung fehlgeschlagen</strong>
-            <span>
-              Bitte pruefe Tenant-ID, Client-ID, Client-Secret und Redirect URI
-              in der Entra App Registration.
-            </span>
+            <strong>Anmeldung fehlgeschlagen</strong>
+            <span>Bitte versuche es erneut.</span>
           </div>
         ) : null}
 
         <SignInButton callbackUrl={callbackUrl} />
-
-        <div className="login-note" role="note">
-          <strong>Geschutzter Zugriff</strong>
-          <span>
-            Nach der Anmeldung prueft die App serverseitig deine Session und
-            bringt dich zur angefragten Seite zuruck.
-          </span>
-        </div>
-
-        <div className="login-links">
-          <Link href="/share-link-chat">Share-Link-Chat</Link>
-          <span aria-hidden="true">/</span>
-          <Link href="/chat">Chat-Demo</Link>
-        </div>
       </section>
     </main>
   );

@@ -731,3 +731,29 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+.login-page-minimal {
+  background: #f7f7f8;
+}
+
+.login-card-minimal {
+  width: max-content;
+  max-width: min(100%, calc(100vw - 2rem));
+  min-width: min(100%, 18rem);
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.08);
+}
+
+.login-card-minimal .microsoft-button {
+  width: max-content;
+  max-width: 100%;
+  white-space: nowrap;
+  padding-inline: 1.25rem;
+}
+
+.login-title-minimal {
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 650;
+}
